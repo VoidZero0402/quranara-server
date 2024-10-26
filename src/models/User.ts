@@ -16,6 +16,7 @@ const schema = new Schema<IUser>({
         required: true,
         unique: true,
         trim: true,
+        index: true,
     },
 
     username: {

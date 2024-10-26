@@ -9,6 +9,7 @@ const schema = new Schema<IBan>({
         type: String,
         required: true,
         unique: true,
+        index: true,
     },
 });
 
