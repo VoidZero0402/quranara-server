@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import BanModel from "@/models/Ban";
+import UserModel from "@/models/User";
 import { SendOtpSchemaType, VerifyOtpSchemaType } from "@/validators/auth";
-import { ConflictException, ForbiddenException } from "@/utils/exceptions";
-import { generateOtp, getOtp } from "@/utils/auth";
+import { BadRequestException, ConflictException, ForbiddenException } from "@/utils/exceptions";
+import { generateAccessToken, generateOtp, generateRefreshToken, getOtp, verifyOtp } from "@/utils/auth";
 import { SuccessResponse } from "@/utils/responses";
+import { getUniqueUsername } from "@/utils/users";
 
 export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -31,7 +33,40 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
     }
 };
 
-export const verify = async (req: Request<{}, {}, VerifyOtpSchemaType>, res: Response, next: NextFunction) => {};
+export const verify = async (req: Request<{}, {}, VerifyOtpSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { phone, otp, username } = req.body;
+
+        const { expired, matched } = await verifyOtp(phone, otp);
+
+        if (expired) {
+            throw new ConflictException("Otp is expired");
+        }
+
+        if (!matched) {
+            throw new BadRequestException("Otp is not matched");
+        }
+
+        let user = await UserModel.findOne({ phone });
+
+        if (!user) {
+            const uniqueUsername = await getUniqueUsername();
+
+            user = await UserModel.create({
+                phone,
+                username: username ?? uniqueUsername,
+            });
+        }
+
+        const accessToken = await generateAccessToken({ _id: user._id });
+        const refreshToken = await generateRefreshToken({ _id: user._id });
+
+        SuccessResponse(res, 200, { user, accessToken, refreshToken });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getMe = async (req: Request, res: Response, next: NextFunction) => {};
 export const refresh = async (req: Request, res: Response, next: NextFunction) => {};
 export const logout = async (req: Request, res: Response, next: NextFunction) => {};

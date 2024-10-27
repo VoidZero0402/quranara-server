@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Document, Model, Schema, model } from "mongoose";
 
 export interface IMetadata {
     users: { counter: number };
@@ -8,7 +8,11 @@ export interface IMetadata {
     blogs: { counter: number };
 }
 
-const schema = new Schema<IMetadata>({
+interface UserModel extends Model<IMetadata> {
+    getMetadata(): Promise<Document<unknown, {}, IMetadata> & IMetadata>;
+}
+
+const schema = new Schema<IMetadata, UserModel>({
     users: {
         counter: {
             type: Number,
@@ -41,8 +45,16 @@ const schema = new Schema<IMetadata>({
     },
 });
 
-const MetadataModel = model<IMetadata>("Metadata", schema);
+schema.static("getMetadata", async function getMetadata() {
+    let metadata = await this.findOne();
 
-// TODO: create just one document Or ( use redis to handle )
+    if (!metadata) {
+        metadata = await this.create({});
+    }
+
+    return metadata;
+});
+
+const MetadataModel = model<IMetadata, UserModel>("Metadata", schema);
 
 export default MetadataModel;
