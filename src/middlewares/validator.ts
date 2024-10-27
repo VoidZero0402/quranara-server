@@ -5,20 +5,23 @@ import { BadRequestException } from "@/utils/exceptions";
 type Type = "body" | "params" | "query";
 
 const validator = (type: Type, schema: ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {
-    const raw = req[type];
+    try {
+        const raw = req[type];
 
-    const { success, error, data } = await schema.safeParseAsync(raw);
+        const { success, error, data } = await schema.safeParseAsync(raw);
 
-    if (!success) {
-        next(new BadRequestException(`Request ${type} is not valid!`, { errors: error.flatten().fieldErrors }));
-        return;
+        if (!success) {
+            throw new BadRequestException(`Request ${type} is not valid!`, { errors: error.flatten().fieldErrors });
+        }
+
+        if (type !== "params") {
+            req[type] = data;
+        }
+
+        next();
+    } catch (err) {
+        next(err);
     }
-
-    if (type !== "params") {
-        req[type] = data;
-    }
-
-    next();
 };
 
 export default validator;

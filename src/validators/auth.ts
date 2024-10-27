@@ -7,6 +7,8 @@ export const SendOtpSchema = z.object({
         .trim(),
 });
 
+export type SendOtpSchemaType = z.infer<typeof SendOtpSchema>;
+
 export const VerifyOtpSchema = z.object({
     phone: z
         .string({ required_error: "Phone is a required field" })
@@ -15,3 +17,5 @@ export const VerifyOtpSchema = z.object({
     otp: z.string({ required_error: "Otp is a required field" }).regex(/^[0-9]{5}$/, { message: "Otp should be a 5 digits number" }),
     username: z.string().min(3, { message: "Username should be has more than 3 character" }).max(25, { message: "Username should be has less than 25 character" }).trim().optional(),
 });
+
+export type VerifyOtpSchemaType = z.infer<typeof VerifyOtpSchema>;
