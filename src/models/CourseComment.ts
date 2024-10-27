@@ -26,6 +26,7 @@ const schema = new Schema<ICourseComment>(
             type: Schema.Types.ObjectId,
             ref: "Course",
             required: true,
+            index: true
         },
 
         user: {

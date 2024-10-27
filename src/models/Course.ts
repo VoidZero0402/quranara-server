@@ -33,6 +33,7 @@ const schema = new Schema<ICourse>(
             type: String,
             unique: true,
             trim: true,
+            index: true,
         },
 
         description: {

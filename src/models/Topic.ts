@@ -17,6 +17,7 @@ const schema = new Schema<ITopic>({
         type: Schema.Types.ObjectId,
         ref: "Course",
         required: true,
+        index: true
     },
 });
 

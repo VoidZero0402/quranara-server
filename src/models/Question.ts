@@ -31,12 +31,14 @@ const schema = new Schema<IQuestion>(
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true
         },
 
         session: {
             type: Schema.Types.ObjectId,
             ref: "Session",
             required: true,
+            index: true
         },
 
         status: {

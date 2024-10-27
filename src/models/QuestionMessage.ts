@@ -30,6 +30,7 @@ const schema = new Schema<IQuestionMessage>(
             type: Schema.Types.ObjectId,
             ref: "Question",
             required: true,
+            index: true
         },
 
         attached: {

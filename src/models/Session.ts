@@ -22,6 +22,7 @@ const schema = new Schema<ISession>({
     slug: {
         type: String,
         unique: true,
+        index: true,
     },
 
     course: {
@@ -34,6 +35,7 @@ const schema = new Schema<ISession>({
         type: Schema.Types.ObjectId,
         ref: "Topic",
         required: true,
+        index: true,
     },
 
     video: {
