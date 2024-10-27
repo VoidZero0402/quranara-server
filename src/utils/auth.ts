@@ -24,6 +24,10 @@ const cookiesOption = {
     secure: process.env.NODE_ENV === "production",
 } as const;
 
+const fiveMinutesInSeconds = 300;
+
+const ninetyDaysInSeconds = 7_776_000;
+
 const oneDayInMilliSeconds = 86_400_000;
 
 const ninetyDaysInMilliSeconds = 7_776_000_000;
@@ -45,7 +49,7 @@ export const getOtp = async (phone: string): Promise<{ expired: boolean; ttl: nu
 };
 
 export const saveOtp = async (phone: string, otp: string) => {
-    await redis.set(getRedisOtpPattern(phone), otp, "EX", 300);
+    await redis.set(getRedisOtpPattern(phone), otp, "EX", fiveMinutesInSeconds);
 };
 
 export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: boolean; matched: boolean }> => {
@@ -65,7 +69,7 @@ export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: 
 };
 
 export const generateAccessToken = async (payload: jose.JWTPayload): Promise<string> => {
-    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: jwtOptions.accessToken.alg }).setExpirationTime("10s").sign(jwtOptions.accessToken.secret);
+    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: jwtOptions.accessToken.alg }).setExpirationTime("1d").sign(jwtOptions.accessToken.secret);
     return jwt;
 };
 
@@ -93,7 +97,11 @@ export const verifyRefreshToken = async (token: string): Promise<jose.JWTPayload
 };
 
 export const saveRefreshTokenInRedis = async (token: string, _id: string): Promise<void> => {
-    await redis.set(getRedisRefreshTokenPattern(_id), token, "EX", 7_776_000);
+    await redis.set(getRedisRefreshTokenPattern(_id), token, "EX", ninetyDaysInSeconds);
+};
+
+export const hasRefreshTokenInRedis = async (_id: string): Promise<boolean> => {
+    return Boolean(await redis.exists(getRedisRefreshTokenPattern(_id)));
 };
 
 export const setCredentialCookies = (res: Response, credentials: { accessToken: string; refreshToken: string; user: Document<unknown, {}, IUser> & IUser }): void => {
