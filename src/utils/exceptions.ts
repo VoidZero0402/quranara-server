@@ -46,3 +46,9 @@ export class RequestTooLongException extends Exception {
         super(message, 413, EXCEPTION_TYPES.REQUEST_TOO_LONG, data);
     }
 }
+
+export class ServiceUnavailableException extends Exception {
+    constructor(public message: string, public data?: any) {
+        super(message, 503, EXCEPTION_TYPES.SERVICE_UNAVAILABLE, data);
+    }
+}

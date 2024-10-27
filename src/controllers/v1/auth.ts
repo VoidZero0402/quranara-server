@@ -1,10 +1,15 @@
 import { Request, Response, NextFunction } from "express";
+
 import BanModel from "@/models/Ban";
 import UserModel from "@/models/User";
+
+import { sendOtp } from "@/services/melipayamak";
+
 import { SendOtpSchemaType, VerifyOtpSchemaType } from "@/validators/auth";
+
 import { BadRequestException, ConflictException, ForbiddenException } from "@/utils/exceptions";
-import { generateAccessToken, generateOtp, generateRefreshToken, getOtp, verifyOtp } from "@/utils/auth";
 import { SuccessResponse } from "@/utils/responses";
+import { generateAccessToken, saveOtp, generateRefreshToken, getOtp, verifyOtp, saveRefreshTokenInRedis, setCredentialCookies } from "@/utils/auth";
 import { getUniqueUsername } from "@/utils/users";
 
 export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Response, next: NextFunction) => {
@@ -23,9 +28,9 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
             throw new ConflictException("Otp already exist", { ttl });
         }
 
-        const otp = await generateOtp(phone);
+        const otp = await sendOtp(phone);
 
-        // TODO: send sms
+        await saveOtp(phone, otp);
 
         SuccessResponse(res, 200, { message: "Otp sent successfully!", otp });
     } catch (err) {
@@ -61,7 +66,11 @@ export const verify = async (req: Request<{}, {}, VerifyOtpSchemaType>, res: Res
         const accessToken = await generateAccessToken({ _id: user._id });
         const refreshToken = await generateRefreshToken({ _id: user._id });
 
-        SuccessResponse(res, 200, { user, accessToken, refreshToken });
+        await saveRefreshTokenInRedis(refreshToken, user._id.toString());
+
+        setCredentialCookies(res, { accessToken, refreshToken, user });
+
+        SuccessResponse(res, 200, { user });
     } catch (err) {
         next(err);
     }
