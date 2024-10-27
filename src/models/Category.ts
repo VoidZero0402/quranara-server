@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { References } from "@/constants/categories";
 
-type Ref = (typeof References)[keyof typeof References];
+export type Ref = (typeof References)[keyof typeof References];
 
 export interface ICategory {
     title: string;

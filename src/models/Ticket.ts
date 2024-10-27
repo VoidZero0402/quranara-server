@@ -3,8 +3,8 @@ import { STATUS, TYPE } from "@/constants/tickets";
 import { IUser } from "./User";
 import { ICourse } from "./Course";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
-type TicketType = (typeof TYPE)[keyof typeof TYPE];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
+export type TicketType = (typeof TYPE)[keyof typeof TYPE];
 
 export interface ITicket {
     title: string;

@@ -2,7 +2,7 @@ import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
 import { STATUS } from "@/constants/courses";
 import { IUser } from "./User";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface ICourse {
     title: string;

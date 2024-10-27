@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { ROLES } from "@/constants/roles";
 
-type Role = (typeof ROLES)[keyof typeof ROLES];
+export type Role = (typeof ROLES)[keyof typeof ROLES];
 
 export interface IUser {
     phone: string;

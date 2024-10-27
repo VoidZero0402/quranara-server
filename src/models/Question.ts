@@ -3,7 +3,7 @@ import { STATUS } from "@/constants/questions";
 import { IUser } from "./User";
 import { ISession } from "./Session";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface IQuestion {
     title: string;

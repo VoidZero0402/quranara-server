@@ -3,7 +3,7 @@ import { STATUS } from "@/constants/comments";
 import { IBlog } from "./Blog";
 import { IUser } from "./User";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface IBlogComment {
     content: string;
