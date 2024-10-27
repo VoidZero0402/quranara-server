@@ -1,8 +1,32 @@
 import { Response } from "express";
 import * as jose from "jose";
-import redis from "@/config/redis";
 import { Document } from "mongoose";
+
 import { IUser } from "@/models/User";
+import redis from "@/config/redis";
+import { UnauthorizedException } from "./exceptions";
+
+const jwtOptions = {
+    accessToken: {
+        secret: new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET),
+        alg: "HS256",
+    },
+    refreshToken: {
+        secret: new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET),
+        alg: "HS256",
+    },
+};
+
+const cookiesOption = {
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+} as const;
+
+const oneDayInMilliSeconds = 86_400_000;
+
+const ninetyDaysInMilliSeconds = 7_776_000_000;
 
 const getRedisOtpPattern = (phone: string): string => `otp:${phone}`;
 
@@ -41,21 +65,31 @@ export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: 
 };
 
 export const generateAccessToken = async (payload: jose.JWTPayload): Promise<string> => {
-    const secret = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
-    const alg = "HS256";
-
-    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg }).setExpirationTime("1d").sign(secret);
-
+    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: jwtOptions.accessToken.alg }).setExpirationTime("10s").sign(jwtOptions.accessToken.secret);
     return jwt;
 };
 
+export const verifyAccessToken = async (token: string): Promise<jose.JWTPayload> => {
+    try {
+        const { payload } = await jose.jwtVerify(token, jwtOptions.accessToken.secret);
+        return payload;
+    } catch (err) {
+        throw new UnauthorizedException("token is expired");
+    }
+};
+
 export const generateRefreshToken = async (payload: jose.JWTPayload): Promise<string> => {
-    const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRET);
-    const alg = "HS256";
-
-    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg }).setExpirationTime("90d").sign(secret);
-
+    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: jwtOptions.refreshToken.alg }).setExpirationTime("90d").sign(jwtOptions.refreshToken.secret);
     return jwt;
+};
+
+export const verifyRefreshToken = async (token: string): Promise<jose.JWTPayload> => {
+    try {
+        const { payload } = await jose.jwtVerify(token, jwtOptions.refreshToken.secret);
+        return payload;
+    } catch (err) {
+        throw new UnauthorizedException("token is expired");
+    }
 };
 
 export const saveRefreshTokenInRedis = async (token: string, _id: string): Promise<void> => {
@@ -63,28 +97,18 @@ export const saveRefreshTokenInRedis = async (token: string, _id: string): Promi
 };
 
 export const setCredentialCookies = (res: Response, credentials: { accessToken: string; refreshToken: string; user: Document<unknown, {}, IUser> & IUser }): void => {
-    const options = {
-        httpOnly: true,
-        path: "/",
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-    } as const;
-
-    const oneDayInMilliSeconds = 86_400_000;
-    const ninetyDaysInMilliSeconds = 7_776_000_000;
-
     res.cookie("accessToken", credentials.accessToken, {
-        ...options,
+        ...cookiesOption,
         expires: new Date(Date.now() + oneDayInMilliSeconds),
     });
 
     res.cookie("refreshToken", credentials.refreshToken, {
-        ...options,
+        ...cookiesOption,
         expires: new Date(Date.now() + ninetyDaysInMilliSeconds),
     });
 
     res.cookie("user", credentials.user.toObject(), {
-        ...options,
+        ...cookiesOption,
         expires: new Date(Date.now() + ninetyDaysInMilliSeconds),
     });
 };

@@ -12,6 +12,8 @@ import { SuccessResponse } from "@/utils/responses";
 import { generateAccessToken, saveOtp, generateRefreshToken, getOtp, verifyOtp, saveRefreshTokenInRedis, setCredentialCookies } from "@/utils/auth";
 import { getUniqueUsername } from "@/utils/users";
 
+import { RequestWithUser } from "@/types/request.types";
+
 export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { phone } = req.body;
@@ -28,7 +30,8 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
             throw new ConflictException("Otp already exist", { ttl });
         }
 
-        const otp = await sendOtp(phone);
+        // const otp = await sendOtp(phone);
+        const otp = "00000";
 
         await saveOtp(phone, otp);
 
@@ -53,6 +56,7 @@ export const verify = async (req: Request<{}, {}, VerifyOtpSchemaType>, res: Res
         }
 
         let user = await UserModel.findOne({ phone });
+        let isSignupPhase = !user;
 
         if (!user) {
             const uniqueUsername = await getUniqueUsername();
@@ -70,12 +74,20 @@ export const verify = async (req: Request<{}, {}, VerifyOtpSchemaType>, res: Res
 
         setCredentialCookies(res, { accessToken, refreshToken, user });
 
+        SuccessResponse(res, isSignupPhase ? 201 : 200, { user });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getMe = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = (req as RequestWithUser).user;
         SuccessResponse(res, 200, { user });
     } catch (err) {
         next(err);
     }
 };
 
-export const getMe = async (req: Request, res: Response, next: NextFunction) => {};
 export const refresh = async (req: Request, res: Response, next: NextFunction) => {};
 export const logout = async (req: Request, res: Response, next: NextFunction) => {};

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodSchema } from "zod";
+
 import { BadRequestException } from "@/utils/exceptions";
 
 type Type = "body" | "params" | "query";

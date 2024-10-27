@@ -1,6 +1,7 @@
+import { NextFunction, Request, Response } from "express";
+
 import { Exception } from "@/utils/exceptions";
 import { ErrorResponse } from "@/utils/responses";
-import { NextFunction, Request, Response } from "express";
 
 const globalErrorHandler = (err: Error | Exception, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof Exception) {
