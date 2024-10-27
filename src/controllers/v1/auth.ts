@@ -9,7 +9,7 @@ import { SendOtpSchemaType, VerifyOtpSchemaType } from "@/validators/auth";
 
 import { BadRequestException, ConflictException, ForbiddenException, UnauthorizedException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
-import { generateAccessToken, saveOtp, generateRefreshToken, getOtp, verifyOtp, saveRefreshTokenInRedis, setCredentialCookies, verifyRefreshToken, hasRefreshTokenInRedis } from "@/utils/auth";
+import { generateAccessToken, generateOtp, generateRefreshToken, getOtp, verifyOtp, saveRefreshTokenInRedis, setCredentialCookies, verifyRefreshToken, hasRefreshTokenInRedis } from "@/utils/auth";
 import { getUniqueUsername } from "@/utils/users";
 
 import { RequestWithUser } from "@/types/request.types";
@@ -30,10 +30,9 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
             throw new ConflictException("Otp already exist", { ttl });
         }
 
-        // const otp = await sendOtp(phone);
-        const otp = "00000";
+        const otp = await generateOtp(phone);
 
-        await saveOtp(phone, otp);
+        // await sendOtp(phone, otp);
 
         SuccessResponse(res, 200, { message: "Otp sent successfully!", otp });
     } catch (err) {
