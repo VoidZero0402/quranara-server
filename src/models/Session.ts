@@ -1,6 +1,9 @@
-import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
+import { Schema, model, PopulatedDoc, Document, ObjectId, Model } from "mongoose";
 import { ICourse } from "./Course";
 import { ITopic } from "./Topic";
+
+import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
+import CourseUserModel from "./CourseUser";
 
 export interface ISession {
     title: string;
@@ -14,7 +17,15 @@ export interface ISession {
     time: string;
 }
 
-const schema = new Schema<ISession>({
+export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
+
+interface ISessionMethods {
+    hasUserAccess(_id: ObjectId): Promise<boolean>;
+}
+
+type SessionModel = Model<ISession, {}, ISessionMethods>;
+
+const schema = new Schema<ISession, SessionModel, ISessionMethods>({
     title: {
         type: String,
         required: true,
@@ -65,6 +76,18 @@ const schema = new Schema<ISession>({
     attached: String,
 });
 
-const SessionModel = model<ISession>("Session", schema);
+schema.method("hasUserAccess", async function hasUserAccess(userId) {
+    if (!this.isPublic) {
+        const hasAccess = await CourseUserModel.exists({ user: userId, course: this.course });
+
+        if (!hasAccess) {
+            return false;
+        }
+    }
+
+    return true;
+});
+
+const SessionModel = model<ISession, SessionModel>("Session", schema);
 
 export default SessionModel;

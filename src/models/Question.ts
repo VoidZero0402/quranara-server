@@ -24,24 +24,26 @@ const schema = new Schema<IQuestion>(
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
-            index: true
+            index: true,
         },
 
         session: {
             type: Schema.Types.ObjectId,
             ref: "Session",
             required: true,
-            index: true
+            index: true,
         },
 
         status: {
             type: String,
             enum: [STATUS.ACTIVE, STATUS.SLEEP, STATUS.COLSED],
-            default: STATUS.ACTIVE
+            default: STATUS.ACTIVE,
         },
     },
     { timestamps: { createdAt: true, updatedAt: false } }
 );
+
+schema.index({ user: 1, session: 1 }, { unique: true });
 
 const QuestionModel = model<IQuestion>("Question", schema);
 
