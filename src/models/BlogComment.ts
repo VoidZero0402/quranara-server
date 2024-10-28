@@ -43,7 +43,7 @@ const schema = new Schema<IBlogComment>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PENDING, STATUS.ACCEPTED, STATUS.REJECTED],
             default: STATUS.PENDING,
         },
 

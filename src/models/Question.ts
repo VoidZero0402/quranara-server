@@ -7,7 +7,6 @@ export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface IQuestion {
     title: string;
-    content: string;
     user: PopulatedDoc<Document<ObjectId> & IUser>;
     session: PopulatedDoc<Document<ObjectId> & ISession>;
     status: Status;
@@ -16,12 +15,6 @@ export interface IQuestion {
 const schema = new Schema<IQuestion>(
     {
         title: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-
-        content: {
             type: String,
             required: true,
             trim: true,
@@ -43,7 +36,7 @@ const schema = new Schema<IQuestion>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.ACTIVE, STATUS.SLEEP, STATUS.COLSED],
             default: STATUS.ACTIVE
         },
     },

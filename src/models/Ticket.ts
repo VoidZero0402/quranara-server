@@ -36,13 +36,13 @@ const schema = new Schema<ITicket>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.ACTIVE, STATUS.COLSED, STATUS.SLEEP],
             default: STATUS.ACTIVE,
         },
 
         type: {
             type: String,
-            enum: Object.values(TYPE),
+            enum: [TYPE.SUPPORT, TYPE.MANAGEMENT],
             default: TYPE.SUPPORT,
         },
 

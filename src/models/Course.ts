@@ -55,7 +55,7 @@ const schema = new Schema<ICourse>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PRE_SELL, STATUS.ON_PERFORMING, STATUS.REACHED],
             default: STATUS.PRE_SELL,
         },
 

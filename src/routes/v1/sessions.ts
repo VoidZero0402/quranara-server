@@ -15,4 +15,3 @@ router.get("/:slug", getOne);
 router.route("/:id/order").patch(auth, roleGuard(ROLES.MANAGER), validator("body", UpdateSessionOrderSchema), updateOrder);
 
 export default router;
-// TODO: refactor course status

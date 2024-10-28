@@ -44,7 +44,7 @@ const schema = new Schema<ICourseComment>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PENDING, STATUS.ACCEPTED, STATUS.REJECTED],
             default: STATUS.PENDING,
         },
 

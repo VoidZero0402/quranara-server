@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
-import { References } from "@/constants/categories";
+import { REFERENCES } from "@/constants/categories";
 
-export type Ref = (typeof References)[keyof typeof References];
+export type Ref = (typeof REFERENCES)[keyof typeof REFERENCES];
 
 export interface ICategory {
     title: string;
@@ -32,13 +32,13 @@ const schema = new Schema<ICategory>({
 
     ref: {
         type: String,
-        enum: Object.values(References),
-        default: References.BLOG,
+        enum: [REFERENCES.BLOG, REFERENCES.TV, REFERENCES.Course],
+        default: REFERENCES.BLOG,
         index: true,
     },
 });
 
-schema.index({ title: 1, ref: 1 }, { unique: true })
+schema.index({ title: 1, ref: 1 }, { unique: true });
 
 const CategoryModel = model<ICategory>("Category", schema);
 

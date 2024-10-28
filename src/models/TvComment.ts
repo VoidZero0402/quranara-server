@@ -43,7 +43,7 @@ const schema = new Schema<ITvComment>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PENDING, STATUS.PENDING, STATUS.REJECTED],
             default: STATUS.PENDING,
         },
 

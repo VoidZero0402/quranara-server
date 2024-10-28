@@ -7,6 +7,7 @@ import authRouter from "@/routes/v1/auth";
 import coursesRouter from "@/routes/v1/courses";
 import topicsRouter from "@/routes/v1/topics";
 import sessionsRouter from "@/routes/v1/sessions";
+import questionsRouter from "@/routes/v1/questions";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);
 app.use("/api/topics", topicsRouter);
 app.use("/api/sessions", sessionsRouter);
+app.use("/api/questions", questionsRouter);
 
 app.use(globalErrorHandler);
 
