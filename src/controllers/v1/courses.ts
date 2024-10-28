@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
 import CourseModel from "@/models/Course";
-import TopicModel from "@/models/Topic";
 
 import { STATUS } from "@/constants/courses";
 
@@ -9,11 +8,13 @@ import { CreateCourseSchemaType, UpdateCourseSchemaType } from "@/validators/cou
 
 import { RequestWithUser } from "@/types/request.types";
 
-import { BadRequestException, ConflictException, NotFoundException } from "@/utils/exceptions";
+import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { decreaseCoursesUnique, getCoursesUnique } from "@/utils/metadata";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { removeFile } from "@/utils/funcs";
+
+type RequestParamsWithID = { id: string };
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {};
 
@@ -48,7 +49,7 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
 
 export const getOne = async (req: Request, res: Response, next: NextFunction) => {};
 
-export const update = async (req: Request<{ id: string }, {}, UpdateCourseSchemaType>, res: Response, next: NextFunction) => {
+export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const { title, slug, description, price, isPresell, video, content } = req.body;
@@ -82,7 +83,7 @@ export const update = async (req: Request<{ id: string }, {}, UpdateCourseSchema
     }
 };
 
-export const remove = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const remove = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
 
@@ -99,9 +100,3 @@ export const remove = async (req: Request<{ id: string }>, res: Response, next: 
         next(err);
     }
 };
-
-export const createTopic = async (req: Request, res: Response, next: NextFunction) => {};
-
-export const updateTopic = async (req: Request, res: Response, next: NextFunction) => {};
-
-export const removeTopic = async (req: Request, res: Response, next: NextFunction) => {};

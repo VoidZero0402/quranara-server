@@ -3,6 +3,7 @@ import { ICourse } from "./Course";
 
 export interface ITopic {
     title: string;
+    order: number;
     course: PopulatedDoc<Document<ObjectId> & ICourse>;
 }
 
@@ -13,11 +14,17 @@ const schema = new Schema<ITopic>({
         trim: true,
     },
 
+    order: {
+        type: Number,
+        required: true,
+        index: true,
+    },
+
     course: {
         type: Schema.Types.ObjectId,
         ref: "Course",
         required: true,
-        index: true
+        index: true,
     },
 });
 

@@ -82,6 +82,12 @@ const schema = new Schema<ICourse>(
     { timestamps: true }
 );
 
+schema.virtual("topics", {
+    ref: "Topic",
+    localField: "_id",
+    foreignField: "course",
+});
+
 const CourseModel = model<ICourse>("Course", schema);
 
 export default CourseModel;
