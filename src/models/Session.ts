@@ -7,6 +7,7 @@ export interface ISession {
     slug: string;
     course: PopulatedDoc<Document<ObjectId> & ICourse>;
     topic: PopulatedDoc<Document<ObjectId> & ITopic>;
+    order: number;
     video: string;
     attached?: string;
     time: string;
@@ -34,6 +35,12 @@ const schema = new Schema<ISession>({
     topic: {
         type: Schema.Types.ObjectId,
         ref: "Topic",
+        required: true,
+        index: true,
+    },
+
+    order: {
+        type: Number,
         required: true,
         index: true,
     },
