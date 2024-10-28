@@ -21,3 +21,11 @@ export const decreaseCoursesUnique = async () => {
     metadata.courses.counter -= 1;
     await metadata.save();
 };
+
+export const getSessionsUnique = async () => {
+    const metadata = await MetadataModel.getMetadata();
+    metadata.sessions.counter += 1;
+    await metadata.save();
+
+    return metadata.sessions.counter;
+};

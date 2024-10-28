@@ -36,10 +36,6 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateTopicSc
             { new: true }
         );
 
-        if (!updatedTopic) {
-            throw new NotFoundException("topic not found");
-        }
-
         SuccessResponse(res, 200, { topic: updatedTopic });
     } catch (err) {
         next(err);

@@ -77,7 +77,10 @@ const schema = new Schema<ICourse>(
             content: String,
         },
 
-        shortId: String,
+        shortId: {
+            type: String,
+            required: true,
+        },
     },
     { timestamps: true }
 );

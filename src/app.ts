@@ -6,6 +6,7 @@ import globalErrorHandler from "./middlewares/globalErrorHandler";
 import authRouter from "@/routes/v1/auth";
 import coursesRouter from "@/routes/v1/courses";
 import topicsRouter from "@/routes/v1/topics";
+import sessionsRouter from "@/routes/v1/sessions";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);
 app.use("/api/topics", topicsRouter);
+app.use("/api/sessions", sessionsRouter);
 
 app.use(globalErrorHandler);
 
