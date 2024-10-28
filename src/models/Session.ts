@@ -8,6 +8,7 @@ export interface ISession {
     course: PopulatedDoc<Document<ObjectId> & ICourse>;
     topic: PopulatedDoc<Document<ObjectId> & ITopic>;
     order: number;
+    isPublic: boolean;
     video: string;
     attached?: string;
     time: string;
@@ -30,6 +31,7 @@ const schema = new Schema<ISession>({
         type: Schema.Types.ObjectId,
         ref: "Course",
         required: true,
+        index: true,
     },
 
     topic: {
@@ -43,6 +45,11 @@ const schema = new Schema<ISession>({
         type: Number,
         required: true,
         index: true,
+    },
+
+    isPublic: {
+        type: Boolean,
+        default: false,
     },
 
     video: {

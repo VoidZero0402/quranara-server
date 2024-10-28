@@ -20,7 +20,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { title, slug, description, price, isPresell, video, content } = req.body;
+        const { title, slug, description, price, status, video, content } = req.body;
 
         const shortId = await getCoursesUnique();
 
@@ -30,7 +30,7 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
             description,
             cover: (req.file as Express.Multer.File).filename,
             price,
-            status: isPresell ? STATUS.PRE_SELL : STATUS.PUBLISH,
+            status,
             teacher: (req as RequestWithUser).user._id,
             introduction: { video, content },
             shortId,
@@ -52,7 +52,7 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { title, slug, description, price, isPresell, video, content } = req.body;
+        const { title, slug, description, price, status, video, content } = req.body;
 
         const updatedCourse = await CourseModel.findByIdAndUpdate(
             id,
@@ -63,7 +63,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseS
                     description,
                     ...(req.file?.filename && { cover: req.file.filename }),
                     price,
-                    status: isPresell ? STATUS.PRE_SELL : STATUS.PUBLISH,
+                    status,
                     introduction: { video, content },
                 },
             },
