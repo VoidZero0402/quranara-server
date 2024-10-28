@@ -4,13 +4,16 @@ import cookieParser from "cookie-parser";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 
 import authRouter from "@/routes/v1/auth";
+import coursesRouter from "@/routes/v1/courses";
 
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
+app.use(express.static("public"));
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
+app.use("/api/courses", coursesRouter);
 
 app.use(globalErrorHandler);
 
