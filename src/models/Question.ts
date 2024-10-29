@@ -45,6 +45,12 @@ const schema = new Schema<IQuestion>(
 
 schema.index({ user: 1, session: 1 }, { unique: true });
 
+schema.virtual("messages", {
+    ref: "QuestionMessage",
+    localField: "_id",
+    foreignField: "question",
+});
+
 const QuestionModel = model<IQuestion>("Question", schema);
 
 export default QuestionModel;

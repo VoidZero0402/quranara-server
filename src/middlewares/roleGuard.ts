@@ -3,16 +3,18 @@ import { Role } from "@/models/User";
 import { RequestWithUser } from "@/types/request.types";
 import { ForbiddenException } from "@/utils/exceptions";
 
-const roleGuard = (role: Role) => (req: Request, res: Response, next: NextFunction) => {
-    try {
-        if (!((req as RequestWithUser).user.role === role)) {
-            throw new ForbiddenException("you can not access to this route");
-        }
+const roleGuard =
+    (...roles: Role[]) =>
+    (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!roles.includes((req as RequestWithUser).user.role)) {
+                throw new ForbiddenException("you can not access to this route");
+            }
 
-        next();
-    } catch (err) {
-        next(err);
-    }
-};
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
 
 export default roleGuard;

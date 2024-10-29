@@ -2,12 +2,16 @@ import { NextFunction, Request, Response } from "express";
 
 import CourseModel from "@/models/Course";
 import SessionModel from "@/models/Session";
+import QuestionModel from "@/models/Question";
 
 import { CreateSessionSchemaType, UpdateSessionSchemaType, UpdateSessionOrderSchemaType } from "@/validators/sessions";
 
-import { NotFoundException } from "@/utils/exceptions";
+import { ROLES } from "@/constants/roles";
+
+import { ForbiddenException, NotFoundException, UnauthorizedException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getSessionsUnique } from "@/utils/metadata";
+import { getUser } from "@/utils/funcs";
 
 type RequestParamsWithID = { id: string };
 type RequestParamsWithSlug = { slug: string };
@@ -108,13 +112,29 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         const session = await SessionModel.findOne({ slug });
 
-        // TODO: populate questions
-
         if (!session) {
             throw new NotFoundException("session not found");
         }
 
-        SuccessResponse(res, 200, { session });
+        const user = await getUser(req);
+
+        if (!session.isPublic) {
+            if (!user) {
+                throw new UnauthorizedException("user is unauthorized");
+            }
+
+            if (user.role === ROLES.USER) {
+                const hasAccess = await session.hasUserAccess(user._id);
+
+                if (!hasAccess) {
+                    throw new ForbiddenException("you can not access to this session");
+                }
+            }
+        }
+
+        const question = user && (await QuestionModel.findOne({ session: session._id, user: user._id }).populate("messages").lean());
+
+        SuccessResponse(res, 200, { session, ...(question && { question }) });
     } catch (err) {
         next(err);
     }
