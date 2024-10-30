@@ -6,7 +6,6 @@ export type Ref = (typeof REFERENCES)[keyof typeof REFERENCES];
 export interface ICategory {
     title: string;
     caption: string;
-    color: string;
     ref: Ref;
 }
 
@@ -24,15 +23,9 @@ const schema = new Schema<ICategory>({
         trim: true,
     },
 
-    color: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-
     ref: {
         type: String,
-        enum: [REFERENCES.BLOG, REFERENCES.TV, REFERENCES.Course],
+        enum: [REFERENCES.BLOG, REFERENCES.TV, REFERENCES.COURSE],
         default: REFERENCES.BLOG,
         index: true,
     },
