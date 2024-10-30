@@ -10,7 +10,7 @@ import { RequestWithUser } from "@/types/request.types";
 
 import { STATUS } from "@/constants/tickets";
 
-import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
+import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getTicketUnique } from "@/utils/metadata";
 import { createPaginationData } from "@/utils/funcs";

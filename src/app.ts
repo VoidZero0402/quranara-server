@@ -11,6 +11,7 @@ import sessionsRouter from "@/routes/v1/sessions";
 import questionsRouter from "@/routes/v1/questions";
 import uploadsRouter from "@/routes/v1/uploads";
 import ticketsRouter from "@/routes/v1/tickets";
+import categoriesRouter from "@/routes/v1/categories";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/sessions", sessionsRouter);
 app.use("/api/questions", questionsRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/tickets", ticketsRouter);
+app.use("/api/categories", categoriesRouter);
 
 app.use(globalErrorHandler);
 

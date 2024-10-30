@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express from "express";
 import { getAll, create, update, remove } from "@/controllers/v1/categories";
 
 import { ROLES } from "@/constants/roles";
@@ -9,7 +9,7 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(getAll).post(create);
-router.route("/:id").put(update).delete(remove);
+router.route("/").get(validator("query", GetAllCategoriesQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("body", CreateCategorySchema), create);
+router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", UpdateCategorySchema), update).delete(auth, roleGuard(ROLES.MANAGER), remove);
 
 export default router;
