@@ -29,3 +29,11 @@ export const getSessionsUnique = async () => {
 
     return metadata.sessions.counter;
 };
+
+export const getTicketUnique = async () => {
+    const metadata = await MetadataModel.getMetadata();
+    metadata.tickets.counter += 1;
+    await metadata.save();
+
+    return metadata.tickets.counter;
+};

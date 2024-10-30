@@ -143,7 +143,6 @@ export const message = async (req: Request<RequestParamsWithID, {}, CreateQuesti
 export const answer = async (req: Request<RequestParamsWithID, {}, AnswerQuestionSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const user = (req as RequestWithUser<RequestParamsWithID>).user;
         const { content, attached } = req.body;
 
         const question = await QuestionModel.findByIdAndUpdate(id, {
@@ -155,7 +154,7 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerQuestio
         }
 
         const answer = await QuestionMessageModel.create({
-            user: user._id,
+            user: (req as RequestWithUser<RequestParamsWithID>).user,
             question: question._id,
             content,
             attached,
