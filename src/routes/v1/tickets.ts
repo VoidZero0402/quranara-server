@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import { getTickets, getAllTickets, getTicket, create, message, answer } from "@/controllers/v1/tickets";
 
 import { ROLES } from "@/constants/roles";
@@ -10,10 +10,10 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(getTickets).post(create);
+router.route("/").get(getTickets).post(auth, validator("body", CreateTicketSchema), create);
 router.get("/all", getAllTickets);
 router.get("/:id", getTicket);
-router.post("/:id/message", message);
-router.post("/:id/answer", answer);
+router.post("/:id/message", auth, validator("body", AnswerTicketSchema), message);
+router.post("/:id/answer", auth, roleGuard(ROLES.MANAGER), validator("body", AnswerTicketSchema), answer);
 
 export default router;

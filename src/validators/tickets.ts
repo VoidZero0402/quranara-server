@@ -11,7 +11,7 @@ export const CreateTicketSchema = z.object({
     type: z.enum([TYPE.SUPPORT, TYPE.MANAGEMENT], { message: "type only can be SUPPORT or MANAGEMENT" }).default(TYPE.SUPPORT),
     attached: z
         .object({
-            type: z.enum([ATTACHED_FILE_TYPES.IMAGE, ATTACHED_FILE_TYPES.AUDIO, ATTACHED_FILE_TYPES.ZIP], { message: "attached type only can be image, audio or zip" }),
+            type: z.enum([ATTACHED_FILE_TYPES.IMAGE, ATTACHED_FILE_TYPES.AUDIO, ATTACHED_FILE_TYPES.ZIP], { message: "attached type only can be IMAGE, AUDIO or ZIP" }),
             url: z.string({ required_error: "attached url is required" }).url(),
         })
         .optional(),
@@ -21,7 +21,7 @@ export type CreateTicketSchemaType = z.infer<typeof CreateTicketSchema>;
 
 export const AnswerTicketSchema = CreateTicketSchema.pick({ content: true, attached: true });
 
-export type AnswerTicketSchemaType = z.infer<typeof CreateTicketSchema>;
+export type AnswerTicketSchemaType = z.infer<typeof AnswerTicketSchema>;
 
 export const GetAllTicketsQuerySchema = PaginationQuerySchema.extend({
     status: z.enum([STATUS.ACTIVE, STATUS.SLEEP, STATUS.COLSED], { message: "status only can be ACTIVE, SLEEP or CLOSED" }).default(STATUS.ACTIVE),
