@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 
@@ -8,8 +9,11 @@ import coursesRouter from "@/routes/v1/courses";
 import topicsRouter from "@/routes/v1/topics";
 import sessionsRouter from "@/routes/v1/sessions";
 import questionsRouter from "@/routes/v1/questions";
+import uploadsRouter from "@/routes/v1/uploads";
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
@@ -20,6 +24,7 @@ app.use("/api/courses", coursesRouter);
 app.use("/api/topics", topicsRouter);
 app.use("/api/sessions", sessionsRouter);
 app.use("/api/questions", questionsRouter);
+app.use("/api/uploads", uploadsRouter);
 
 app.use(globalErrorHandler);
 

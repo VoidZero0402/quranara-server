@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
 import { ATTACHED_FILE_TYPES } from "@/constants/files";
+import { PaginationQuerySchema } from "./pagination";
+import { STATUS } from "@/constants/questions";
 
 export const CreateQuestionSchema = z.object({
     session: validateObjectId,
@@ -18,3 +20,9 @@ export type CreateQuestionSchemaType = z.infer<typeof CreateQuestionSchema>;
 export const AnswerQuestionSchema = CreateQuestionSchema.omit({ session: true });
 
 export type AnswerQuestionSchemaType = z.infer<typeof AnswerQuestionSchema>;
+
+export const GetAllQuestionsQuerySchema = PaginationQuerySchema.extend({
+    status: z.enum([STATUS.ACTIVE, STATUS.SLEEP, STATUS.COLSED], { message: "status only can be ACTIVE, SLEEP or CLOSED" }).default(STATUS.ACTIVE),
+});
+
+export type GetAllQuestionsQuerySchemaType = z.infer<typeof GetAllQuestionsQuerySchema>;
