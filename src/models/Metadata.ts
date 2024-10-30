@@ -2,7 +2,7 @@ import { Document, Model, Schema, model } from "mongoose";
 
 export interface IMetadata {
     users: { counter: number };
-    courses: { courses: number };
+    courses: { counter: number };
     sessions: { counter: number };
     tickets: { counter: number };
     blogs: { counter: number };

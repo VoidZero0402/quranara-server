@@ -1,4 +1,5 @@
 export const STATUS = {
     PRE_SELL: "PRE_SELL",
-    PUBLISH: "PUBLISH",
+    ON_PERFORMING: "ON_PERFORMING",
+    REACHED: "REACHED",
 } as const;

@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { ROLES } from "@/constants/roles";
 
-type Role = (typeof ROLES)[keyof typeof ROLES];
+export type Role = (typeof ROLES)[keyof typeof ROLES];
 
 export interface IUser {
     phone: string;
@@ -27,7 +27,7 @@ const schema = new Schema<IUser>({
 
     role: {
         type: String,
-        enum: Object.values(ROLES),
+        enum: [ROLES.MANAGER, ROLES.ADMIN, ROLES.USER],
         default: ROLES.USER,
     },
 

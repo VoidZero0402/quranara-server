@@ -32,7 +32,7 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
 
         const otp = await generateOtp(phone);
 
-        // await sendOtp(phone, otp);
+        await sendOtp(phone, otp);
 
         SuccessResponse(res, 200, { message: "Otp sent successfully!", otp });
     } catch (err) {

@@ -3,8 +3,8 @@ import { STATUS, TYPE } from "@/constants/tickets";
 import { IUser } from "./User";
 import { ICourse } from "./Course";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
-type TicketType = (typeof TYPE)[keyof typeof TYPE];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
+export type TicketType = (typeof TYPE)[keyof typeof TYPE];
 
 export interface ITicket {
     title: string;
@@ -36,13 +36,13 @@ const schema = new Schema<ITicket>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.ACTIVE, STATUS.COLSED, STATUS.SLEEP],
             default: STATUS.ACTIVE,
         },
 
         type: {
             type: String,
-            enum: Object.values(TYPE),
+            enum: [TYPE.SUPPORT, TYPE.MANAGEMENT],
             default: TYPE.SUPPORT,
         },
 

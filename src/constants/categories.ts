@@ -1,4 +1,4 @@
-export const References = {
+export const REFERENCES = {
     BLOG: "BLOG",
     TV: "TV",
     Course: "Course",

@@ -3,7 +3,7 @@ import { STATUS } from "@/constants/comments";
 import { ICourse } from "./Course";
 import { IUser } from "./User";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface ICourseComment {
     content: string;
@@ -26,6 +26,7 @@ const schema = new Schema<ICourseComment>(
             type: Schema.Types.ObjectId,
             ref: "Course",
             required: true,
+            index: true
         },
 
         user: {
@@ -43,7 +44,7 @@ const schema = new Schema<ICourseComment>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PENDING, STATUS.ACCEPTED, STATUS.REJECTED],
             default: STATUS.PENDING,
         },
 

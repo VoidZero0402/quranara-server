@@ -16,13 +16,13 @@ export const sendOtp = async (phone: string, otp: string): Promise<string> => {
 
         const res = await fetch(process.env.MELIPAYAMAK_SEND_OTP_API as string, options);
 
-        if (res.status === 200) {
-            const { recId } = await res.json();
-            return recId;
+        if (res.status !== 200) {
+            throw new Error();
         }
 
-        throw new Error();
-    } catch (err) {
+        const { recId } = await res.json();
+        return recId;
+    } catch {
         throw new ServiceUnavailableException("melipayamak service is unavailable");
     }
 };

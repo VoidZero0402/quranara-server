@@ -4,6 +4,9 @@ node_modules/
 # Output directory for compiled TypeScript files
 dist/
 
+# dev
+public/
+
 # TypeScript cache
 *.tsbuildinfo
 

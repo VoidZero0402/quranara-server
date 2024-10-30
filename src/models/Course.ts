@@ -2,7 +2,7 @@ import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
 import { STATUS } from "@/constants/courses";
 import { IUser } from "./User";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface ICourse {
     title: string;
@@ -33,6 +33,7 @@ const schema = new Schema<ICourse>(
             type: String,
             unique: true,
             trim: true,
+            index: true,
         },
 
         description: {
@@ -54,7 +55,7 @@ const schema = new Schema<ICourse>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PRE_SELL, STATUS.ON_PERFORMING, STATUS.REACHED],
             default: STATUS.PRE_SELL,
         },
 
@@ -76,10 +77,19 @@ const schema = new Schema<ICourse>(
             content: String,
         },
 
-        shortId: String,
+        shortId: {
+            type: String,
+            required: true,
+        },
     },
     { timestamps: true }
 );
+
+schema.virtual("topics", {
+    ref: "Topic",
+    localField: "_id",
+    foreignField: "course",
+});
 
 const CourseModel = model<ICourse>("Course", schema);
 

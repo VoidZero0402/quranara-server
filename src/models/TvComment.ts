@@ -3,7 +3,7 @@ import { STATUS } from "@/constants/comments";
 import { ITv } from "./Tv";
 import { IUser } from "./User";
 
-type Status = (typeof STATUS)[keyof typeof STATUS];
+export type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface ITvComment {
     content: string;
@@ -43,7 +43,7 @@ const schema = new Schema<ITvComment>(
 
         status: {
             type: String,
-            enum: Object.values(STATUS),
+            enum: [STATUS.PENDING, STATUS.PENDING, STATUS.REJECTED],
             default: STATUS.PENDING,
         },
 
