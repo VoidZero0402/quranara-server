@@ -13,6 +13,7 @@ import { STATUS } from "@/constants/questions";
 
 import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
+import { createPaginationData } from "@/utils/funcs";
 
 type RequestParamsWithID = { id: string };
 
@@ -20,12 +21,16 @@ export const getQuestions = async (req: Request, res: Response, next: NextFuncti
     try {
         const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
 
-        const questions = await QuestionModel.find({ user: (req as RequestWithUser).user._id })
+        const filters = { user: (req as RequestWithUser).user._id };
+
+        const questions = await QuestionModel.find(filters)
             .populate("session", "slug")
             .skip((page - 1) * limit)
             .limit(limit);
 
-        SuccessResponse(res, 200, { questions });
+        const questionsCount = await QuestionModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { questions, pagination: createPaginationData(page, limit, questionsCount) });
     } catch (err) {
         next(err);
     }
@@ -53,11 +58,15 @@ export const getAllQuestions = async (req: Request, res: Response, next: NextFun
     try {
         const { page, limit, status } = req.query as unknown as GetAllQuestionsQuerySchemaType;
 
-        const questions = await QuestionModel.find({ status })
+        const filters = { status };
+
+        const questions = await QuestionModel.find(filters)
             .skip((page - 1) * limit)
             .limit(limit);
 
-        SuccessResponse(res, 200, { questions });
+        const questionsCount = await QuestionModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { questions, pagination: createPaginationData(page, limit, questionsCount) });
     } catch (err) {
         next(err);
     }

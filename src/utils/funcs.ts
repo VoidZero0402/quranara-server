@@ -21,3 +21,5 @@ export const getUser = async (req: Request) => {
 
     return user;
 };
+
+export const createPaginationData = (page: number, limit: number, count: number) => ({ page, limit, pagesCount: Math.ceil(count / limit), count });

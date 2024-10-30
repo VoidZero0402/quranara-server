@@ -13,12 +13,59 @@ import { STATUS } from "@/constants/tickets";
 import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getTicketUnique } from "@/utils/metadata";
+import { createPaginationData } from "@/utils/funcs";
 
 type RequestParamsWithID = { id: string };
 
-export const getTickets = async (req: Request, res: Response, next: NextFunction) => {};
-export const getAllTickets = async (req: Request, res: Response, next: NextFunction) => {};
-export const getTicket = async (req: Request, res: Response, next: NextFunction) => {};
+export const getTickets = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+
+        const filters = { user: (req as RequestWithUser).user._id };
+
+        const tickets = await TicketModel.find(filters)
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const ticketsCount = await TicketModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { tickets, pagination: createPaginationData(page, limit, ticketsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getTicket = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const ticket = await TicketModel.findById(id)
+            .populate({ path: "messages", populate: { path: "user" } })
+            .lean();
+
+        SuccessResponse(res, 200, { ticket });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAllTickets = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, status } = req.query as unknown as GetAllTicketsQuerySchemaType;
+
+        const filters = { status };
+
+        const tickets = await TicketModel.find(filters)
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const ticketsCount = await TicketModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { tickets, pagination: createPaginationData(page, limit, ticketsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export const create = async (req: Request<{}, {}, CreateTicketSchemaType>, res: Response, next: NextFunction) => {
     try {
