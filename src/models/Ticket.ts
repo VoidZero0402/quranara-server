@@ -51,6 +51,12 @@ const schema = new Schema<ITicket>(
     { timestamps: { createdAt: true, updatedAt: false } }
 );
 
+schema.virtual("messages", {
+    ref: "TicketMessage",
+    localField: "_id",
+    foreignField: "ticket",
+});
+
 const TicketModel = model<ITicket>("Ticket", schema);
 
 export default TicketModel;
