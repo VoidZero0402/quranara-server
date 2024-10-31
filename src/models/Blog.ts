@@ -71,6 +71,7 @@ const schema = new Schema<IBlog>(
             type: String,
             enum: [STATUS.DRAFTED, STATUS.PUBLISHED],
             default: STATUS.DRAFTED,
+            index: true,
         },
 
         tags: [String],

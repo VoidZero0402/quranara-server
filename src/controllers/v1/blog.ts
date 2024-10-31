@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 
 import BlogModel from "@/models/Blog";
 
+import { STATUS } from "@/constants/blog";
+
 import { CreateBlogSchemaType, CreateBlogQuerySchemaType, GetAllBlogsQuerySchemaType, SearchBlogsQuerySchameType } from "@/validators/blog";
 
 import { RequestWithUser } from "@/types/request.types";
@@ -15,7 +17,25 @@ import { decreaseBlogsUnique, getBlogUnique } from "@/utils/metadata";
 type RequestParamsWithID = { id: string };
 type RequestParamsWithSlug = { slug: string };
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {};
+export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, category } = req.query as unknown as GetAllBlogsQuerySchemaType;
+
+        const filters = { ...(category && { category }), status: STATUS.PUBLISHED };
+
+        const blogs = await BlogModel.find(filters)
+            .populate("author", "username profile")
+            .populate("category", "title")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const blogsCount = await BlogModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -50,8 +70,41 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Re
     }
 };
 
-export const search = async (req: Request, res: Response, next: NextFunction) => {};
-export const getOne = async (req: Request, res: Response, next: NextFunction) => {};
+export const search = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, q } = req.query as unknown as SearchBlogsQuerySchameType;
+
+        const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }], status: STATUS.PUBLISHED };
+
+        const blogs = await BlogModel.find(filters)
+            .populate("author", "username profile")
+            .populate("category", "title")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const blogsCount = await BlogModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) })
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    try {
+        const { slug } = req.params;
+
+        const blog = await BlogModel.findOne({ slug, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title");
+
+        if (!blog) {
+            throw new NotFoundException("blog not found");
+        }
+
+        SuccessResponse(res, 200, { blog });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -106,4 +159,32 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
     }
 };
 
-export const getRelated = async (req: Request, res: Response, next: NextFunction) => {};
+export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    try {
+        const { slug } = req.params;
+
+        const blog = await BlogModel.findOne({ slug, status: STATUS.PUBLISHED });
+
+        if (!blog) {
+            throw new NotFoundException("blog not found");
+        }
+
+        const aggragation = await BlogModel.aggregate([
+            {
+                $match: { $or: [{ category: blog.category }, { tags: { $in: blog.tags } }], status: STATUS.PUBLISHED, _id: { $ne: blog._id } },
+            },
+            {
+                $sample: { size: 8 },
+            },
+        ]);
+
+        const related = await BlogModel.populate(aggragation, [
+            { path: "author", select: "username profile" },
+            { path: "category", select: "title" },
+        ]);
+
+        SuccessResponse(res, 200, { blogs: related });
+    } catch (err) {
+        next(err);
+    }
+};

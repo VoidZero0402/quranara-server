@@ -9,8 +9,8 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(getAll).post(auth, roleGuard(ROLES.MANAGER), validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
-router.get("/search", search);
+router.route("/").get(validator("query", GetAllBlogsQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
+router.get("/search", validator("query", SearchBlogsQuerySchame), search);
 router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", CreateBlogSchema), update).delete(auth, roleGuard(ROLES.MANAGER), remove);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
