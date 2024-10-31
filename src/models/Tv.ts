@@ -21,6 +21,7 @@ const schema = new Schema<ITv>(
             required: true,
             trim: true,
             unique: true,
+            index: true,
         },
 
         description: {
@@ -39,6 +40,7 @@ const schema = new Schema<ITv>(
             type: Schema.Types.ObjectId,
             ref: "Category",
             required: true,
+            index: true,
         },
 
         cover: {
