@@ -31,6 +31,7 @@ const schema = new Schema<ICourse>(
 
         slug: {
             type: String,
+            required: true,
             unique: true,
             trim: true,
             index: true,

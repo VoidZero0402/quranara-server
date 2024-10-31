@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { slugRefiner } from "@/utils/validations";
 import { STATUS } from "@/constants/courses";
 
 const CreateCourseObject = z.object({
@@ -11,13 +12,7 @@ const CreateCourseObject = z.object({
     content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
 });
 
-export const CreateCourseSchema = CreateCourseObject.refine((values) => {
-    if (!values.slug) {
-        values.slug = values.title.replaceAll(" ", "-");
-    }
-
-    return true;
-});
+export const CreateCourseSchema = CreateCourseObject.refine(slugRefiner);
 
 export type CreateCourseSchemaType = z.infer<typeof CreateCourseSchema> & { slug: string };
 

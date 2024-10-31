@@ -33,6 +33,7 @@ const schema = new Schema<ITv>(
 
         slug: {
             type: String,
+            required: true,
             unique: true,
             index: true,
         },

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sanitizeHtmlContent, validateObjectId } from "@/utils/validations";
+import { sanitizeHtmlContent, slugRefiner, validateObjectId } from "@/utils/validations";
 import { PaginationQuerySchema } from "./pagination";
 
 export const CreateTvSchema = z
@@ -13,13 +13,7 @@ export const CreateTvSchema = z
         attached: z.string().min(1, { message: "attached should not be empty" }).trim().optional(),
         content: z.string().min(1, { message: "content should not be empty" }).trim().transform(sanitizeHtmlContent).optional(),
     })
-    .refine((values) => {
-        if (!values.slug) {
-            values.slug = values.title.replaceAll(" ", "-");
-        }
-
-        return true;
-    });
+    .refine(slugRefiner);
 
 export type CreateTvSchemaType = z.infer<typeof CreateTvSchema> & { slug: string };
 

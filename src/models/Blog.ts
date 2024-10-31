@@ -2,6 +2,9 @@ import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
 import { IUser } from "./User";
 import { ICategory } from "./Category";
 import { ICourse } from "./Course";
+import { STATUS } from "@/constants/blog";
+
+type Status = (typeof STATUS)[keyof typeof STATUS];
 
 export interface IBlog {
     title: string;
@@ -11,6 +14,7 @@ export interface IBlog {
     content: string;
     author: PopulatedDoc<Document<ObjectId> & IUser>;
     category: PopulatedDoc<Document<ObjectId> & ICategory>;
+    status: Status;
     tags: string[];
     views: number;
     timeToRead: number;
@@ -31,6 +35,7 @@ const schema = new Schema<IBlog>(
             required: true,
             trim: true,
             unique: true,
+            index: true,
         },
 
         description: {
@@ -59,6 +64,13 @@ const schema = new Schema<IBlog>(
             type: Schema.Types.ObjectId,
             ref: "Category",
             required: true,
+            index: true,
+        },
+
+        status: {
+            type: String,
+            enum: [STATUS.DRAFTED, STATUS.PUBLISHED],
+            default: STATUS.DRAFTED,
         },
 
         tags: [String],

@@ -34,6 +34,7 @@ const schema = new Schema<ISession, SessionModel, ISessionMethods>({
 
     slug: {
         type: String,
+        required: true,
         unique: true,
         index: true,
     },
