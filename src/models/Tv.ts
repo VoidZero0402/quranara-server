@@ -5,6 +5,7 @@ import { ICategory } from "./Category";
 export interface ITv {
     title: string;
     description: string;
+    slug: string;
     publisher: PopulatedDoc<Document<ObjectId> & IUser>;
     category: PopulatedDoc<Document<ObjectId> & ICategory>;
     cover: string;
@@ -28,6 +29,12 @@ const schema = new Schema<ITv>(
             type: String,
             required: true,
             trim: true,
+        },
+
+        slug: {
+            type: String,
+            unique: true,
+            index: true,
         },
 
         publisher: {

@@ -9,18 +9,39 @@ import { RequestWithUser } from "@/types/request.types";
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
+import { createPaginationData } from "@/utils/funcs";
 
 type RequestParamsWithID = { id: string };
+type RequestParamsWithSlug = { slug: string };
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {};
+export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, category } = req.query as unknown as GetAllTvsQuerySchemaType;
+
+        const filters = { ...(category && { category }) };
+
+        const tvs = await TvModel.find(filters)
+            .populate("publisher", "username profile")
+            .populate("category", "title")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const tvsCount = await TvModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { tvs, pagination: createPaginationData(page, limit, tvsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export const create = async (req: Request<{}, {}, CreateTvSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { title, description, category, cover, video, attached, content } = req.body;
+        const { title, description, slug, category, cover, video, attached, content } = req.body;
 
         const tv = await TvModel.create({
             title,
             description,
+            slug,
             category,
             cover,
             video,
@@ -38,13 +59,46 @@ export const create = async (req: Request<{}, {}, CreateTvSchemaType>, res: Resp
     }
 };
 
-export const search = async (req: Request, res: Response, next: NextFunction) => {};
-export const getOne = async (req: Request, res: Response, next: NextFunction) => {};
+export const search = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, q } = req.query as unknown as SearchTvsQuerySchameType;
+
+        const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
+
+        const tvs = await TvModel.find(filters)
+            .populate("publisher", "username profile")
+            .populate("category", "title")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const tvsCount = await TvModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { tvs, pagination: createPaginationData(page, limit, tvsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    try {
+        const { slug } = req.params;
+
+        const tv = await TvModel.findOne({ slug }).populate("publisher").populate("category");
+
+        if (!tv) {
+            throw new NotFoundException("tv not found");
+        }
+
+        SuccessResponse(res, 200, { tv });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export const update = async (req: Request<RequestParamsWithID, {}, CreateTvSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { title, description, category, cover, video, attached, content } = req.body;
+        const { title, description, slug, category, cover, video, attached, content } = req.body;
 
         const tv = await TvModel.findByIdAndUpdate(
             id,
@@ -52,6 +106,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateTvSchem
                 $set: {
                     title,
                     description,
+                    slug,
                     category,
                     cover,
                     video,
@@ -93,4 +148,32 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
     }
 };
 
-export const getRelated = async (req: Request, res: Response, next: NextFunction) => {};
+export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    try {
+        const { slug } = req.params;
+
+        const tv = await TvModel.findOne({ slug });
+
+        if (!tv) {
+            throw new NotFoundException("tv not found");
+        }
+
+        const aggregation = await TvModel.aggregate([
+            {
+                $match: { category: tv.category, _id: { $ne: tv._id } },
+            },
+            {
+                $sample: { size: 8 },
+            },
+        ]);
+
+        const related = await TvModel.populate(aggregation, [
+            { path: "publisher", select: "username profile" },
+            { path: "category", select: "title" },
+        ]);
+
+        SuccessResponse(res, 200, { tvs: related });
+    } catch (err) {
+        next(err);
+    }
+};
