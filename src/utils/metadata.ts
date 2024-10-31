@@ -1,20 +1,18 @@
 import MetadataModel from "@/models/Metadata";
 
-export const getUsersUnique = async () => {
+type Entities = "users" | "courses" | "sessions" | "tickets" | "blogs";
+
+const getUnique = (entity: Entities) => async () => {
     const metadata = await MetadataModel.getMetadata();
-    metadata.users.counter += 1;
+    metadata[entity].counter += 1;
     await metadata.save();
 
-    return metadata.users.counter;
+    return metadata[entity].counter;
 };
 
-export const getCoursesUnique = async () => {
-    const metadata = await MetadataModel.getMetadata();
-    metadata.courses.counter += 1;
-    await metadata.save();
+export const getUsersUnique = getUnique("users");
 
-    return metadata.courses.counter;
-};
+export const getCoursesUnique = getUnique("courses");
 
 export const decreaseCoursesUnique = async () => {
     const metadata = await MetadataModel.getMetadata();
@@ -22,18 +20,14 @@ export const decreaseCoursesUnique = async () => {
     await metadata.save();
 };
 
-export const getSessionsUnique = async () => {
+export const getSessionsUnique = getUnique("sessions");
+
+export const getTicketUnique = getUnique("tickets");
+
+export const getBlogUnique = getUnique("blogs");
+
+export const decreaseBlogsUnique = async () => {
     const metadata = await MetadataModel.getMetadata();
-    metadata.sessions.counter += 1;
+    metadata.blogs.counter -= 1;
     await metadata.save();
-
-    return metadata.sessions.counter;
-};
-
-export const getTicketUnique = async () => {
-    const metadata = await MetadataModel.getMetadata();
-    metadata.tickets.counter += 1;
-    await metadata.save();
-
-    return metadata.tickets.counter;
 };

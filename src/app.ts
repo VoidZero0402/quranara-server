@@ -13,6 +13,7 @@ import uploadsRouter from "@/routes/v1/uploads";
 import ticketsRouter from "@/routes/v1/tickets";
 import categoriesRouter from "@/routes/v1/categories";
 import tvRouter from "@/routes/v1/tv";
+import blogRouter from "@/routes/v1/blog";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/uploads", uploadsRouter);
 app.use("/api/tickets", ticketsRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/tv", tvRouter);
+app.use("/api/blog", blogRouter);
 
 app.use(globalErrorHandler);
 
