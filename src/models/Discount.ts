@@ -19,6 +19,7 @@ const schema = new Schema<IDiscount>(
             required: true,
             trim: true,
             unique: true,
+            index: true
         },
 
         percent: {
