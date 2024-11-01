@@ -15,6 +15,7 @@ import categoriesRouter from "@/routes/v1/categories";
 import tvRouter from "@/routes/v1/tv";
 import blogRouter from "@/routes/v1/blog";
 import commentsRouter from "@/routes/v1/comments";
+import discountsRouter from "@/routes/v1/discounts";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/categories", categoriesRouter);
 app.use("/api/tv", tvRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/comments", commentsRouter);
+app.use("/api/discount", discountsRouter);
 
 app.use(globalErrorHandler);
 

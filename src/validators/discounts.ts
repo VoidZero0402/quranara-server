@@ -6,7 +6,11 @@ export const CreateDiscountSchema = z.object({
     percent: z.number({ required_error: "percent is required" }).min(1, { message: "minimum value of percent is 1" }).max(100, { message: "maximum vlaue of percent is 100" }),
     course: validateObjectId.optional(),
     max: z.number({ required_error: "max is required" }).min(1, { message: "minimum value of max is 1" }).max(9999, { message: "maximum vlaue of max is 9999" }),
-    expireAt: z.date({ message: "expireAt is required" }),
+    expireAtTime: z.number({ required_error: "expireAtTime is required" }),
 });
 
 export type CreateDiscountSchemaType = z.infer<typeof CreateDiscountSchema>;
+
+export const AvailableDiscountQuerySchema = CreateDiscountSchema.pick({ code: true, course: true });
+
+export type AvailableDiscountQuerySchemaType = z.infer<typeof AvailableDiscountQuerySchema>;
