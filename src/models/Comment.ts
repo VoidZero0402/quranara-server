@@ -1,20 +1,24 @@
 import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
 import { STATUS } from "@/constants/comments";
+import { ICourse } from "./Course";
+import { IBlog } from "./Blog";
 import { ITv } from "./Tv";
 import { IUser } from "./User";
 
 export type Status = (typeof STATUS)[keyof typeof STATUS];
 
-export interface ITvComment {
+export interface IComment {
     content: string;
-    tv: PopulatedDoc<Document<ObjectId> & ITv>;
+    blog?: PopulatedDoc<Document<ObjectId> & IBlog>;
+    course?: PopulatedDoc<Document<ObjectId> & ICourse>;
+    tv?: PopulatedDoc<Document<ObjectId> & ITv>;
     user: PopulatedDoc<Document<ObjectId> & IUser>;
     rating?: Number;
     status: Status;
-    replyTo?: PopulatedDoc<Document<ObjectId> & ITvComment>;
+    replyTo?: PopulatedDoc<Document<ObjectId> & IComment>;
 }
 
-const schema = new Schema<ITvComment>(
+const schema = new Schema<IComment>(
     {
         content: {
             type: String,
@@ -22,10 +26,22 @@ const schema = new Schema<ITvComment>(
             trim: true,
         },
 
+        blog: {
+            type: Schema.Types.ObjectId,
+            ref: "Blog",
+            index: true,
+        },
+
+        course: {
+            type: Schema.Types.ObjectId,
+            ref: "Course",
+            index: true,
+        },
+
         tv: {
             type: Schema.Types.ObjectId,
             ref: "Tv",
-            required: true,
+            index: true,
         },
 
         user: {
@@ -43,19 +59,26 @@ const schema = new Schema<ITvComment>(
 
         status: {
             type: String,
-            enum: [STATUS.PENDING, STATUS.PENDING, STATUS.REJECTED],
+            enum: [STATUS.PENDING, STATUS.ACCEPTED, STATUS.REJECTED],
             default: STATUS.PENDING,
-            index: true
+            index: true,
         },
 
         replyTo: {
             type: Schema.Types.ObjectId,
-            ref: "TvComment",
+            ref: "Comment",
         },
     },
     { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-const TvCommentModel = model<ITvComment>("TvComment", schema);
+schema.virtual("replies", {
+    ref: "Comment",
+    localField: "_id",
+    foreignField: "replyTo",
+    match: { status: STATUS.ACCEPTED },
+});
 
-export default TvCommentModel;
+const CommentModel = model<IComment>("Comment", schema);
+
+export default CommentModel;
