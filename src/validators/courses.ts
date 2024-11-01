@@ -3,7 +3,7 @@ import { slugRefiner } from "@/utils/validations";
 import { STATUS } from "@/constants/courses";
 
 const CreateCourseObject = z.object({
-    title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 25 character" }).trim(),
+    title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
     slug: z.string().min(1, { message: "slug should not be empty" }).max(255, { message: "slug should be has less than 25 character" }).trim().optional(),
     description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(1024, { message: "description should be has less than 1024 character" }).trim(),
     price: z.coerce.number().positive({ message: "price can not be negative" }).default(0),

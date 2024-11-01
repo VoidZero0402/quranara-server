@@ -3,3 +3,9 @@ export const STATUS = {
     ACCEPTED: "ACCEPTED",
     REJECTED: "REJECTED",
 } as const;
+
+export const TYPE = {
+    BLOG: "BLOG",
+    TV: "TV",
+    COURSE: "COURSE",
+} as const;

@@ -45,6 +45,7 @@ const schema = new Schema<ITvComment>(
             type: String,
             enum: [STATUS.PENDING, STATUS.PENDING, STATUS.REJECTED],
             default: STATUS.PENDING,
+            index: true
         },
 
         replyTo: {

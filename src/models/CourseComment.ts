@@ -46,6 +46,7 @@ const schema = new Schema<ICourseComment>(
             type: String,
             enum: [STATUS.PENDING, STATUS.ACCEPTED, STATUS.REJECTED],
             default: STATUS.PENDING,
+            index: true
         },
 
         replyTo: {
