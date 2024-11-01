@@ -1,10 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 
 import BlogModel from "@/models/Blog";
+import CommentModel from "@/models/Comment";
 
 import { STATUS } from "@/constants/blog";
+import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 
 import { CreateBlogSchemaType, CreateBlogQuerySchemaType, GetAllBlogsQuerySchemaType, SearchBlogsQuerySchameType } from "@/validators/blog";
+import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestWithUser } from "@/types/request.types";
 
@@ -84,7 +87,7 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
 
         const blogsCount = await BlogModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) })
+        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
     } catch (err) {
         next(err);
     }
@@ -184,6 +187,36 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
         ]);
 
         SuccessResponse(res, 200, { blogs: related });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    try {
+        const { slug } = req.params;
+        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+
+        const blog = await BlogModel.findOne({ slug });
+
+        if (!blog) {
+            throw new NotFoundException("blog not found");
+        }
+
+        const filters = { blog: blog._id, status: COMMENT_STATUS.ACCEPTED };
+
+        console.log(filters);
+
+        const comments = await CommentModel.find(filters)
+            .populate("user", "username profile")
+            .populate({ path: "replies", populate: { path: "user", select: "username profile" } })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
+        const commentsCount = await CommentModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
     } catch (err) {
         next(err);
     }

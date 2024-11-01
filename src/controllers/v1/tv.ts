@@ -1,8 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 
 import TvModel from "@/models/Tv";
+import CommentModel from "@/models/Comment";
+
+import { STATUS } from "@/constants/comments";
 
 import { CreateTvSchemaType, GetAllTvsQuerySchemaType, SearchTvsQuerySchameType } from "@/validators/tv";
+import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestWithUser } from "@/types/request.types";
 
@@ -173,6 +177,35 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
         ]);
 
         SuccessResponse(res, 200, { tvs: related });
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    try {
+        const { slug } = req.params;
+        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+
+        const tv = await TvModel.findOne({ slug });
+
+        if (!tv) {
+            throw new NotFoundException("tv not found");
+        }
+
+        const filters = { tv: tv._id, status: STATUS.ACCEPTED };
+
+        const comments = await CommentModel.find(filters)
+            .populate("user", "username profile")
+            .populate({ path: "replies", populate: { path: "user", select: "username profile" } })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
+        const commentsCount = await CommentModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
     } catch (err) {
         next(err);
     }
