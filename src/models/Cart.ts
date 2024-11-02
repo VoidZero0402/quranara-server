@@ -7,18 +7,20 @@ export interface ICart {
     items: PopulatedDoc<Document<ObjectId> & ICourse>[];
 }
 
+export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
+
 const schema = new Schema<ICart>({
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,
         unique: true,
+        index: true,
     },
 
     items: {
         type: [Schema.Types.ObjectId],
         ref: "Course",
-        required: true,
     },
 });
 

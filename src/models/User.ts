@@ -1,6 +1,8 @@
 import { Schema, model } from "mongoose";
 import { ROLES } from "@/constants/roles";
 
+import CartModel from "./Cart";
+
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
 export interface IUser {
@@ -32,6 +34,11 @@ const schema = new Schema<IUser>({
     },
 
     profile: String,
+});
+
+schema.pre("save", async function (next) {
+    await CartModel.create({ user: this._id });
+    next();
 });
 
 const UserModel = model<IUser>("User", schema);

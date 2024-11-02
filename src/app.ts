@@ -16,6 +16,7 @@ import tvRouter from "@/routes/v1/tv";
 import blogRouter from "@/routes/v1/blog";
 import commentsRouter from "@/routes/v1/comments";
 import discountsRouter from "@/routes/v1/discounts";
+import cartRouter from "@/routes/v1/cart";
 
 const app = express();
 
@@ -37,7 +38,8 @@ app.use("/api/categories", categoriesRouter);
 app.use("/api/tv", tvRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/comments", commentsRouter);
-app.use("/api/discount", discountsRouter);
+app.use("/api/discounts", discountsRouter);
+app.use("/api/cart", cartRouter);
 
 app.use(globalErrorHandler);
 
