@@ -40,7 +40,7 @@ const schema = new Schema<IQuestion>(
             default: STATUS.ACTIVE,
         },
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 schema.index({ user: 1, session: 1 }, { unique: true });

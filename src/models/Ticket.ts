@@ -48,7 +48,7 @@ const schema = new Schema<ITicket>(
 
         shortId: String,
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 schema.virtual("messages", {

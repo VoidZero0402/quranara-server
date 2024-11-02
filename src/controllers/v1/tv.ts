@@ -14,6 +14,7 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData } from "@/utils/funcs";
+import { increaseViews } from "@/utils/metadata";
 
 type RequestParamsWithID = { id: string };
 type RequestParamsWithSlug = { slug: string };
@@ -92,6 +93,8 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
         if (!tv) {
             throw new NotFoundException("tv not found");
         }
+
+        await increaseViews("tv", tv._id.toString());
 
         SuccessResponse(res, 200, { tv });
     } catch (err) {
@@ -181,7 +184,6 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
         next(err);
     }
 };
-
 
 export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {

@@ -15,7 +15,7 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData } from "@/utils/funcs";
-import { decreaseBlogsUnique, getBlogUnique } from "@/utils/metadata";
+import { decreaseBlogsUnique, getBlogUnique, increaseViews } from "@/utils/metadata";
 
 type RequestParamsWithID = { id: string };
 type RequestParamsWithSlug = { slug: string };
@@ -102,6 +102,8 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
         if (!blog) {
             throw new NotFoundException("blog not found");
         }
+
+        await increaseViews("blog", blog._id.toString());
 
         SuccessResponse(res, 200, { blog });
     } catch (err) {
