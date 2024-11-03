@@ -7,10 +7,12 @@ import { sendOtp } from "@/services/melipayamak";
 
 import { SignupShcemaType, SendOtpSchemaType, LoginWithOtpSchemaType, LoginWithEmailSchemaType } from "@/validators/auth";
 
+import { RequestWithUser } from "@/types/request.types";
+
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createSession, generateOtp, getOtp, saveSessionInRedis, setCredentialCookies, verifyOtp } from "@/utils/auth";
+import { createSession, generateOtp, getOtp, removeSessionFromRedis, saveSessionInRedis, setCredentialCookies, verifyOtp } from "@/utils/auth";
 
 export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Response, next: NextFunction) => {
     try {
@@ -75,7 +77,82 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
     }
 };
 
-export const loginWithOtp = async (req: Request, res: Response, next: NextFunction) => {};
-export const loginWithEmail = async (req: Request, res: Response, next: NextFunction) => {};
-export const getMe = async (req: Request, res: Response, next: NextFunction) => {};
-export const logout = async (req: Request, res: Response, next: NextFunction) => {};
+export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { phone, otp } = req.body;
+
+        const { expired, matched } = await verifyOtp(phone, otp);
+
+        if (expired) {
+            throw new ConflictException("otp is expired");
+        }
+
+        if (!matched) {
+            throw new BadRequestException("otp is not matched");
+        }
+
+        const user = await UserModel.findOne({ phone });
+
+        if (!user) {
+            throw new NotFoundException("user not found");
+        }
+
+        const session = await createSession({ _id: user._id });
+
+        await saveSessionInRedis(session, user._id.toString());
+
+        setCredentialCookies(res, { session, user });
+
+        SuccessResponse(res, 200, { user });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const loginWithEmail = async (req: Request<{}, {}, LoginWithEmailSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            throw new NotFoundException("user not found");
+        }
+
+        const isMatched = await user.comparePassword(password);
+
+        if (!isMatched) {
+            throw new NotFoundException("user not found");
+        }
+
+        const session = await createSession({ _id: user._id });
+
+        await saveSessionInRedis(session, user._id.toString());
+
+        setCredentialCookies(res, { session, user });
+
+        SuccessResponse(res, 200, { user });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getMe = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        SuccessResponse(res, 200, { user: (req as RequestWithUser).user });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await removeSessionFromRedis((req as RequestWithUser).user._id.toString());
+        res.clearCookie("_session");
+        res.clearCookie("_user");
+
+        SuccessResponse(res, 200, { message: "logout is successful" });
+    } catch (err) {
+        next(err);
+    }
+};

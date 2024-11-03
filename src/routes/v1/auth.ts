@@ -9,9 +9,9 @@ const router = express.Router();
 
 router.post("/signup", validator("body", SignupShcema), signup);
 router.post("/send-otp", validator("body", SendOtpSchema), send);
-router.post("/login/with-otp", loginWithOtp);
-router.post("/login/with-email", loginWithEmail);
-router.get("/me", getMe);
-router.get("/logout", logout);
+router.post("/login/with-otp", validator("body", LoginWithOtpSchema), loginWithOtp);
+router.post("/login/with-email", validator("body", LoginWithEmailSchema), loginWithEmail);
+router.get("/me", auth, getMe);
+router.get("/logout", auth, logout);
 
 export default router;

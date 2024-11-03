@@ -3,6 +3,7 @@ import * as jose from "jose";
 
 import redis from "@/config/redis";
 import { UserDocument } from "@/models/User";
+import { UnauthorizedException } from "./exceptions";
 
 const TWO_MINUTES_IN_SECONDS = 120;
 
@@ -59,10 +60,23 @@ export const createSession = async (payload: jose.JWTPayload): Promise<string> =
     return jwt;
 };
 
+export const verifySession = async (session: string): Promise<jose.JWTPayload> => {
+    try {
+        const { payload } = await jose.jwtVerify(session, JWT_SECRET);
+        return payload;
+    } catch (err) {
+        throw new UnauthorizedException("session is expired");
+    }
+};
+
 const getRedisSessionPattern = (_id: string): string => `session:${_id}`;
 
-export const saveSessionInRedis = async (token: string, _id: string): Promise<void> => {
-    await redis.set(getRedisSessionPattern(_id), token, "EX", NINETY_DAYS_IN_SECONDS);
+export const saveSessionInRedis = async (session: string, _id: string): Promise<void> => {
+    await redis.set(getRedisSessionPattern(_id), session, "EX", NINETY_DAYS_IN_SECONDS);
+};
+
+export const removeSessionFromRedis = async (_id: string): Promise<void> => {
+    await redis.del(getRedisSessionPattern(_id));
 };
 
 const cookiesOption = {
