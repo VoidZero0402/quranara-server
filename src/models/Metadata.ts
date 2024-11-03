@@ -1,24 +1,17 @@
 import { Document, Model, Schema, model } from "mongoose";
 
 export interface IMetadata {
-    users: { counter: number };
     courses: { counter: number };
     sessions: { counter: number };
     tickets: { counter: number };
     blogs: { counter: number };
 }
 
-interface UserModel extends Model<IMetadata> {
+interface MetadataModel extends Model<IMetadata> {
     getMetadata(): Promise<Document<unknown, {}, IMetadata> & IMetadata>;
 }
 
-const schema = new Schema<IMetadata, UserModel>({
-    users: {
-        counter: {
-            type: Number,
-            default: 0,
-        },
-    },
+const schema = new Schema<IMetadata, MetadataModel>({
     courses: {
         counter: {
             type: Number,
@@ -55,6 +48,6 @@ schema.static("getMetadata", async function getMetadata() {
     return metadata;
 });
 
-const MetadataModel = model<IMetadata, UserModel>("Metadata", schema);
+const MetadataModel = model<IMetadata, MetadataModel>("Metadata", schema);
 
 export default MetadataModel;
