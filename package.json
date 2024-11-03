@@ -12,6 +12,7 @@
     "license": "MIT",
     "description": "The ServerSide Of quranara.com",
     "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
         "@types/cookie-parser": "^1.4.7",
         "@types/cors": "^2.8.17",
         "@types/express": "^5.0.0",
@@ -26,6 +27,7 @@
     "dependencies": {
         "@aws-sdk/client-s3": "^3.679.0",
         "@aws-sdk/s3-request-presigner": "^3.679.0",
+        "bcryptjs": "^2.4.3",
         "cookie": "^1.0.1",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
