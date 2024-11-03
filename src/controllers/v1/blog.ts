@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import BlogModel from "@/models/Blog";
 import CommentModel from "@/models/Comment";
+import BlogLikeModel from "@/models/BlogLike";
 
 import { STATUS } from "@/constants/blog";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
@@ -219,6 +220,41 @@ export const getComments = async (req: Request<RequestParamsWithSlug>, res: Resp
         const commentsCount = await CommentModel.countDocuments(filters);
 
         SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const like = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const like = await BlogLikeModel.create({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+
+        await BlogModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
+
+        SuccessResponse(res, 201, { like });
+    } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("like already exists with this information"));
+        }
+        next(err);
+    }
+};
+
+export const dislike = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const like = await BlogLikeModel.findOneAndDelete({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+
+        if (!like) {
+            throw new NotFoundException("like not found!");
+        }
+
+        await BlogModel.updateOne({ _id: id }, { $inc: { likes: -1 } });
+
+        SuccessResponse(res, 200, { like });
     } catch (err) {
         next(err);
     }

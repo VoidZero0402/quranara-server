@@ -10,7 +10,7 @@ import app from "@/app";
 import connectToDatabase from "@/config/database";
 
 const startServer = async () => {
-    const port = process.env.PORT;    
+    const port = process.env.PORT;
 
     app.listen(port, () => {
         console.log(`Server Running In ${isProduction ? "Production" : "Development"} Mode On Port ${port}`);

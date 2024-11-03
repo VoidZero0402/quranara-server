@@ -17,6 +17,7 @@ export interface IBlog {
     status: Status;
     tags: string[];
     views: number;
+    likes: number;
     timeToRead: number;
     shortId: string;
     relatedCourses: PopulatedDoc<Document<ObjectId> & ICourse>[];
@@ -77,6 +78,11 @@ const schema = new Schema<IBlog>(
         tags: [String],
 
         views: {
+            type: Number,
+            default: 0,
+        },
+
+        likes: {
             type: Number,
             default: 0,
         },

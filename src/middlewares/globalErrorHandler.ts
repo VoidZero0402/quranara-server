@@ -15,6 +15,11 @@ const globalErrorHandler = (err: Error | Exception, req: Request, res: Response,
         return;
     }
 
+    if (err instanceof mongoose.Error.ValidationError) {
+        ErrorResponse(res, 400, "database validation failed");
+        return;
+    }
+
     const message = err.message || "Internal Server Error";
 
     ErrorResponse(res, 500, message);

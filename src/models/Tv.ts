@@ -13,6 +13,7 @@ export interface ITv {
     attached: string;
     content: string;
     views: number;
+    likes: number;
 }
 
 const schema = new Schema<ITv>(
@@ -66,6 +67,11 @@ const schema = new Schema<ITv>(
         content: String,
 
         views: {
+            type: Number,
+            default: 0,
+        },
+
+        likes: {
             type: Number,
             default: 0,
         },

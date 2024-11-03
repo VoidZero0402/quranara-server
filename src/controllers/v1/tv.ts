@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import TvModel from "@/models/Tv";
 import CommentModel from "@/models/Comment";
+import TvLikeModel from "@/models/TvLike";
 
 import { STATUS } from "@/constants/comments";
 
@@ -208,6 +209,41 @@ export const getComments = async (req: Request<RequestParamsWithSlug>, res: Resp
         const commentsCount = await CommentModel.countDocuments(filters);
 
         SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const like = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const like = await TvLikeModel.create({ tv: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+
+        await TvModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
+
+        SuccessResponse(res, 201, { like });
+    } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("like already exists with this information"));
+        }
+        next(err);
+    }
+};
+
+export const dislike = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const like = await TvLikeModel.findOneAndDelete({ tv: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+
+        if (!like) {
+            throw new NotFoundException("like not found!");
+        }
+
+        await TvModel.updateOne({ _id: id }, { $inc: { likes: -1 } });
+
+        SuccessResponse(res, 200, { like });
     } catch (err) {
         next(err);
     }
