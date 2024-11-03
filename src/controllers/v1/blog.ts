@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import BlogModel from "@/models/Blog";
 import CommentModel from "@/models/Comment";
 import BlogLikeModel from "@/models/BlogLike";
+import BlogSaveModel from "@/models/BlogSave";
 
 import { STATUS } from "@/constants/blog";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
@@ -255,6 +256,37 @@ export const dislike = async (req: Request<RequestParamsWithID>, res: Response, 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: -1 } });
 
         SuccessResponse(res, 200, { like });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const save = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const save = await BlogSaveModel.create({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+
+        SuccessResponse(res, 201, { save });
+    } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("blog saved already with this information"));
+        }
+        next(err);
+    }
+};
+
+export const unsave = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const save = await BlogSaveModel.findOneAndDelete({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+
+        if (!save) {
+            throw new NotFoundException("saved blog not found!");
+        }
+
+        SuccessResponse(res, 200, { save });
     } catch (err) {
         next(err);
     }
