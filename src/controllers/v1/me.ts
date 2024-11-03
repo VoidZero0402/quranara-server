@@ -1,10 +1,13 @@
 import { NextFunction, Request, Response } from "express";
+import { hash } from "bcryptjs";
 
+import UserModel from "@/models/User";
 import BlogLikeModel from "@/models/BlogLike";
 import BlogSaveModel from "@/models/BlogSave";
 import TvLikeModel from "@/models/TvLike";
 import TvSaveModel from "@/models/TvSave";
 
+import { UpdateAccountSchemaType, ChangePasswordSchemaType } from "@/validators/me";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestWithUser } from "@/types/request.types";
@@ -12,6 +15,65 @@ import { RequestWithUser } from "@/types/request.types";
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
+import { isDuplicateKeyError } from "@/utils/errors";
+import { updateUserCredentialCookie } from "@/utils/auth";
+
+export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const user = (req as RequestWithUser).user;
+        const { fullname, username, profile } = req.body;
+
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            user._id,
+            {
+                $set: {
+                    fullname,
+                    username,
+                    profile,
+                },
+            },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            throw new NotFoundException("user not found");
+        }
+
+        await updateUserCredentialCookie(res, updatedUser);
+
+        SuccessResponse(res, 200, { user: updatedUser });
+    } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("user already exists with this information", { field: Object.keys((err as any).keyPattern)[0] }));
+        }
+        next(err);
+    }
+};
+
+export const changePassword = async (req: Request<{}, {}, ChangePasswordSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const user = (req as RequestWithUser).user;
+        const { past, new: newPassword } = req.body;
+
+        const isMatched = await user.comparePassword(past);
+
+        if (!isMatched) {
+            throw new ConflictException("past password is not matched");
+        }
+
+        const hashedPassword = await hash(newPassword, 12);
+
+        const updatedUser = await UserModel.findByIdAndUpdate(user._id, {
+            $set: {
+                password: hashedPassword,
+            },
+        });
+
+        SuccessResponse(res, 200, { user: updatedUser });
+    } catch (err) {
+        next(err);
+    }
+};
 
 export const getSavedBlog = async (req: Request, res: Response, next: NextFunction) => {
     try {

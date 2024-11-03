@@ -94,7 +94,22 @@ export const setCredentialCookies = (res: Response, credentials: { session: stri
         expires,
     });
 
+    Reflect.deleteProperty(credentials.user, "password");
+
     res.cookie("_user", credentials.user.toObject(), {
+        ...cookiesOption,
+        expires,
+    });
+};
+
+export const updateUserCredentialCookie = async (res: Response, user: UserDocument): Promise<void> => {
+    const ttl = await redis.ttl(getRedisSessionPattern(user._id.toString()));
+
+    const expires = new Date(Date.now() + ttl * 1000);
+
+    Reflect.deleteProperty(user, "password");
+
+    res.cookie("_user", user.toObject(), {
         ...cookiesOption,
         expires,
     });

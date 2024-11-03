@@ -1,4 +1,4 @@
-import { Document, Model, Schema, model } from "mongoose";
+import { Document, Model, Schema, Types, model } from "mongoose";
 import { compare, hash } from "bcryptjs";
 import { ROLES } from "@/constants/roles";
 
@@ -16,7 +16,16 @@ export interface IUser {
     profile?: string;
 }
 
-export type UserDocument = Document<unknown, {}, IUser> & IUser;
+export type UserDocument = Document<unknown, {}, IUser> &
+    Omit<
+        IUser & {
+            _id: Types.ObjectId;
+        } & {
+            __v?: number;
+        },
+        "comparePassword"
+    > &
+    IUserMethods;
 
 interface IUserMethods {
     comparePassword(password: string): Promise<boolean>;
