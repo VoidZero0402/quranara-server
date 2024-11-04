@@ -11,13 +11,25 @@ import { SuccessResponse } from "@/utils/responses";
 
 export const getCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const cart = await CartModel.findOne({ user: (req as RequestWithUser).user._id }).populate("items", "title slug cover price discount").lean();
+        const cart = await CartModel.findOne({ user: (req as RequestWithUser).user._id }, "items")
+            .populate<{ items: PopulatedCourse[] }>("items", "title description slug cover price discount")
+            .lean();
 
         if (!cart) {
             throw new NotFoundException("cart not found");
         }
 
-        SuccessResponse(res, 200, { cart });
+        let totalPrice = 0;
+        let discount = 0;
+
+        for (let course of cart.items) {
+            totalPrice += course.price;
+            discount += (course.price * course.discount) / 100;
+        }
+
+        const payableAmount = totalPrice - discount;
+
+        SuccessResponse(res, 200, { ...cart, totalPrice, discount, payableAmount });
     } catch (err) {
         next(err);
     }
