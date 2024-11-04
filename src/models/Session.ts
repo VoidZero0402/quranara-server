@@ -1,4 +1,4 @@
-import { Schema, model, PopulatedDoc, Document, ObjectId, Model } from "mongoose";
+import { Schema, model, PopulatedDoc, Document, ObjectId, Model, Types } from "mongoose";
 import { ICourse } from "./Course";
 import { ITopic } from "./Topic";
 
@@ -20,7 +20,7 @@ export interface ISession {
 export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
 
 interface ISessionMethods {
-    hasUserAccess(_id: ObjectId): Promise<boolean>;
+    hasUserAccess(_id: Types.ObjectId): Promise<boolean>;
 }
 
 type SessionModel = Model<ISession, {}, ISessionMethods>;

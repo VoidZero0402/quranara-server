@@ -11,6 +11,7 @@ export interface IOrder {
     amount: number;
     status: Status;
     authority: string;
+    shortId: string;
 }
 
 const schema = new Schema<IOrder>(
@@ -41,7 +42,13 @@ const schema = new Schema<IOrder>(
         authority: {
             type: String,
             required: true,
-            index: true
+            index: true,
+        },
+
+        shortId: {
+            type: String,
+            required: true,
+            index: true,
         },
     },
     { timestamps: true }

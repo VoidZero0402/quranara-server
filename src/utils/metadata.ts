@@ -2,7 +2,7 @@ import MetadataModel from "@/models/Metadata";
 
 import redis from "@/config/redis";
 
-type Entities = "users" | "courses" | "sessions" | "tickets" | "blogs";
+type Entities = "courses" | "sessions" | "tickets" | "blogs" | "orders";
 
 const getUnique = (entity: Entities) => async () => {
     const metadata = await MetadataModel.getMetadata();
@@ -11,8 +11,6 @@ const getUnique = (entity: Entities) => async () => {
 
     return metadata[entity].counter;
 };
-
-export const getUsersUnique = getUnique("users");
 
 export const getCoursesUnique = getUnique("courses");
 
@@ -38,3 +36,5 @@ export const increaseViews = async (entity: string, _id: string) => {
     const key = `${entity}:${_id}:views`;
     await redis.incr(key);
 };
+
+export const getOrdersUnique = getUnique("orders");

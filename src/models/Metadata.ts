@@ -5,6 +5,7 @@ export interface IMetadata {
     sessions: { counter: number };
     tickets: { counter: number };
     blogs: { counter: number };
+    orders: { counter: number };
 }
 
 interface MetadataModel extends Model<IMetadata> {
@@ -18,19 +19,29 @@ const schema = new Schema<IMetadata, MetadataModel>({
             default: 0,
         },
     },
+    
     sessions: {
         counter: {
             type: Number,
             default: 0,
         },
     },
+
     tickets: {
         counter: {
             type: Number,
             default: 0,
         },
     },
+
     blogs: {
+        counter: {
+            type: Number,
+            default: 0,
+        },
+    },
+
+    orders: {
         counter: {
             type: Number,
             default: 0,
