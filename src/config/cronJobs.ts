@@ -11,6 +11,8 @@ import TvModel from "@/models/Tv";
 import { STATUS as TICKET_STATUS } from "@/constants/tickets";
 import { STATUS as QUESTION_STATUS } from "@/constants/questions";
 
+import { scanRedisKeys } from "@/utils/funcs";
+
 const updateTicketsStatus = async (date: Date) => {
     await TicketModel.updateMany(
         { status: TICKET_STATUS.SLEEP, updatedAt: { $lte: date } },
@@ -18,19 +20,6 @@ const updateTicketsStatus = async (date: Date) => {
             $set: { status: TICKET_STATUS.COLSED },
         }
     );
-};
-
-const scanRedisKeys = async (pattern: string): Promise<string[]> => {
-    const keys = [];
-    let cursor = "0";
-
-    do {
-        const [newCursor, founded] = await redis.scan(cursor, "MATCH", pattern);
-        cursor = newCursor;
-        keys.push(...founded);
-    } while (cursor !== "0");
-
-    return keys;
 };
 
 const updateQuestionsStatus = async (date: Date) => {
