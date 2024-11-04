@@ -10,12 +10,16 @@ import { createPayment, verifyPayment } from "@/services/zarinpal";
 import { STATUS } from "@/constants/orders";
 
 import { CreateOrderSchemaType } from "@/validators/orders";
+import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestWithUser } from "@/types/request.types";
 
-import { ForbiddenException, NotFoundException, ConflictException, BadRequestException } from "@/utils/exceptions";
+import { ForbiddenException, NotFoundException, BadRequestException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getOrdersUnique } from "@/utils/metadata";
+import { createPaginationData } from "@/utils/funcs";
+
+type RequestParamsWithID = { id: string };
 
 export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -37,9 +41,9 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
             discount = discountDoc.percent;
         }
 
-        const cart = await CartModel.findOne({ user: (req as RequestWithUser).user._id })
-            .populate<{ items: PopulatedCourse[] }>("items", "price discount")
-            .lean();
+        const user = (req as RequestWithUser).user;
+
+        const cart = await CartModel.findOne({ user: user._id }).populate<{ items: PopulatedCourse[] }>("items", "price discount").lean();
 
         if (!cart) {
             throw new NotFoundException("cart not found");
@@ -56,13 +60,13 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
         const shortId = await getOrdersUnique();
 
         const orderInstance = new OrderModel({
-            user: (req as RequestWithUser).user._id,
+            user: user._id,
             items: cart.items,
             amount: payableAmount,
             shortId,
         });
 
-        const payment = await createPayment({ amount: payableAmount, description: `سفارش با شناسه #${shortId}`, mobile: (req as RequestWithUser).user.phone, email: (req as RequestWithUser).user.email });
+        const payment = await createPayment({ amount: payableAmount, description: `سفارش با شناسه #${shortId}`, mobile: user.phone, email: user.email });
 
         orderInstance.authority = payment.authority;
 
@@ -108,6 +112,43 @@ export const verify = async (req: Request, res: Response, next: NextFunction) =>
     }
 };
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {};
+export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
 
-export const getOne = async (req: Request, res: Response, next: NextFunction) => {};
+        const filters = { status: STATUS.SUCCESSFUL };
+
+        const orders = await OrderModel.find(filters)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
+        const ordersCount = await OrderModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { orders, pagination: createPaginationData(page, limit, ordersCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getOne = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const user = (req as RequestWithUser<RequestParamsWithID>).user;
+        const { id } = req.params;
+
+        const order = await OrderModel.findOne({ shortId: id }).populate<{ items: PopulatedCourse[] }>("items", "title description slug cover price discount").lean();
+
+        if (!order) {
+            throw new NotFoundException("order not found");
+        }
+
+        if (!(order.user === user._id)) {
+            throw new ForbiddenException("you can not access to this route");
+        }
+
+        SuccessResponse(res, 200, { order });
+    } catch (err) {
+        next(err);
+    }
+};

@@ -37,6 +37,7 @@ const schema = new Schema<IOrder>(
             type: String,
             enum: [STATUS.PAYING, STATUS.SUCCESSFUL, STATUS.PAYING],
             default: STATUS.PAYING,
+            index: true,
         },
 
         authority: {
@@ -53,6 +54,8 @@ const schema = new Schema<IOrder>(
     },
     { timestamps: true }
 );
+
+schema.index({ createdAt: -1 });
 
 const OrderModel = model<IOrder>("Order", schema);
 

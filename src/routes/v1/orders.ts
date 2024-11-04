@@ -14,7 +14,7 @@ router.use(auth);
 
 router.post("/", validator("body", CreateOrderSchema), create);
 router.get("/verify", verify);
-router.get("/all", getAll);
+router.get("/all", roleGuard(ROLES.MANAGER), validator("body", PaginationQuerySchema), getAll);
 router.get("/check/:id", getOne);
 
 export default router;

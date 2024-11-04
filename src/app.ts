@@ -18,6 +18,7 @@ import commentsRouter from "@/routes/v1/comments";
 import discountsRouter from "@/routes/v1/discounts";
 import cartRouter from "@/routes/v1/cart";
 import meRouter from "@/routes/v1/me";
+import ordersRouter from "@/routes/v1/orders";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/comments", commentsRouter);
 app.use("/api/discounts", discountsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/me", meRouter);
+app.use("/api/orders", ordersRouter);
 
 app.use(globalErrorHandler);
 

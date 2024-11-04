@@ -4,6 +4,7 @@ const baseURL = process.env.ZARINPAL_API_BASE_URL;
 const merchantId = process.env.ZARINPAL_MERCHANT_ID;
 const paymentBaseURL = process.env.ZARINPAL_PAYMENT_BASE_URL;
 const callbackURL = process.env.ZARINPAL_CALLBACK_URL;
+const currency = process.env.ZARINPAL_CURRENCY;
 
 type CreatePaymentProps = { amount: number; description: string; mobile: string; email?: string };
 type CreatePaymentOutput = Promise<{ data: object; authority: string; paymentUrl: string }>;
@@ -19,6 +20,7 @@ export const createPayment = async ({ amount, description, mobile, email }: Crea
                 merchant_id: merchantId,
                 callback_url: callbackURL,
                 amount,
+                currency,
                 description,
                 metadata: {
                     mobile,
@@ -30,7 +32,7 @@ export const createPayment = async ({ amount, description, mobile, email }: Crea
         const { data } = await res.json();
 
         if (data.code !== 100) {
-            throw new Error("zarinpal service is error");
+            throw new Error("zarinpal service error");
         }
 
         return {
