@@ -1,19 +1,20 @@
 import fs from "fs/promises";
 import { Request } from "express";
-import UserModel from "@/models/User";
-
+import redis from "@/config/redis";
+import UserModel, { UserDocument } from "@/models/User";
+import { verifySession } from "./auth";
 export const removeFile = async (path: string): Promise<void> => {
     await fs.unlink(path);
 };
 
 export const getUser = async (req: Request) => {
-    const accessToken: string = req.cookies.accessToken;
+    const session: string = req.cookies._session;
 
-    if (!accessToken) {
+    if (!session) {
         return null;
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifySession(session);
 
     const user = (await UserModel.findById(payload._id, "-__v")) as UserDocument;
 
@@ -21,21 +22,3 @@ export const getUser = async (req: Request) => {
 };
 
 export const createPaginationData = (page: number, limit: number, count: number) => ({ page, limit, pagesCount: Math.ceil(count / limit), count });
-
-export const timeToSeconds = (time: string): number => {
-    const parts = time.split(":").map(Number);
-
-    if (parts.length === 2) {
-        const [minutes, seconds] = parts;
-        return minutes * 60 + seconds;
-    }
-
-    const [hours, minutes, seconds] = parts;
-    return hours * 3600 + minutes * 60 + seconds;
-};
-
-export const secondsToTimeArray = (seconds: number): [number, number] => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return [hours, minutes];
-};
