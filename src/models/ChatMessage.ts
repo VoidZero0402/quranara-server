@@ -1,6 +1,6 @@
 import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
 import { IUser } from "./User";
-import { IChat } from "@/types/chat.types";
+import { IChat } from "./Chat";
 import { ATTACHED_FILE_TYPES } from "@/constants/files";
 
 export type AttachedType = (typeof ATTACHED_FILE_TYPES)[keyof typeof ATTACHED_FILE_TYPES];
@@ -14,6 +14,7 @@ interface IChatMessage {
         url: string;
     };
     replyTo: PopulatedDoc<Document<ObjectId> & IChatMessage>;
+    expireAt: Date;
 }
 
 const schema = new Schema<IChatMessage>(
@@ -48,9 +49,18 @@ const schema = new Schema<IChatMessage>(
             type: Schema.Types.ObjectId,
             ref: "ChatMessage",
         },
+
+        expireAt: {
+            type: Date,
+            default: new Date(Date.now() + 259_200_000),
+        },
     },
     { timestamps: { createdAt: true } }
 );
+
+schema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+
+schema.index({ createdAt: -1 });
 
 const ChatMessageModel = model<IChatMessage>("ChatMessage", schema);
 

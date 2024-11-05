@@ -4,7 +4,7 @@ import { IUser } from "./User";
 
 export type Status = (typeof STATUS)[keyof typeof STATUS];
 
-interface IChat {
+export interface IChat {
     user?: PopulatedDoc<Document<ObjectId> & IUser>;
     status: Status;
 }
@@ -19,7 +19,7 @@ const schema = new Schema<IChat>(
         status: {
             type: String,
             enum: [STATUS.ACTIVE, STATUS.SLEEP],
-            default: STATUS.SLEEP,
+            default: STATUS.ACTIVE,
         },
     },
     { timestamps: true }
