@@ -7,7 +7,7 @@ export interface INews {
     type: Type;
     cover: string;
     title?: string;
-    desciption?: string;
+    description?: string;
     link?: {
         text?: string;
         url: string;
@@ -35,7 +35,7 @@ const schema = new Schema<INews>(
             },
         },
 
-        desciption: {
+        description: {
             type: String,
             trim: true,
             required() {

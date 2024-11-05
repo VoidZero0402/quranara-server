@@ -19,6 +19,7 @@ import discountsRouter from "@/routes/v1/discounts";
 import cartRouter from "@/routes/v1/cart";
 import meRouter from "@/routes/v1/me";
 import ordersRouter from "@/routes/v1/orders";
+import newsRouter from "@/routes/v1/news";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/discounts", discountsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/me", meRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/news", newsRouter);
 
 app.use(globalErrorHandler);
 

@@ -5,10 +5,6 @@ import multer from "multer";
 import { BadRequestException } from "./exceptions";
 
 export const createUploader = (destination: string, allowedTypes = /jpg|jpeg|png|webp/) => {
-    if (!fs.existsSync(destination)) {
-        fs.mkdirSync(destination);
-    }
-
     const storage = multer.diskStorage({
         destination: (_, __, callback) => {
             callback(null, destination);
