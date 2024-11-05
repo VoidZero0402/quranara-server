@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 
 import CommentModel from "@/models/Comment";
+import ReplyCommentModel from "@/models/ReplyComment";
 
 import { STATUS } from "@/constants/comments";
 
-import { CreateCommentSchemaType, ReplyCommentSchemaType } from "@/validators/comments";
+import { CreateCommentSchemaType, ReplyCommentSchemaType, ActionsQuerySchemaType } from "@/validators/comments";
 
 import { RequestWithUser } from "@/types/request.types";
 
-import { NotFoundException } from "@/utils/exceptions";
+import { BadRequestException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 
 type RequestParamsWithID = { id: string };
@@ -56,7 +57,7 @@ export const reply = async (req: Request<RequestParamsWithID, {}, ReplyCommentSc
         const { id } = req.params;
         const { content } = req.body;
 
-        const reply = await CommentModel.create({
+        const reply = await ReplyCommentModel.create({
             content,
             user: (req as RequestWithUser<RequestParamsWithID>).user._id,
             replyTo: id,
@@ -73,7 +74,7 @@ export const answer = async (req: Request<RequestParamsWithID, {}, ReplyCommentS
         const { id } = req.params;
         const { content } = req.body;
 
-        const reply = await CommentModel.create({
+        const reply = await ReplyCommentModel.create({
             content,
             user: (req as RequestWithUser<RequestParamsWithID>).user._id,
             status: STATUS.ACCEPTED,
@@ -88,12 +89,90 @@ export const answer = async (req: Request<RequestParamsWithID, {}, ReplyCommentS
 
 export const accept = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
     try {
+        const { isReply } = req.query as unknown as ActionsQuerySchemaType;
+        const { id } = req.params;
+
+        if (isReply) {
+            const reply = await ReplyCommentModel.findByIdAndUpdate(
+                id,
+                {
+                    $set: { status: STATUS.ACCEPTED },
+                },
+                { new: true }
+            );
+
+            if (!reply) {
+                throw new NotFoundException("reply not found");
+            }
+
+            SuccessResponse(res, 200, { reply });
+        } else {
+            const comment = await CommentModel.findByIdAndUpdate(
+                id,
+                {
+                    $set: { status: STATUS.ACCEPTED },
+                },
+                { new: true }
+            );
+
+            if (!comment) {
+                throw new NotFoundException("comment not found");
+            }
+
+            SuccessResponse(res, 200, { comment });
+        }
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const reject = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { isReply } = req.query as unknown as ActionsQuerySchemaType;
+        const { id } = req.params;
+
+        if (isReply) {
+            const reply = await ReplyCommentModel.findByIdAndUpdate(
+                id,
+                {
+                    $set: { status: STATUS.REJECTED },
+                },
+                { new: true }
+            );
+
+            if (!reply) {
+                throw new NotFoundException("reply not found");
+            }
+
+            SuccessResponse(res, 200, { reply });
+        } else {
+            const comment = await CommentModel.findByIdAndUpdate(
+                id,
+                {
+                    $set: { status: STATUS.REJECTED },
+                },
+                { new: true }
+            );
+
+            if (!comment) {
+                throw new NotFoundException("comment not found");
+            }
+
+            SuccessResponse(res, 200, { comment });
+        }
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const pin = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
         const { id } = req.params;
 
         const comment = await CommentModel.findByIdAndUpdate(
             id,
             {
-                $set: { status: STATUS.ACCEPTED },
+                $set: { pin: true },
             },
             { new: true }
         );
@@ -108,14 +187,14 @@ export const accept = async (req: Request<RequestParamsWithID>, res: Response, n
     }
 };
 
-export const reject = async (req: Request, res: Response, next: NextFunction) => {
+export const unpin = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
 
         const comment = await CommentModel.findByIdAndUpdate(
             id,
             {
-                $set: { status: STATUS.REJECTED },
+                $set: { pin: false },
             },
             { new: true }
         );

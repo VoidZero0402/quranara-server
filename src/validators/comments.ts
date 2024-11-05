@@ -18,3 +18,9 @@ export const ReplyCommentSchema = z.object({
 });
 
 export type ReplyCommentSchemaType = z.infer<typeof ReplyCommentSchema>;
+
+export const ActionsQuerySchema = z.object({
+    isReply: z.coerce.number().transform(Boolean).optional(),
+});
+
+export type ActionsQuerySchemaType = z.infer<typeof ActionsQuerySchema>;

@@ -138,9 +138,10 @@ export const getComments = async (req: Request<RequestParamsWithSlug>, res: Resp
             throw new NotFoundException("course not found");
         }
 
-        const filters = { course: course._id, status: STATUS.ACCEPTED };
+        const filters = { course: course._id, status: STATUS.ACCEPTED, pin: false };
 
         const comments = await CommentModel.find(filters)
+            .sort({ pin: -1, createdAt: -1 })
             .populate("user", "username profile")
             .populate({ path: "replies", populate: { path: "user", select: "username profile" } })
             .skip((page - 1) * limit)

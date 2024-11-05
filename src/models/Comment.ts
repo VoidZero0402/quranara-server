@@ -13,9 +13,9 @@ export interface IComment {
     course?: PopulatedDoc<Document<ObjectId> & ICourse>;
     tv?: PopulatedDoc<Document<ObjectId> & ITv>;
     user: PopulatedDoc<Document<ObjectId> & IUser>;
-    rating?: Number;
+    rating: Number;
+    pin: boolean;
     status: Status;
-    replyTo?: PopulatedDoc<Document<ObjectId> & IComment>;
 }
 
 const schema = new Schema<IComment>(
@@ -52,9 +52,13 @@ const schema = new Schema<IComment>(
 
         rating: {
             type: Number,
-            required() {
-                return !this.replyTo;
-            },
+            required: true,
+        },
+
+        pin: {
+            type: Boolean,
+            default: false,
+            index: -1,
         },
 
         status: {
@@ -63,17 +67,14 @@ const schema = new Schema<IComment>(
             default: STATUS.PENDING,
             index: true,
         },
-
-        replyTo: {
-            type: Schema.Types.ObjectId,
-            ref: "Comment",
-        },
     },
     { timestamps: { createdAt: true, updatedAt: false } }
 );
 
+schema.index({ createdAt: -1 });
+
 schema.virtual("replies", {
-    ref: "Comment",
+    ref: "ReplyComment",
     localField: "_id",
     foreignField: "replyTo",
     match: { status: STATUS.ACCEPTED },

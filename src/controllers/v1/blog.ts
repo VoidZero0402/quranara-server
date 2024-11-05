@@ -209,9 +209,8 @@ export const getComments = async (req: Request<RequestParamsWithSlug>, res: Resp
 
         const filters = { blog: blog._id, status: COMMENT_STATUS.ACCEPTED };
 
-        console.log(filters);
-
         const comments = await CommentModel.find(filters)
+            .sort({ pin: -1, createdAt: -1 })
             .populate("user", "username profile")
             .populate({ path: "replies", populate: { path: "user", select: "username profile" } })
             .skip((page - 1) * limit)
