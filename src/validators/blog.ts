@@ -9,7 +9,7 @@ export const CreateBlogSchema = z
         description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(1024, { message: "description should be has less than 1024 character" }).trim(),
         slug: z.string().min(1, { message: "slug should not be empty" }).max(255, { message: "slug should be has less than 25 character" }).trim().optional(),
         category: validateObjectId,
-        cover: z.string({ required_error: "cover is required" }).min(1, { message: "cover should not be empty" }).trim(),
+        cover: z.string({ required_error: "cover is required" }).min(1, { message: "cover should not be empty" }).regex(/^[\w-]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" }).trim(),
         content: z.string({ required_error: "content is required" }).min(1, { message: "content should not be empty" }).trim().transform(sanitizeHtmlContent),
         tags: z.array(z.string().min(1, { message: "tag should not be empty" }), { invalid_type_error: "tags should be an array od string" }).optional(),
         relatedCourses: z.array(validateObjectId, { message: "relatedCourses should be an array of course ObjectIds" }).optional(),

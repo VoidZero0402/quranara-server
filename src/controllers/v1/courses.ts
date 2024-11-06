@@ -15,7 +15,7 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { decreaseCoursesUnique, getCoursesUnique } from "@/utils/metadata";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createPaginationData, removeFile } from "@/utils/funcs";
+import { createPaginationData } from "@/utils/funcs";
 
 type RequestParamsWithID = { id: string };
 type RequestParamsWithSlug = { slug: string };
@@ -32,7 +32,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { title, slug, description, price, status, video, content } = req.body;
+        const { title, slug, cover, description, price, status, introduction, metadata } = req.body;
 
         const shortId = await getCoursesUnique();
 
@@ -40,11 +40,12 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
             title,
             slug,
             description,
-            cover: (req.file as Express.Multer.File).filename,
+            cover,
             price,
             status,
             teacher: (req as RequestWithUser).user._id,
-            introduction: { video, content },
+            introduction,
+            metadata,
             shortId,
         });
 
@@ -52,7 +53,6 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             await decreaseCoursesUnique();
-            await removeFile((req.file as Express.Multer.File).path);
             next(new ConflictException("course already exists with this information"));
         }
         next(err);
@@ -78,7 +78,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { title, slug, description, price, status, video, content } = req.body;
+        const { title, slug, description, cover, price, status, introduction, metadata, discount } = req.body;
 
         const updatedCourse = await CourseModel.findByIdAndUpdate(
             id,
@@ -87,10 +87,12 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseS
                     title,
                     slug,
                     description,
-                    ...(req.file?.filename && { cover: req.file.filename }),
+                    cover,
                     price,
                     status,
-                    introduction: { video, content },
+                    introduction,
+                    metadata,
+                    ...(discount && { discount }),
                 },
             },
             { new: true }

@@ -18,6 +18,12 @@ export interface ICourse {
         content: string;
     };
     shortId: string;
+    metadata: {
+        support: string;
+        preRequisite: string;
+        present: string;
+        hours: number;
+    };
 }
 
 const schema = new Schema<ICourse>(
@@ -51,6 +57,7 @@ const schema = new Schema<ICourse>(
 
         price: {
             type: Number,
+            min: 0,
             default: 0,
         },
 
@@ -81,6 +88,29 @@ const schema = new Schema<ICourse>(
         shortId: {
             type: String,
             required: true,
+        },
+
+        metadata: {
+            support: {
+                type: String,
+                required: true,
+            },
+
+            preRequisite: {
+                type: String,
+                required: true,
+            },
+
+            present: {
+                type: String,
+                required: true,
+            },
+
+            hours: {
+                type: Number,
+                min: 1,
+                required: true,
+            },
         },
     },
     { timestamps: true }

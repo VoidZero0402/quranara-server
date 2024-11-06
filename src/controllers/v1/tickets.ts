@@ -10,7 +10,7 @@ import { RequestWithUser } from "@/types/request.types";
 
 import { STATUS } from "@/constants/tickets";
 
-import { NotFoundException } from "@/utils/exceptions";
+import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getTicketUnique } from "@/utils/metadata";
 import { createPaginationData } from "@/utils/funcs";
@@ -42,6 +42,14 @@ export const getTicket = async (req: Request<RequestParamsWithID>, res: Response
         const ticket = await TicketModel.findById(id)
             .populate({ path: "messages", populate: { path: "user" } })
             .lean();
+
+        if (!ticket) {
+            throw new NotFoundException("ticket not found");
+        }
+
+        if (ticket.user !== (req as RequestWithUser).user._id) {
+            throw new ForbiddenException("you can not access this ticket");
+        }
 
         SuccessResponse(res, 200, { ticket });
     } catch (err) {

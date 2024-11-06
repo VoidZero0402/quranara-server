@@ -6,7 +6,7 @@ export const CreateSessionSchema = z.object({
     course: validateObjectId,
     topic: validateObjectId,
     isPublic: z.boolean().default(false),
-    video: z.string({ required_error: "video is required" }).min(1, { message: "video should not be empty" }).trim(),
+    video: z.string({ required_error: "video is required" }).min(1, { message: "video should not be empty" }).regex(/^[\w-]+\.(mp4)$/, { message: "video has invalid signiture" }).trim(),
     time: z
         .string({ required_error: "time of video is required" })
         .trim()
