@@ -1,6 +1,8 @@
-import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
+import { Schema, model, PopulatedDoc, Document, ObjectId, Model } from "mongoose";
 import { STATUS } from "@/constants/courses";
 import { IUser } from "./User";
+import SessionModel from "./Session";
+import { secondsToTimeArray } from "@/utils/funcs";
 
 export type Status = (typeof STATUS)[keyof typeof STATUS];
 
@@ -13,12 +15,16 @@ export interface ICourse {
     status: Status;
     discount: number;
     teacher: PopulatedDoc<Document<ObjectId> & IUser>;
+    shown: boolean;
+    order: number;
     introduction: {
         video: string;
         content: string;
     };
     shortId: string;
     metadata: {
+        students: number;
+        rating: number;
         support: string;
         preRequisite: string;
         present: string;
@@ -26,7 +32,14 @@ export interface ICourse {
     };
 }
 
-const schema = new Schema<ICourse>(
+interface ICourseMethods {
+    getTime(): Promise<[number, number]>;
+    getProgress(hours: number): number;
+}
+
+type CourseModel = Model<ICourse, {}, ICourseMethods>;
+
+const schema = new Schema<ICourse, CourseModel, ICourseMethods>(
     {
         title: {
             type: String,
@@ -80,6 +93,18 @@ const schema = new Schema<ICourse>(
             required: true,
         },
 
+        shown: {
+            type: Boolean,
+            required: true,
+            index: 1,
+        },
+
+        order: {
+            type: Number,
+            required: true,
+            index: 1,
+        },
+
         introduction: {
             video: String,
             content: String,
@@ -91,6 +116,18 @@ const schema = new Schema<ICourse>(
         },
 
         metadata: {
+            students: {
+                type: Number,
+                default: 0,
+            },
+
+            rating: {
+                type: Number,
+                min: 0,
+                max: 5,
+                default: 5,
+            },
+
             support: {
                 type: String,
                 required: true,
@@ -122,6 +159,23 @@ schema.virtual("topics", {
     foreignField: "course",
 });
 
-const CourseModel = model<ICourse>("Course", schema);
+schema.method("getTime", async function () {
+    const sessions = await SessionModel.find({ course: this._id }, "seconds");
+
+    let seconds = 0;
+
+    for (let session of sessions) {
+        seconds += session.seconds;
+    }
+
+    return secondsToTimeArray(seconds);
+});
+
+schema.method("getProgress", function (hours: number) {
+    if (hours === 0) return 0;
+    return Math.floor((hours * 100) / this.metadata.hours);
+});
+
+const CourseModel = model<ICourse, CourseModel>("Course", schema);
 
 export default CourseModel;

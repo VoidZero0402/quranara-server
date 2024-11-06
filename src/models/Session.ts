@@ -15,6 +15,7 @@ export interface ISession {
     video: string;
     attached?: string;
     time: string;
+    seconds: number
 }
 
 export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
@@ -71,6 +72,11 @@ const schema = new Schema<ISession, SessionModel, ISessionMethods>({
 
     time: {
         type: String,
+        required: true,
+    },
+
+    seconds: {
+        type: Number,
         required: true,
     },
 

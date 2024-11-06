@@ -4,7 +4,8 @@ import CourseModel from "@/models/Course";
 import CommentModel from "@/models/Comment";
 import TopicModel from "@/models/Topic";
 
-import { STATUS } from "@/constants/comments";
+import { STATUS } from "@/constants/courses";
+import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 
 import { CreateCourseSchemaType, UpdateCourseSchemaType } from "@/validators/courses";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
@@ -24,7 +25,17 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
 
-        // TODO: handle course getters
+        const filters = { shown: true };
+
+        const courses = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
+            .populate("teacher", "username profile")
+            .sort({ order: 1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const coursesCount = await CourseModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { courses, pagination: createPaginationData(page, limit, coursesCount) });
     } catch (err) {
         next(err);
     }
@@ -32,9 +43,11 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { title, slug, cover, description, price, status, introduction, metadata } = req.body;
+        const { title, slug, cover, description, price, status, shown, introduction, metadata } = req.body;
 
         const shortId = await getCoursesUnique();
+
+        const order = await CourseModel.countDocuments({});
 
         const course = await CourseModel.create({
             title,
@@ -43,6 +56,8 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
             cover,
             price,
             status,
+            shown,
+            order: order + 1,
             teacher: (req as RequestWithUser).user._id,
             introduction,
             metadata,
@@ -63,13 +78,19 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const course = await CourseModel.findOne({ slug }).populate("teacher");
+        const course = await CourseModel.findOne({ slug }).populate("teacher", "username profile");
 
         if (!course) {
             throw new NotFoundException("course not found");
         }
 
-        SuccessResponse(res, 200, { course });
+        const time = await course.getTime();
+
+        const defredTime = time[0] + time[1] ? 1 : 0;
+
+        const progress = course.getProgress(defredTime);
+        
+        SuccessResponse(res, 200, { course: { ...course.toObject(), time, progress } });
     } catch (err) {
         next(err);
     }
@@ -111,24 +132,6 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseS
     }
 };
 
-export const remove = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
-    try {
-        const { id } = req.params;
-
-        const course = await CourseModel.findByIdAndDelete(id);
-
-        // TODO: handle delete course side effects
-
-        if (!course) {
-            throw new NotFoundException("course not found");
-        }
-
-        SuccessResponse(res, 200, { course });
-    } catch (err) {
-        next(err);
-    }
-};
-
 export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
@@ -140,7 +143,7 @@ export const getComments = async (req: Request<RequestParamsWithSlug>, res: Resp
             throw new NotFoundException("course not found");
         }
 
-        const filters = { course: course._id, status: STATUS.ACCEPTED, pin: false };
+        const filters = { course: course._id, status: COMMENT_STATUS.ACCEPTED, pin: false };
 
         const comments = await CommentModel.find(filters)
             .sort({ pin: -1, createdAt: -1 })
@@ -168,6 +171,73 @@ export const getTopics = async (req: Request<RequestParamsWithID>, res: Response
             .lean();
 
         SuccessResponse(res, 200, { topics });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const shown = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const course = await CourseModel.findByIdAndUpdate(
+            id,
+            {
+                $set: { shown: true },
+            },
+            { new: true }
+        );
+
+        SuccessResponse(res, 200, { course });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const unshown = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const course = await CourseModel.findByIdAndUpdate(
+            id,
+            {
+                $set: { shown: false },
+            },
+            { new: true }
+        );
+
+        SuccessResponse(res, 200, { course });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateOrder = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { from, to } = req.body;
+
+        const fromCourse = await CourseModel.findOne({ _id: id, order: from });
+
+        if (!fromCourse) {
+            throw new NotFoundException("from course not found");
+        }
+
+        const toCourse = await CourseModel.findOne({ order: to });
+
+        if (!toCourse) {
+            throw new NotFoundException("to topic not found");
+        }
+
+        const fromCourseOrder = fromCourse.order;
+
+        fromCourse.order = toCourse.order;
+        toCourse.order = fromCourseOrder;
+
+        await fromCourse.save();
+        await toCourse.save();
+
+        SuccessResponse(res, 200, { message: "order changed successfully" });
     } catch (err) {
         next(err);
     }

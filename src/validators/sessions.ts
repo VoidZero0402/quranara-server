@@ -6,11 +6,15 @@ export const CreateSessionSchema = z.object({
     course: validateObjectId,
     topic: validateObjectId,
     isPublic: z.boolean().default(false),
-    video: z.string({ required_error: "video is required" }).min(1, { message: "video should not be empty" }).regex(/^[\w-]+\.(mp4)$/, { message: "video has invalid signiture" }).trim(),
+    video: z
+        .string({ required_error: "video is required" })
+        .min(1, { message: "video should not be empty" })
+        .regex(/^[\w-]+\.(mp4)$/, { message: "video has invalid signiture" })
+        .trim(),
     time: z
         .string({ required_error: "time of video is required" })
         .trim()
-        .regex(/^[0-5]?\d:[0-5]\d$/, { message: "time is not valid" }),
+        .regex(/^(\d{1,2}):([0-5]\d):([0-5]\d)$|^([0-5]?\d):([0-5]\d)$/, { message: "time is not valid" }),
     attached: z.string().min(1, { message: "attached should not be empty" }).trim().optional(),
 });
 

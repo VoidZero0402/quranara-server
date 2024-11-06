@@ -11,7 +11,7 @@ import { ROLES } from "@/constants/roles";
 import { ForbiddenException, NotFoundException, UnauthorizedException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getSessionsUnique } from "@/utils/metadata";
-import { getUser } from "@/utils/funcs";
+import { getUser, timeToSeconds } from "@/utils/funcs";
 
 type RequestParamsWithID = { id: string };
 type RequestParamsWithSlug = { slug: string };
@@ -32,6 +32,8 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
 
         const sessionCounts = await SessionModel.countDocuments({ topic });
 
+        const seconds = timeToSeconds(time);
+
         const session = await SessionModel.create({
             title,
             slug,
@@ -41,6 +43,7 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
             isPublic,
             video,
             time,
+            seconds,
             attached,
         });
 
