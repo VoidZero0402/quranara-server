@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { hash } from "bcryptjs";
 
 import UserModel from "@/models/User";
+import CourseUserModel from "@/models/CourseUser";
+import TicketModel from "@/models/Ticket";
 import BlogLikeModel from "@/models/BlogLike";
 import BlogSaveModel from "@/models/BlogSave";
 import TvLikeModel from "@/models/TvLike";
@@ -75,6 +77,25 @@ export const changePassword = async (req: Request<{}, {}, ChangePasswordSchemaTy
     }
 };
 
+export const getCourses = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const courseUsers = await CourseUserModel.find({ user: (req as RequestWithUser).user._id })
+            .sort({ _id: -1 })
+            .populate("course", "metadata.students metadata.rating title slug description cover price discount status")
+            .lean();
+
+        const courses = [];
+
+        for (let courseUser of courseUsers) {
+            courses.push(courseUser.course);
+        }
+
+        SuccessResponse(res, 200, { courses });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getSavedBlog = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
@@ -96,7 +117,13 @@ export const getSavedBlog = async (req: Request, res: Response, next: NextFuncti
 
         const savesCount = await BlogSaveModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { saves, pagination: createPaginationData(page, limit, savesCount) });
+        const savedBlogs = [];
+
+        for (let save of saves) {
+            savedBlogs.push(save.blog);
+        }
+
+        SuccessResponse(res, 200, { saves: savedBlogs, pagination: createPaginationData(page, limit, savesCount) });
     } catch (err) {
         next(err);
     }
@@ -123,7 +150,13 @@ export const getSavedTv = async (req: Request, res: Response, next: NextFunction
 
         const savesCount = await TvSaveModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { saves, pagination: createPaginationData(page, limit, savesCount) });
+        const savedTvs = [];
+
+        for (let save of saves) {
+            savedTvs.push(save.tv);
+        }
+
+        SuccessResponse(res, 200, { saves: savedTvs, pagination: createPaginationData(page, limit, savesCount) });
     } catch (err) {
         next(err);
     }
@@ -150,7 +183,13 @@ export const getLikedBlog = async (req: Request, res: Response, next: NextFuncti
 
         const likesCount = await BlogLikeModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { likes, pagination: createPaginationData(page, limit, likesCount) });
+        const likedBlogs = [];
+
+        for (let like of likes) {
+            likedBlogs.push(like.blog);
+        }
+
+        SuccessResponse(res, 200, { likes: likedBlogs, pagination: createPaginationData(page, limit, likesCount) });
     } catch (err) {
         next(err);
     }
@@ -177,7 +216,13 @@ export const getLikedTv = async (req: Request, res: Response, next: NextFunction
 
         const likesCount = await TvLikeModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { likes, pagination: createPaginationData(page, limit, likesCount) });
+        const likedTvs = [];
+
+        for (let like of likes) {
+            likedTvs.push(like.tv);
+        }
+
+        SuccessResponse(res, 200, { likes: likedTvs, pagination: createPaginationData(page, limit, likesCount) });
     } catch (err) {
         next(err);
     }

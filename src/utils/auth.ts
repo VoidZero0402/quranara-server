@@ -95,6 +95,7 @@ export const setCredentialCookies = (res: Response, credentials: { session: stri
     });
 
     Reflect.deleteProperty(credentials.user, "password");
+    Reflect.deleteProperty(credentials.user, "_id");
 
     res.cookie("_user", credentials.user.toObject(), {
         ...cookiesOption,
@@ -108,6 +109,7 @@ export const updateUserCredentialCookie = async (res: Response, user: UserDocume
     const expires = new Date(Date.now() + ttl * 1000);
 
     Reflect.deleteProperty(user, "password");
+    Reflect.deleteProperty(user, "_id");
 
     res.cookie("_user", user.toObject(), {
         ...cookiesOption,
