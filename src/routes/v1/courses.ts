@@ -1,16 +1,17 @@
 import express from "express";
-import { getAll, create, getOne, update, getComments, getTopics, shown, unshown, updateOrder } from "@/controllers/v1/courses";
+import { getAll, create, search, getOne, update, getComments, getTopics, shown, unshown, updateOrder } from "@/controllers/v1/courses";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
-import { CreateCourseSchema, UpdateCourseSchema, UpdateCourseOrderSchema } from "@/validators/courses";
+import { CreateCourseSchema, UpdateCourseSchema, UpdateCourseOrderSchema, GetAllCoursesQuerySchema, SearchCoursesQuerySchame } from "@/validators/courses";
 import { PaginationQuerySchema } from "@/validators/pagination";
 import auth from "@/middlewares/auth";
 import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(validator("query", PaginationQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("body", CreateCourseSchema), create);
+router.route("/").get(validator("query", GetAllCoursesQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("body", CreateCourseSchema), create);
+router.get('/search', validator('query', SearchCoursesQuerySchame), search)
 router.put("/:id", auth, roleGuard(ROLES.MANAGER), validator("body", UpdateCourseSchema), update);
 router.get("/:slug", getOne);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);

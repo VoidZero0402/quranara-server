@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { sanitizeHtmlContent, slugRefiner, validateObjectId } from "@/utils/validations";
 import { PaginationQuerySchema } from "./pagination";
+import { SORTING } from "@/constants/tv";
 
 export const CreateTvSchema = z
     .object({
@@ -18,7 +19,9 @@ export const CreateTvSchema = z
 export type CreateTvSchemaType = z.infer<typeof CreateTvSchema> & { slug: string };
 
 export const GetAllTvsQuerySchema = PaginationQuerySchema.extend({
-    category: validateObjectId.optional(),
+    category: validateObjectId.or(z.array(validateObjectId)).optional(),
+    sort: z.enum([SORTING.NEWEST, SORTING.OLDEST, SORTING.POPULAR]).default(SORTING.NEWEST),
+    search: z.string().min(1, { message: "search should not be empty" }).optional(),
 });
 
 export type GetAllTvsQuerySchemaType = z.infer<typeof GetAllTvsQuerySchema>;

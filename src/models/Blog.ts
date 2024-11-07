@@ -12,6 +12,7 @@ export interface IBlog {
     description: string;
     cover: string;
     content: string;
+    headings: { id: string; heading: string }[];
     author: PopulatedDoc<Document<ObjectId> & IUser>;
     category: PopulatedDoc<Document<ObjectId> & ICategory>;
     status: Status;
@@ -54,6 +55,20 @@ const schema = new Schema<IBlog>(
             type: String,
             required: true,
         },
+
+        headings: [
+            {
+                id: {
+                    type: String,
+                    required: true,
+                },
+
+                heading: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
 
         author: {
             type: Schema.Types.ObjectId,

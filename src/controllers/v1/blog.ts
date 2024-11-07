@@ -5,7 +5,7 @@ import CommentModel from "@/models/Comment";
 import BlogLikeModel from "@/models/BlogLike";
 import BlogSaveModel from "@/models/BlogSave";
 
-import { STATUS } from "@/constants/blog";
+import { STATUS, SORTING } from "@/constants/blog";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 
 import { CreateBlogSchemaType, CreateBlogQuerySchemaType, GetAllBlogsQuerySchemaType, SearchBlogsQuerySchameType } from "@/validators/blog";
@@ -24,11 +24,14 @@ type RequestParamsWithSlug = { slug: string };
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, category } = req.query as unknown as GetAllBlogsQuerySchemaType;
+        const { page, limit, category, sort, search } = req.query as unknown as GetAllBlogsQuerySchemaType;
 
-        const filters = { ...(category && { category }), status: STATUS.PUBLISHED };
+        const filters = { status: STATUS.PUBLISHED, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
+
+        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
         const blogs = await BlogModel.find(filters)
+            .sort(sorting)
             .populate("author", "username profile")
             .populate("category", "title")
             .skip((page - 1) * limit)
@@ -82,6 +85,7 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
         const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }], status: STATUS.PUBLISHED };
 
         const blogs = await BlogModel.find(filters)
+            .sort({ _id: -1 })
             .populate("author", "username profile")
             .populate("category", "title")
             .skip((page - 1) * limit)

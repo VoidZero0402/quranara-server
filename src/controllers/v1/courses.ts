@@ -4,10 +4,10 @@ import CourseModel from "@/models/Course";
 import CommentModel from "@/models/Comment";
 import TopicModel from "@/models/Topic";
 
-import { STATUS } from "@/constants/courses";
+import { SORTING } from "@/constants/courses";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 
-import { CreateCourseSchemaType, UpdateCourseSchemaType } from "@/validators/courses";
+import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType } from "@/validators/courses";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestWithUser } from "@/types/request.types";
@@ -23,13 +23,15 @@ type RequestParamsWithSlug = { slug: string };
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit, sort, search } = req.query as unknown as GetAllCoursesQuerySchemaType;
 
-        const filters = { shown: true };
+        const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }) };
+
+        const sorting = { ...(sort === SORTING.DEFAULT && { order: 1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
 
         const courses = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
+            .sort(sorting)
             .populate("teacher", "username profile")
-            .sort({ order: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
 
@@ -74,6 +76,26 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
     }
 };
 
+export const search = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, q } = req.query as unknown as SearchCoursesQuerySchameType;
+
+        const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }], shown: true };
+
+        const blogs = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
+            .sort({ order: 1 })
+            .populate("teacher", "username profile")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const blogsCount = await CourseModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
@@ -89,7 +111,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
         const defredTime = time[0] + time[1] ? 1 : 0;
 
         const progress = course.getProgress(defredTime);
-        
+
         SuccessResponse(res, 200, { course: { ...course.toObject(), time, progress } });
     } catch (err) {
         next(err);

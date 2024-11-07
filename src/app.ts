@@ -29,6 +29,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.get("/api/testing", (req, res) => {
+    res.json({ query: req.query });
+});
+
 app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);
 app.use("/api/topics", topicsRouter);

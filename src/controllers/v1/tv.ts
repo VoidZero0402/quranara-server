@@ -6,6 +6,7 @@ import TvLikeModel from "@/models/TvLike";
 import TvSaveModel from "@/models/TvSave";
 
 import { STATUS } from "@/constants/comments";
+import { SORTING } from "@/constants/tv";
 
 import { CreateTvSchemaType, GetAllTvsQuerySchemaType, SearchTvsQuerySchameType } from "@/validators/tv";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
@@ -23,11 +24,14 @@ type RequestParamsWithSlug = { slug: string };
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, category } = req.query as unknown as GetAllTvsQuerySchemaType;
+        const { page, limit, category, sort, search } = req.query as unknown as GetAllTvsQuerySchemaType;
 
-        const filters = { ...(category && { category }) };
+        const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
+
+        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
         const tvs = await TvModel.find(filters)
+            .sort(sorting)
             .populate("publisher", "username profile")
             .populate("category", "title")
             .skip((page - 1) * limit)
@@ -73,6 +77,7 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
         const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
         const tvs = await TvModel.find(filters)
+            .sort({ _id: -1 })
             .populate("publisher", "username profile")
             .populate("category", "title")
             .skip((page - 1) * limit)

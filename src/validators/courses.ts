@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { slugRefiner } from "@/utils/validations";
-import { STATUS } from "@/constants/courses";
+import { SORTING, STATUS } from "@/constants/courses";
+import { PaginationQuerySchema } from "./pagination";
 
 const CreateCourseObject = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
@@ -54,3 +55,16 @@ export const UpdateCourseOrderSchema = z
     .refine((values) => values.from !== values.to, { path: ["from-to"], params: ["from", "to"], message: "from and to can not be same" });
 
 export type UpdateCourseOrderSchemaType = z.infer<typeof UpdateCourseOrderSchema>;
+
+export const GetAllCoursesQuerySchema = PaginationQuerySchema.extend({
+    sort: z.enum([SORTING.DEFAULT, SORTING.NEWSET, SORTING.OLDEST, SORTING.POPULAR]).default(SORTING.DEFAULT),
+    search: z.string().min(1, { message: "search should not be empty" }).optional(),
+});
+
+export type GetAllCoursesQuerySchemaType = z.infer<typeof GetAllCoursesQuerySchema>;
+
+export const SearchCoursesQuerySchame = PaginationQuerySchema.extend({
+    q: z.string({ message: "q is required" }).min(1, { message: "title should not be empty" }).trim(),
+});
+
+export type SearchCoursesQuerySchameType = z.infer<typeof SearchCoursesQuerySchame>;
