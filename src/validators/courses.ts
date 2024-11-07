@@ -64,7 +64,13 @@ export const GetAllCoursesQuerySchema = PaginationQuerySchema.extend({
 export type GetAllCoursesQuerySchemaType = z.infer<typeof GetAllCoursesQuerySchema>;
 
 export const SearchCoursesQuerySchame = PaginationQuerySchema.extend({
-    q: z.string({ message: "q is required" }).min(1, { message: "title should not be empty" }).trim(),
+    q: z.string({ message: "q is required" }).min(1, { message: "q should not be empty" }).trim(),
 });
 
 export type SearchCoursesQuerySchameType = z.infer<typeof SearchCoursesQuerySchame>;
+
+export const DiscountAllSchema = z.object({
+    discount: z.number().min(0, { message: "discount can not be negative" }).max(100, { message: "discount can not be over han 100" }),
+});
+
+export type DiscountAllSchemaType = z.infer<typeof DiscountAllSchema>;

@@ -1,9 +1,10 @@
 import express from "express";
-import { getAll, create, banUser, unbanUser, signingCourse } from "@/controllers/v1/users";
+import { getAll, create, getAllBan, banUser, unbanUser, signingCourse } from "@/controllers/v1/users";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
-import { CreateUserSchema, BanUserSchema, UnbanUserSchema, SigningCourseSchema } from "@/validators/users";
+import { CreateUserSchema, BanUserSchema, UnbanUserSchema, SigningCourseSchema, GetAllUsersQuerySchema } from "@/validators/users";
+import { PaginationQuerySchema } from "@/validators/pagination";
 import auth from "@/middlewares/auth";
 import roleGuard from "@/middlewares/roleGuard";
 
@@ -11,9 +12,9 @@ const router = express.Router();
 
 router.use(auth, roleGuard(ROLES.MANAGER));
 
-router.route("/").get(getAll).post(create);
-router.post("/ban", banUser);
-router.post("/unban", unbanUser);
-router.post("/:id/signing-course", signingCourse);
+router.route("/").get(validator("query", GetAllUsersQuerySchema), getAll).post(validator("body", CreateUserSchema), create);
+router.route("/ban").get(validator("query", PaginationQuerySchema), getAllBan).post(validator("body", BanUserSchema), banUser);
+router.post("/unban", validator("body", UnbanUserSchema), unbanUser);
+router.post("/signing-course", validator("body", SigningCourseSchema), signingCourse);
 
 export default router;

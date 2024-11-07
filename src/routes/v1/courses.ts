@@ -1,9 +1,9 @@
 import express from "express";
-import { getAll, create, search, getOne, update, getComments, getTopics, shown, unshown, updateOrder } from "@/controllers/v1/courses";
+import { getAll, create, search, getOne, update, getComments, getTopics, shown, unshown, updateOrder, applyDiscountAll, removeDiscountAll } from "@/controllers/v1/courses";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
-import { CreateCourseSchema, UpdateCourseSchema, UpdateCourseOrderSchema, GetAllCoursesQuerySchema, SearchCoursesQuerySchame } from "@/validators/courses";
+import { CreateCourseSchema, UpdateCourseSchema, UpdateCourseOrderSchema, GetAllCoursesQuerySchema, SearchCoursesQuerySchame, DiscountAllSchema } from "@/validators/courses";
 import { PaginationQuerySchema } from "@/validators/pagination";
 import auth from "@/middlewares/auth";
 import roleGuard from "@/middlewares/roleGuard";
@@ -19,5 +19,7 @@ router.get("/:id/topics", getTopics);
 router.patch("/:id/shown", auth, roleGuard(ROLES.MANAGER), shown);
 router.patch("/:id/unshown", auth, roleGuard(ROLES.MANAGER), unshown);
 router.patch("/:id/order", auth, roleGuard(ROLES.MANAGER), validator("body", UpdateCourseOrderSchema), updateOrder);
+router.patch('/all/discount/apply', validator("body", DiscountAllSchema), applyDiscountAll)
+router.patch('/all/discount/remove', removeDiscountAll)
 
 export default router;

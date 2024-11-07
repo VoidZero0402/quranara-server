@@ -26,7 +26,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const { page, limit, category, sort, search } = req.query as unknown as GetAllTvsQuerySchemaType;
 
-        const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
+        const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
         const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
@@ -74,7 +74,7 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const { page, limit, q } = req.query as unknown as SearchTvsQuerySchameType;
 
-        const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
+        const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
         const tvs = await TvModel.find(filters)
             .sort({ _id: -1 })
@@ -153,29 +153,11 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateTvSchem
     }
 };
 
-export const remove = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
-    try {
-        const { id } = req.params;
-
-        const tv = await TvModel.findByIdAndDelete(id);
-
-        // TODO: handle delete tv side effects
-
-        if (!tv) {
-            throw new NotFoundException("tv not found");
-        }
-
-        SuccessResponse(res, 200, { tv });
-    } catch (err) {
-        next(err);
-    }
-};
-
 export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
 
-        const tv = await TvModel.findOne({ slug });
+        const tv = await TvModel.findOne({ slug, shown: true });
 
         if (!tv) {
             throw new NotFoundException("tv not found");
@@ -183,7 +165,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
 
         const aggregation = await TvModel.aggregate([
             {
-                $match: { category: tv.category, _id: { $ne: tv._id } },
+                $match: { shown: true, category: tv.category, _id: { $ne: tv._id } },
             },
             {
                 $sample: { size: 8 },
@@ -206,7 +188,7 @@ export const getComments = async (req: Request<RequestParamsWithSlug>, res: Resp
         const { slug } = req.params;
         const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
 
-        const tv = await TvModel.findOne({ slug });
+        const tv = await TvModel.findOne({ slug, shown: true });
 
         if (!tv) {
             throw new NotFoundException("tv not found");

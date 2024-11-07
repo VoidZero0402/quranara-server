@@ -28,6 +28,12 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
             throw new BadRequestException("otp is not matched");
         }
 
+        const isBanned = await BanModel.findOne({ $or: [{ phone }, { email }] });
+
+        if (isBanned) {
+            throw new ForbiddenException("this account has been blocked");
+        }
+
         const user = await UserModel.create({
             phone,
             email,
@@ -58,7 +64,7 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
         const isBanned = await BanModel.findOne({ phone });
 
         if (isBanned) {
-            throw new ForbiddenException("this phone has been blocked");
+            throw new ForbiddenException("this account has been blocked");
         }
 
         const { expired, ttl } = await getOtp(phone);
@@ -112,6 +118,12 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
 export const loginWithEmail = async (req: Request<{}, {}, LoginWithEmailSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
+
+        const isBanned = await BanModel.findOne({ email });
+
+        if (isBanned) {
+            throw new ForbiddenException("this account has been blocked");
+        }
 
         const user = await UserModel.findOne({ email });
 

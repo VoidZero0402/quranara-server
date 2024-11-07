@@ -7,7 +7,7 @@ import TopicModel from "@/models/Topic";
 import { SORTING } from "@/constants/courses";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 
-import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType } from "@/validators/courses";
+import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType, DiscountAllSchemaType } from "@/validators/courses";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestWithUser } from "@/types/request.types";
@@ -100,7 +100,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const course = await CourseModel.findOne({ slug }).populate("teacher", "username profile");
+        const course = await CourseModel.findOne({ slug, shown: true }).populate("teacher", "username profile");
 
         if (!course) {
             throw new NotFoundException("course not found");
@@ -260,6 +260,28 @@ export const updateOrder = async (req: Request<RequestParamsWithID>, res: Respon
         await toCourse.save();
 
         SuccessResponse(res, 200, { message: "order changed successfully" });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const applyDiscountAll = async (req: Request<{}, {}, DiscountAllSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { discount } = req.body;
+
+        await CourseModel.updateMany({ shown: true }, { $set: { discount } });
+
+        SuccessResponse(res, 200, { message: "discount apply successfully" });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const removeDiscountAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await CourseModel.updateMany({}, { $set: { discount: 0 } });
+
+        SuccessResponse(res, 200, { message: "discount remove successfully" });
     } catch (err) {
         next(err);
     }

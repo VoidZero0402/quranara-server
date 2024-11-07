@@ -1,7 +1,9 @@
-import { Schema, model } from "mongoose";
-
+import { Document, ObjectId, PopulatedDoc, Schema, model } from "mongoose";
+import { IUser } from "./User";
 export interface IBan {
     phone: string;
+    email: string;
+    user: PopulatedDoc<Document<ObjectId> & IUser>;
 }
 
 const schema = new Schema<IBan>({
@@ -10,6 +12,19 @@ const schema = new Schema<IBan>({
         required: true,
         unique: true,
         index: true,
+    },
+
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
+    },
+
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
 });
 
