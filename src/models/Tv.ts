@@ -14,6 +14,7 @@ export interface ITv {
     content: string;
     views: number;
     likes: number;
+    shown: boolean
 }
 
 const schema = new Schema<ITv>(
@@ -74,6 +75,12 @@ const schema = new Schema<ITv>(
         likes: {
             type: Number,
             default: 0,
+        },
+
+        shown: {
+            type: Boolean,
+            required: true,
+            index: 1,
         },
     },
     { timestamps: { createdAt: true, updatedAt: false } }

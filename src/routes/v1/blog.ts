@@ -1,5 +1,5 @@
 import express from "express";
-import { getAll, create, search, getOne, update, remove, getRelated, getComments, like, dislike, save, unsave } from "@/controllers/v1/blog";
+import { getAll, create, search, getOne, update, remove, getRelated, getComments, like, dislike, save, unsave, shown, unshown } from "@/controllers/v1/blog";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
@@ -20,5 +20,7 @@ router.post("/:id/like", auth, like);
 router.delete("/:id/dislike", auth, dislike);
 router.post("/:id/save", auth, save);
 router.delete("/:id/unsave", auth, unsave);
+router.patch("/:id/shown", auth, roleGuard(ROLES.MANAGER), shown);
+router.patch("/:id/unshown", auth, roleGuard(ROLES.MANAGER), unshown);
 
 export default router;

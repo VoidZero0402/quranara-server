@@ -295,3 +295,39 @@ export const unsave = async (req: Request<RequestParamsWithID>, res: Response, n
         next(err);
     }
 };
+
+export const shown = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const tv = await TvModel.findByIdAndUpdate(
+            id,
+            {
+                $set: { shown: true },
+            },
+            { new: true }
+        );
+
+        SuccessResponse(res, 200, { tv });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const unshown = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const tv = await TvModel.findByIdAndUpdate(
+            id,
+            {
+                $set: { shown: false },
+            },
+            { new: true }
+        );
+
+        SuccessResponse(res, 200, { tv });
+    } catch (err) {
+        next(err);
+    }
+};

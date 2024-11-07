@@ -22,6 +22,7 @@ export interface IBlog {
     timeToRead: number;
     shortId: string;
     relatedCourses: PopulatedDoc<Document<ObjectId> & ICourse>[];
+    shown: boolean
 }
 
 const schema = new Schema<IBlog>(
@@ -109,6 +110,12 @@ const schema = new Schema<IBlog>(
         relatedCourses: {
             type: [Schema.Types.ObjectId],
             ref: "Course",
+        },
+
+        shown: {
+            type: Boolean,
+            required: true,
+            index: 1,
         },
     },
     { timestamps: true }
