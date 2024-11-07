@@ -135,12 +135,30 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
             }
         }
 
-        const question = user && (await QuestionModel.findOne({ session: session._id, user: user._id }).populate("messages").lean());
-
-        SuccessResponse(res, 200, { session, ...(question && { question }) });
+        SuccessResponse(res, 200, { session });
     } catch (err) {
         next(err);
     }
+};
+
+export const getQuestion = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+    const { slug } = req.params;
+
+    const session = await SessionModel.findOne({ slug });
+
+    if (!session) {
+        throw new NotFoundException("session not found");
+    }
+
+    const user = await getUser(req);
+
+    const question =
+        user &&
+        (await QuestionModel.findOne({ session: session._id, user: user._id }, "title status")
+            .populate({ path: "messages", populate: { path: "user", select: "username profile" } })
+            .lean());
+
+    SuccessResponse(res, 200, { question });
 };
 
 export const remove = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {

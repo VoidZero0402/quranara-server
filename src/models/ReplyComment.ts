@@ -1,5 +1,5 @@
 import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
-import { STATUS } from "@/constants/comments";
+import { STATUS, ROLES } from "@/constants/comments";
 import { IUser } from "./User";
 import { IComment } from "./Comment";
 
@@ -37,7 +37,7 @@ const schema = new Schema<IReplyComment>(
             type: Schema.Types.ObjectId,
             ref: "Comment",
             index: true,
-        },
+        }
     },
     { timestamps: { createdAt: true, updatedAt: false } }
 );

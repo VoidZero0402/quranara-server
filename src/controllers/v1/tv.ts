@@ -16,7 +16,7 @@ import { RequestWithUser } from "@/types/request.types";
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createPaginationData } from "@/utils/funcs";
+import { createPaginationData, getUser } from "@/utils/funcs";
 import { increaseViews } from "@/utils/metadata";
 
 type RequestParamsWithID = { id: string };
@@ -103,7 +103,16 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         await increaseViews("tv", tv._id.toString());
 
-        SuccessResponse(res, 200, { tv });
+        const user = await getUser(req);
+
+        if (user) {
+            const isLiked = await TvLikeModel.exists({ user: user._id, tv: tv._id });
+            const isSaved = await TvSaveModel.exists({ user: user._id, tv: tv._id });
+
+            SuccessResponse(res, 200, { blog: { ...tv.toObject(), isLiked: Boolean(isLiked), isSaved: Boolean(isSaved) } });
+        } else {
+            SuccessResponse(res, 200, { tv });
+        }
     } catch (err) {
         next(err);
     }

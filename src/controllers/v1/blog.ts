@@ -16,7 +16,7 @@ import { RequestWithUser } from "@/types/request.types";
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createPaginationData } from "@/utils/funcs";
+import { createPaginationData, getUser } from "@/utils/funcs";
 import { decreaseBlogsUnique, getBlogUnique, increaseViews } from "@/utils/metadata";
 
 type RequestParamsWithID = { id: string };
@@ -111,7 +111,16 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         await increaseViews("blog", blog._id.toString());
 
-        SuccessResponse(res, 200, { blog });
+        const user = await getUser(req);
+
+        if (user) {
+            const isLiked = await BlogLikeModel.exists({ user: user._id, blog: blog._id });
+            const isSaved = await BlogSaveModel.exists({ user: user._id, blog: blog._id });
+
+            SuccessResponse(res, 200, { blog: { ...blog.toObject(), isLiked: Boolean(isLiked), isSaved: Boolean(isSaved) } });
+        } else {
+            SuccessResponse(res, 200, { blog });
+        }
     } catch (err) {
         next(err);
     }

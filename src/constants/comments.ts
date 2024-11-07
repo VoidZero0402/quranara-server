@@ -9,3 +9,9 @@ export const TYPE = {
     TV: "TV",
     COURSE: "COURSE",
 } as const;
+
+export const ROLES = {
+    USER: "USER",
+    STUDENT: "STUDENT",
+    MANAGER: "MANAGER",
+} as const;
