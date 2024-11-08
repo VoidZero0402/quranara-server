@@ -8,3 +8,9 @@ export const SORTING = {
     OLDEST: "oldest",
     POPULAR: "popular",
 } as const;
+
+export const CONTENT_TYPE = {
+    HTML: "HTML",
+    IMAGE: "IMAGE",
+    POLL: "POLL",
+} as const;

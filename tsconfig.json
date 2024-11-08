@@ -1,24 +1,17 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "commonjs",
+        "module": "NodeNext",
         "outDir": "./dist",
         "rootDir": "./src",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "typeRoots": [
-            "./node_modules/@types",
-            "./src/types"
-        ],
-        "types": [
-            "node",
-            "express"
-        ],
-        "baseUrl": ".",
+        "moduleResolution": "NodeNext",
+        "baseUrl": "./",
         "paths": {
-            "@/*": ["./src/*"]
+            "@/*": ["src/*"]
         }
     },
     "include": ["src"],
