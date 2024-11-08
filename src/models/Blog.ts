@@ -99,6 +99,8 @@ const schema = new Schema<IBlog>(
                     type: String,
                     required: true,
                 },
+
+                _id: false,
             },
         ],
 
@@ -146,11 +148,12 @@ const schema = new Schema<IBlog>(
         shown: {
             type: Boolean,
             required: true,
-            index: 1,
         },
     },
     { timestamps: true }
 );
+
+schema.index({ status: "text", shown: "text" });
 
 const BlogModel = model<IBlog>("Blog", schema);
 

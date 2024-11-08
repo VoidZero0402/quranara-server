@@ -7,8 +7,10 @@ import auth from "@/middlewares/auth";
 
 const router = express.Router();
 
-router.get("/", auth, getCart);
-router.patch("/add", auth, validator("body", UpdateCartSchema), updateCart);
-router.patch("/remove", auth, validator("body", UpdateCartSchema), removeItem);
+router.use(auth);
+
+router.get("/", getCart);
+router.patch("/add", validator("body", UpdateCartSchema), updateCart);
+router.patch("/remove", validator("body", UpdateCartSchema), removeItem);
 
 export default router;

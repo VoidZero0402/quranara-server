@@ -79,7 +79,7 @@ export const search = async (req: Request<{}, {}, {}, SearchBlogsQuerySchameType
     try {
         const { page, limit, q } = req.query;
 
-        const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }], status: STATUS.PUBLISHED };
+        const filters = { shown: true, status: STATUS.PUBLISHED, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
         const blogs = await BlogModel.find(filters)
             .sort({ _id: -1 })
@@ -100,7 +100,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const blog = await BlogModel.findOne({ slug, status: STATUS.PUBLISHED, shown: true }).populate("author", "username profile").populate("category", "title");
+        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title");
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -162,7 +162,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
     try {
         const { slug } = req.params;
 
-        const blog = await BlogModel.findOne({ slug, status: STATUS.PUBLISHED, shown: true });
+        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED });
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -170,10 +170,10 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
 
         const aggragation = await BlogModel.aggregate([
             {
-                $match: { shown: true, $or: [{ category: blog.category }, { tags: { $in: blog.tags } }], status: STATUS.PUBLISHED, _id: { $ne: blog._id } },
+                $match: { shown: true, status: STATUS.PUBLISHED, $or: [{ category: blog.category }, { tags: { $in: blog.tags } }], _id: { $ne: blog._id } },
             },
             {
-                $sample: { size: 8 },
+                $sample: { size: 4 },
             },
         ]);
 
@@ -193,7 +193,7 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
         const { slug } = req.params;
         const { page, limit } = req.query;
 
-        const blog = await BlogModel.findOne({ slug, shown: true });
+        const blog = await BlogModel.findOne({ slug });
 
         if (!blog) {
             throw new NotFoundException("blog not found");

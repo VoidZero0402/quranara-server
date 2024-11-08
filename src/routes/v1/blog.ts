@@ -10,9 +10,8 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(validator("query", GetAllBlogsQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
+router.get("/", validator("query", GetAllBlogsQuerySchema), getAll);
 router.get("/search", validator("query", SearchBlogsQuerySchame), search);
-router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", CreateBlogSchema), update);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
@@ -20,7 +19,12 @@ router.post("/:id/like", auth, like);
 router.delete("/:id/dislike", auth, dislike);
 router.post("/:id/save", auth, save);
 router.delete("/:id/unsave", auth, unsave);
-router.patch("/:id/shown", auth, roleGuard(ROLES.MANAGER), shown);
-router.patch("/:id/unshown", auth, roleGuard(ROLES.MANAGER), unshown);
+
+router.use(auth, roleGuard(ROLES.MANAGER));
+
+router.post("/", validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
+router.route("/:id").put(validator("body", CreateBlogSchema), update);
+router.patch("/:id/shown", shown);
+router.patch("/:id/unshown", unshown);
 
 export default router;
