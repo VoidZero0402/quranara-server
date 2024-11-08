@@ -20,6 +20,7 @@ import cartRouter from "@/routes/v1/cart";
 import meRouter from "@/routes/v1/me";
 import ordersRouter from "@/routes/v1/orders";
 import newsRouter from "@/routes/v1/news";
+import uiRouter from "@/routes/v1/ui";
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/cart", cartRouter);
 app.use("/api/me", meRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/news", newsRouter);
+app.use("/api/ui", uiRouter);
 
 app.use(globalErrorHandler);
 
