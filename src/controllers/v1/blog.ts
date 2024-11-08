@@ -27,7 +27,7 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaType
 
         const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
-        const blogs = await BlogModel.find(filters)
+        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
             .sort(sorting)
             .populate("author", "username profile")
             .populate("category", "title")
@@ -50,7 +50,7 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType, CreateBl
         const timeToRead = Math.ceil(content.length / 1500);
         const shortId = await getBlogUnique();
 
-        const blog = await BlogModel.create({
+        await BlogModel.create({
             title,
             description,
             slug,
@@ -65,7 +65,7 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType, CreateBl
             shortId,
         });
 
-        SuccessResponse(res, 201, { blog });
+        SuccessResponse(res, 201, { message: "blog created successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             await decreaseBlogsUnique();
@@ -81,7 +81,7 @@ export const search = async (req: Request<{}, {}, {}, SearchBlogsQuerySchameType
 
         const filters = { shown: true, status: STATUS.PUBLISHED, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
-        const blogs = await BlogModel.find(filters)
+        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
             .sort({ _id: -1 })
             .populate("author", "username profile")
             .populate("category", "title")
@@ -154,7 +154,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSch
             throw new NotFoundException("blog not found");
         }
 
-        SuccessResponse(res, 200, { blog });
+        SuccessResponse(res, 200, { message: "blog updated successfully" });
     } catch (err) {
         next(err);
     }
@@ -166,7 +166,7 @@ export const getAllDrafted = async (req: Request<{}, {}, {}, PaginationQuerySche
 
         const filters = { status: STATUS.DRAFTED };
 
-        const blogs = await BlogModel.find(filters)
+        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
             .sort({ _id: -1 })
             .populate("author", "username profile")
             .populate("category", "title")
@@ -185,7 +185,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
     try {
         const { slug } = req.params;
 
-        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED });
+        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED }, "_id category tags");
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -197,6 +197,9 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
             },
             {
                 $sample: { size: 4 },
+            },
+            {
+                $project: { content: 0, relatedCourses: 0, headings: 0, shown: 0, status: 0 },
             },
         ]);
 
@@ -216,7 +219,7 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
         const { slug } = req.params;
         const { page, limit } = req.query;
 
-        const blog = await BlogModel.findOne({ slug });
+        const blog = await BlogModel.findOne({ slug }, "_id");
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -248,7 +251,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
-        SuccessResponse(res, 201, { like });
+        SuccessResponse(res, 201, { message: "blog like is successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("like already exists with this information"));
@@ -269,7 +272,7 @@ export const dislike = async (req: Request<RequestParamsWithID>, res: Response, 
 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: -1 } });
 
-        SuccessResponse(res, 200, { like });
+        SuccessResponse(res, 200, { message: "blog dislike is successfully" });
     } catch (err) {
         next(err);
     }
@@ -281,7 +284,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
 
         const save = await BlogSaveModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
-        SuccessResponse(res, 201, { save });
+        SuccessResponse(res, 201, { message: "blog save is successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("blog saved already with this information"));
@@ -300,7 +303,7 @@ export const unsave = async (req: Request<RequestParamsWithID>, res: Response, n
             throw new NotFoundException("saved blog not found!");
         }
 
-        SuccessResponse(res, 200, { save });
+        SuccessResponse(res, 200, { message: "blog unsave is successfully" });
     } catch (err) {
         next(err);
     }
@@ -310,15 +313,14 @@ export const shown = async (req: Request<RequestParamsWithID>, res: Response, ne
     try {
         const { id } = req.params;
 
-        const blog = await BlogModel.findByIdAndUpdate(
-            id,
+        await BlogModel.updateOne(
+            { _id: id },
             {
                 $set: { shown: true },
-            },
-            { new: true }
+            }
         );
 
-        SuccessResponse(res, 200, { blog });
+        SuccessResponse(res, 200, { message: "shown set successfully" });
     } catch (err) {
         next(err);
     }
@@ -328,15 +330,14 @@ export const unshown = async (req: Request<RequestParamsWithID>, res: Response, 
     try {
         const { id } = req.params;
 
-        const blog = await BlogModel.findByIdAndUpdate(
-            id,
+        await BlogModel.updateOne(
+            { _id: id },
             {
                 $set: { shown: false },
-            },
-            { new: true }
+            }
         );
 
-        SuccessResponse(res, 200, { blog });
+        SuccessResponse(res, 200, { message: "shown unset successfully" });
     } catch (err) {
         next(err);
     }

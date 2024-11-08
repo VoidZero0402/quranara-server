@@ -58,7 +58,7 @@ export const create = async (req: Request<{}, {}, CreateTvSchemaType>, res: Resp
             content,
         });
 
-        SuccessResponse(res, 201, { tv });
+        SuccessResponse(res, 201, { message: "tv created successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("tv already exists with this information"));
@@ -141,7 +141,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateTvSchem
             throw new NotFoundException("tv not found");
         }
 
-        SuccessResponse(res, 200, { tv });
+        SuccessResponse(res, 200, { message: "tv updated successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("tv already exists with this information"));
@@ -217,7 +217,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
 
         await TvModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
-        SuccessResponse(res, 201, { like });
+        SuccessResponse(res, 201, { message: "tv like is successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("like already exists with this information"));
@@ -238,7 +238,7 @@ export const dislike = async (req: Request<RequestParamsWithID>, res: Response, 
 
         await TvModel.updateOne({ _id: id }, { $inc: { likes: -1 } });
 
-        SuccessResponse(res, 200, { like });
+        SuccessResponse(res, 200, { message: "tv dislike is successfully" });
     } catch (err) {
         next(err);
     }
@@ -250,7 +250,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
 
         const save = await TvSaveModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
-        SuccessResponse(res, 201, { save });
+        SuccessResponse(res, 201, { message: "tv save is successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("tv saved already with this information"));
@@ -269,7 +269,7 @@ export const unsave = async (req: Request<RequestParamsWithID>, res: Response, n
             throw new NotFoundException("saved tv not found!");
         }
 
-        SuccessResponse(res, 200, { save });
+        SuccessResponse(res, 200, { message: "tv unsave is successfully" });
     } catch (err) {
         next(err);
     }
@@ -279,15 +279,14 @@ export const shown = async (req: Request<RequestParamsWithID>, res: Response, ne
     try {
         const { id } = req.params;
 
-        const tv = await TvModel.findByIdAndUpdate(
-            id,
+        await TvModel.updateOne(
+            { _id: id },
             {
                 $set: { shown: true },
-            },
-            { new: true }
+            }
         );
 
-        SuccessResponse(res, 200, { tv });
+        SuccessResponse(res, 200, { message: "shown set successfully" });
     } catch (err) {
         next(err);
     }
@@ -297,15 +296,14 @@ export const unshown = async (req: Request<RequestParamsWithID>, res: Response, 
     try {
         const { id } = req.params;
 
-        const tv = await TvModel.findByIdAndUpdate(
-            id,
+        await TvModel.updateOne(
+            { _id: id },
             {
                 $set: { shown: false },
-            },
-            { new: true }
+            }
         );
 
-        SuccessResponse(res, 200, { tv });
+        SuccessResponse(res, 200, { message: "unshown set successfully" });
     } catch (err) {
         next(err);
     }

@@ -79,15 +79,15 @@ export const search = async (req: Request<{}, {}, {}, SearchCoursesQuerySchameTy
 
         const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
-        const blogs = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
+        const courses = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
             .sort({ order: 1 })
             .populate("teacher", "username profile")
             .skip((page - 1) * limit)
             .limit(limit);
 
-        const blogsCount = await CourseModel.countDocuments(filters);
+        const coursesCount = await CourseModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
+        SuccessResponse(res, 200, { courses, pagination: createPaginationData(page, limit, coursesCount) });
     } catch (err) {
         next(err);
     }
@@ -142,7 +142,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseS
             throw new NotFoundException("course not found");
         }
 
-        SuccessResponse(res, 200, { course: updatedCourse });
+        SuccessResponse(res, 200, { message: "course updated successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("course already exists with this information"));
@@ -156,7 +156,7 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
         const { slug } = req.params;
         const { page, limit } = req.query;
 
-        const course = await CourseModel.findOne({ slug });
+        const course = await CourseModel.findOne({ slug }, "_id");
 
         if (!course) {
             throw new NotFoundException("course not found");
@@ -199,15 +199,14 @@ export const shown = async (req: Request<RequestParamsWithID>, res: Response, ne
     try {
         const { id } = req.params;
 
-        const course = await CourseModel.findByIdAndUpdate(
-            id,
+        await CourseModel.updateOne(
+            { _id: id },
             {
                 $set: { shown: true },
-            },
-            { new: true }
+            }
         );
 
-        SuccessResponse(res, 200, { course });
+        SuccessResponse(res, 200, { message: "shown set successfully" });
     } catch (err) {
         next(err);
     }
@@ -217,15 +216,14 @@ export const unshown = async (req: Request<RequestParamsWithID>, res: Response, 
     try {
         const { id } = req.params;
 
-        const course = await CourseModel.findByIdAndUpdate(
-            id,
+        await CourseModel.updateOne(
+            { _id: id },
             {
                 $set: { shown: false },
-            },
-            { new: true }
+            }
         );
 
-        SuccessResponse(res, 200, { course });
+        SuccessResponse(res, 200, { message: "shown unset successfully" });
     } catch (err) {
         next(err);
     }
