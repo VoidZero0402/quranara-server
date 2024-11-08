@@ -8,13 +8,12 @@ import { CreateSessionSchemaType, UpdateSessionSchemaType, UpdateSessionOrderSch
 
 import { ROLES } from "@/constants/roles";
 
+import { RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
+
 import { ForbiddenException, NotFoundException, UnauthorizedException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getSessionsUnique } from "@/utils/metadata";
 import { getUser, timeToSeconds } from "@/utils/funcs";
-
-type RequestParamsWithID = { id: string };
-type RequestParamsWithSlug = { slug: string };
 
 export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res: Response, next: NextFunction) => {
     try {

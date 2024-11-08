@@ -7,7 +7,7 @@ import { sendOtp } from "@/services/melipayamak";
 
 import { SignupShcemaType, SendOtpSchemaType, LoginWithOtpSchemaType, LoginWithEmailSchemaType } from "@/validators/auth";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest } from "@/types/request.types";
 
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
@@ -151,7 +151,7 @@ export const loginWithEmail = async (req: Request<{}, {}, LoginWithEmailSchemaTy
 
 export const getMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        SuccessResponse(res, 200, { user: (req as RequestWithUser).user });
+        SuccessResponse(res, 200, { user: (req as AuthenticatedRequest).user });
     } catch (err) {
         next(err);
     }
@@ -159,7 +159,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await removeSessionFromRedis((req as RequestWithUser).user._id.toString());
+        await removeSessionFromRedis((req as AuthenticatedRequest).user._id.toString());
         res.clearCookie("_session");
         res.clearCookie("_user");
 

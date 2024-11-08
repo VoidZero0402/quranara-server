@@ -4,15 +4,15 @@ import CategoryModel from "@/models/Category";
 
 import { CreateCategorySchemaType, UpdateCategorySchemaType, GetAllCategoriesQuerySchemaType } from "@/validators/categories";
 
+import { RequestParamsWithID } from "@/types/request.types";
+
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
 
-type RequestParamsWithID = { id: string };
-
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, GetAllCategoriesQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, ref } = req.query as unknown as GetAllCategoriesQuerySchemaType;
+        const { page, limit, ref } = req.query;
 
         const filters = { ref };
 
@@ -72,8 +72,6 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
         const { id } = req.params;
 
         const category = await CategoryModel.findByIdAndDelete(id);
-
-        // TODO: handle remove category side effects
 
         if (!category) {
             throw new NotFoundException("category not found");

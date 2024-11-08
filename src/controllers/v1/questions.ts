@@ -7,7 +7,7 @@ import SessionModel, { PopulatedCourse } from "@/models/Session";
 import { CreateQuestionSchemaType, AnswerQuestionSchemaType, GetAllQuestionsQuerySchemaType } from "@/validators/questions";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
 import { STATUS } from "@/constants/questions";
 
@@ -15,13 +15,11 @@ import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
 
-type RequestParamsWithID = { id: string };
-
-export const getQuestions = async (req: Request, res: Response, next: NextFunction) => {
+export const getQuestions = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
-        const filters = { user: (req as RequestWithUser).user._id };
+        const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const questions = await QuestionModel.find(filters)
             .populate("session", "slug")
@@ -54,9 +52,9 @@ export const getQuestion = async (req: Request<RequestParamsWithID>, res: Respon
     }
 };
 
-export const getAllQuestions = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllQuestions = async (req: Request<{}, {}, {}, GetAllQuestionsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, status } = req.query as unknown as GetAllQuestionsQuerySchemaType;
+        const { page, limit, status } = req.query;
 
         const filters = { status };
 
@@ -74,7 +72,7 @@ export const getAllQuestions = async (req: Request, res: Response, next: NextFun
 
 export const create = async (req: Request<{}, {}, CreateQuestionSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const user = (req as RequestWithUser).user;
+        const user = (req as AuthenticatedRequest).user;
         const { session: sessionId, content, attached } = req.body;
 
         const session = await SessionModel.findById(sessionId).populate<{ course: PopulatedCourse }>("course");
@@ -113,7 +111,7 @@ export const create = async (req: Request<{}, {}, CreateQuestionSchemaType>, res
 export const message = async (req: Request<RequestParamsWithID, {}, CreateQuestionSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const user = (req as RequestWithUser<RequestParamsWithID>).user;
+        const user = (req as AuthenticatedRequest).user;
         const { session: sessionId, content, attached } = req.body;
 
         const session = await SessionModel.findById(sessionId);
@@ -163,7 +161,7 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerQuestio
         }
 
         const answer = await QuestionMessageModel.create({
-            user: (req as RequestWithUser<RequestParamsWithID>).user,
+            user: (req as AuthenticatedRequest).user,
             question: question._id,
             content,
             attached,

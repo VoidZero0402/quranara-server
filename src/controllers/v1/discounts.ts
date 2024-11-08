@@ -5,18 +5,16 @@ import DiscountModel from "@/models/Discount";
 import { CreateDiscountSchemaType, AvailableDiscountQuerySchemaType } from "@/validators/discounts";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
 import { NotFoundException, ConflictException, ForbiddenException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData } from "@/utils/funcs";
 
-type RequestParamsWithID = { id: string };
-
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
         const discounts = await DiscountModel.find()
             .populate("creator", "username profile")
@@ -41,7 +39,7 @@ export const create = async (req: Request<{}, {}, CreateDiscountSchemaType>, res
             code,
             percent,
             course,
-            creator: (req as RequestWithUser).user._id,
+            creator: (req as AuthenticatedRequest).user._id,
             max,
             expireAt,
         });
@@ -105,9 +103,9 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
     }
 };
 
-export const available = async (req: Request, res: Response, next: NextFunction) => {
+export const available = async (req: Request<{}, {}, {}, AvailableDiscountQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { code, course } = req.query as unknown as AvailableDiscountQuerySchemaType;
+        const { code, course } = req.query;
 
         const discount = await DiscountModel.findOne({ code, ...(course && { course }) });
 

@@ -6,14 +6,14 @@ import CourseUserModel from "@/models/CourseUser";
 
 import { UpdateCartSchemaType } from "@/validators/cart";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest } from "@/types/request.types";
 
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 
 export const getCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const cart = await CartModel.findOne({ user: (req as RequestWithUser).user._id }, "items")
+        const cart = await CartModel.findOne({ user: (req as AuthenticatedRequest).user._id }, "items")
             .populate<{ items: PopulatedCourse[] }>("items", "title description slug cover price discount")
             .lean();
 
@@ -50,12 +50,12 @@ export const updateCart = async (req: Request<{}, {}, UpdateCartSchemaType>, res
         const isFreeCourse = course.price === 0 || course.discount === 100;
 
         if (isFreeCourse) {
-            await CourseUserModel.create({ user: (req as RequestWithUser).user._id, course: course._id });
+            await CourseUserModel.create({ user: (req as AuthenticatedRequest).user._id, course: course._id });
             SuccessResponse(res, 201, { messsage: "course added to your account" });
             return;
         }
 
-        const cart = await CartModel.findOne({ user: (req as RequestWithUser).user._id });
+        const cart = await CartModel.findOne({ user: (req as AuthenticatedRequest).user._id });
 
         if (!cart) {
             throw new NotFoundException("cart not found");
@@ -82,7 +82,7 @@ export const removeItem = async (req: Request, res: Response, next: NextFunction
         const { course } = req.body;
 
         const cart = await CartModel.findOneAndUpdate(
-            { user: (req as RequestWithUser).user._id },
+            { user: (req as AuthenticatedRequest).user._id },
             {
                 $pull: { items: course },
             },

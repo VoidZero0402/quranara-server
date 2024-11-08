@@ -11,7 +11,7 @@ import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 import { CreateBlogSchemaType, CreateBlogQuerySchemaType, GetAllBlogsQuerySchemaType, SearchBlogsQuerySchameType } from "@/validators/blog";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
 
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
@@ -19,12 +19,9 @@ import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData, getUser } from "@/utils/funcs";
 import { decreaseBlogsUnique, getBlogUnique, increaseViews } from "@/utils/metadata";
 
-type RequestParamsWithID = { id: string };
-type RequestParamsWithSlug = { slug: string };
-
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, category, sort, search } = req.query as unknown as GetAllBlogsQuerySchemaType;
+        const { page, limit, category, sort, search } = req.query;
 
         const filters = { shown: true, status: STATUS.PUBLISHED, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
@@ -45,9 +42,9 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
     }
 };
 
-export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
+export const create = async (req: Request<{}, {}, CreateBlogSchemaType, CreateBlogQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { status } = req.query as unknown as CreateBlogQuerySchemaType;
+        const { status } = req.query;
         const { title, description, slug, category, cover, content, tags, relatedCourses } = req.body;
 
         const timeToRead = Math.ceil(content.length / 1500);
@@ -58,7 +55,7 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Re
             description,
             slug,
             category,
-            author: (req as RequestWithUser).user._id,
+            author: (req as AuthenticatedRequest).user._id,
             cover,
             content,
             status,
@@ -78,11 +75,11 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Re
     }
 };
 
-export const search = async (req: Request, res: Response, next: NextFunction) => {
+export const search = async (req: Request<{}, {}, {}, SearchBlogsQuerySchameType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, q } = req.query as unknown as SearchBlogsQuerySchameType;
+        const { page, limit, q } = req.query;
 
-        const filters = {  shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }], status: STATUS.PUBLISHED };
+        const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }], status: STATUS.PUBLISHED };
 
         const blogs = await BlogModel.find(filters)
             .sort({ _id: -1 })
@@ -191,10 +188,10 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
     }
 };
 
-export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
         const blog = await BlogModel.findOne({ slug, shown: true });
 
@@ -224,7 +221,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const like = await BlogLikeModel.create({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const like = await BlogLikeModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
@@ -241,7 +238,7 @@ export const dislike = async (req: Request<RequestParamsWithID>, res: Response, 
     try {
         const { id } = req.params;
 
-        const like = await BlogLikeModel.findOneAndDelete({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const like = await BlogLikeModel.findOneAndDelete({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
         if (!like) {
             throw new NotFoundException("like not found!");
@@ -259,7 +256,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const save = await BlogSaveModel.create({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const save = await BlogSaveModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
         SuccessResponse(res, 201, { save });
     } catch (err) {
@@ -274,7 +271,7 @@ export const unsave = async (req: Request<RequestParamsWithID>, res: Response, n
     try {
         const { id } = req.params;
 
-        const save = await BlogSaveModel.findOneAndDelete({ blog: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const save = await BlogSaveModel.findOneAndDelete({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
         if (!save) {
             throw new NotFoundException("saved blog not found!");

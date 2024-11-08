@@ -10,7 +10,7 @@ import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType, DiscountAllSchemaType } from "@/validators/courses";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
 
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
@@ -18,12 +18,9 @@ import { decreaseCoursesUnique, getCoursesUnique } from "@/utils/metadata";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData } from "@/utils/funcs";
 
-type RequestParamsWithID = { id: string };
-type RequestParamsWithSlug = { slug: string };
-
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, sort, search } = req.query as unknown as GetAllCoursesQuerySchemaType;
+        const { page, limit, sort, search } = req.query;
 
         const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }) };
 
@@ -60,7 +57,7 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
             status,
             shown,
             order: order + 1,
-            teacher: (req as RequestWithUser).user._id,
+            teacher: (req as AuthenticatedRequest).user._id,
             introduction,
             metadata,
             shortId,
@@ -76,9 +73,9 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
     }
 };
 
-export const search = async (req: Request, res: Response, next: NextFunction) => {
+export const search = async (req: Request<{}, {}, {}, SearchCoursesQuerySchameType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, q } = req.query as unknown as SearchCoursesQuerySchameType;
+        const { page, limit, q } = req.query;
 
         const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }], shown: true };
 
@@ -154,10 +151,10 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseS
     }
 };
 
-export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
         const course = await CourseModel.findOne({ slug });
 

@@ -12,14 +12,12 @@ import { STATUS } from "@/constants/orders";
 import { CreateOrderSchemaType } from "@/validators/orders";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
 import { ForbiddenException, NotFoundException, BadRequestException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getOrdersUnique } from "@/utils/metadata";
 import { createPaginationData } from "@/utils/funcs";
-
-type RequestParamsWithID = { id: string };
 
 export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -41,7 +39,7 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
             discount = discountDoc.percent;
         }
 
-        const user = (req as RequestWithUser).user;
+        const user = (req as AuthenticatedRequest).user;
 
         const cart = await CartModel.findOne({ user: user._id }).populate<{ items: PopulatedCourse[] }>("items", "price discount").lean();
 
@@ -78,9 +76,9 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
     }
 };
 
-export const verify = async (req: Request, res: Response, next: NextFunction) => {
+export const verify = async (req: Request<{}, {}, {}, { Authority: string }>, res: Response, next: NextFunction) => {
     try {
-        const { Authority: authority } = req.query as unknown as { Authority: string };
+        const { Authority: authority } = req.query;
 
         const order = await OrderModel.findOne({ authority, status: STATUS.PAYING });
 
@@ -112,9 +110,9 @@ export const verify = async (req: Request, res: Response, next: NextFunction) =>
     }
 };
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
         const filters = { status: STATUS.SUCCESSFUL };
 
@@ -134,7 +132,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const getOne = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
     try {
-        const user = (req as RequestWithUser<RequestParamsWithID>).user;
+        const user = (req as AuthenticatedRequest).user;
         const { id } = req.params;
 
         const order = await OrderModel.findOne({ shortId: id }).populate<{ items: PopulatedCourse[] }>("items", "title description slug cover price discount").lean();

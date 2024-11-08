@@ -6,7 +6,7 @@ import TicketMessageModel from "@/models/TicketMessage";
 import { CreateTicketSchemaType, AnswerTicketSchemaType, GetAllTicketsQuerySchemaType } from "@/validators/tickets";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
 import { STATUS } from "@/constants/tickets";
 
@@ -15,13 +15,11 @@ import { SuccessResponse } from "@/utils/responses";
 import { getTicketUnique } from "@/utils/metadata";
 import { createPaginationData } from "@/utils/funcs";
 
-type RequestParamsWithID = { id: string };
-
-export const getTickets = async (req: Request, res: Response, next: NextFunction) => {
+export const getTickets = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
-        const filters = { user: (req as RequestWithUser).user._id };
+        const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const tickets = await TicketModel.find(filters)
             .skip((page - 1) * limit)
@@ -47,7 +45,7 @@ export const getTicket = async (req: Request<RequestParamsWithID>, res: Response
             throw new NotFoundException("ticket not found");
         }
 
-        if (ticket.user !== (req as RequestWithUser).user._id) {
+        if (ticket.user !== (req as AuthenticatedRequest).user._id) {
             throw new ForbiddenException("you can not access this ticket");
         }
 
@@ -57,9 +55,9 @@ export const getTicket = async (req: Request<RequestParamsWithID>, res: Response
     }
 };
 
-export const getAllTickets = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllTickets = async (req: Request<{}, {}, {}, GetAllTicketsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, status } = req.query as unknown as GetAllTicketsQuerySchemaType;
+        const { page, limit, status } = req.query;
 
         const filters = { status };
 
@@ -85,12 +83,12 @@ export const create = async (req: Request<{}, {}, CreateTicketSchemaType>, res: 
             title,
             course,
             type,
-            user: (req as RequestWithUser).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             shortId,
         });
 
         const message = await TicketMessageModel.create({
-            user: (req as RequestWithUser).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             content,
             ticket: ticket._id,
             attached,
@@ -116,7 +114,7 @@ export const message = async (req: Request<RequestParamsWithID, {}, AnswerTicket
         }
 
         const message = await TicketMessageModel.create({
-            user: (req as RequestWithUser<RequestParamsWithID>).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             content,
             ticket: ticket._id,
             attached,
@@ -142,7 +140,7 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerTicketS
         }
 
         const message = await TicketMessageModel.create({
-            user: (req as RequestWithUser<RequestParamsWithID>).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             content,
             ticket: ticket._id,
             attached,

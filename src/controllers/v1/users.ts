@@ -12,9 +12,9 @@ import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
 import { removeSessionFromRedis } from "@/utils/auth";
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, GetAllUsersQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, search } = req.query as unknown as GetAllUsersQuerySchemaType;
+        const { page, limit, search } = req.query;
 
         const filters = { ...(search && { fullname: { $regex: search } }) };
 
@@ -49,9 +49,9 @@ export const create = async (req: Request<{}, {}, CreateUserSchemaType>, res: Re
     }
 };
 
-export const getAllBan = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllBan = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
         const bans = await BanModel.find({})
             .sort({ _id: -1 })

@@ -11,7 +11,7 @@ import { SORTING } from "@/constants/tv";
 import { CreateTvSchemaType, GetAllTvsQuerySchemaType, SearchTvsQuerySchameType } from "@/validators/tv";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
 
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
@@ -19,12 +19,9 @@ import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData, getUser } from "@/utils/funcs";
 import { increaseViews } from "@/utils/metadata";
 
-type RequestParamsWithID = { id: string };
-type RequestParamsWithSlug = { slug: string };
-
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, GetAllTvsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, category, sort, search } = req.query as unknown as GetAllTvsQuerySchemaType;
+        const { page, limit, category, sort, search } = req.query;
 
         const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
@@ -56,7 +53,7 @@ export const create = async (req: Request<{}, {}, CreateTvSchemaType>, res: Resp
             category,
             cover,
             video,
-            publisher: (req as RequestWithUser).user._id,
+            publisher: (req as AuthenticatedRequest).user._id,
             attached,
             content,
         });
@@ -70,9 +67,9 @@ export const create = async (req: Request<{}, {}, CreateTvSchemaType>, res: Resp
     }
 };
 
-export const search = async (req: Request, res: Response, next: NextFunction) => {
+export const search = async (req: Request<{}, {}, {}, SearchTvsQuerySchameType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, q } = req.query as unknown as SearchTvsQuerySchameType;
+        const { page, limit, q } = req.query;
 
         const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
@@ -183,10 +180,10 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
     }
 };
 
-export const getComments = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
+export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
         const tv = await TvModel.findOne({ slug, shown: true });
 
@@ -216,7 +213,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const like = await TvLikeModel.create({ tv: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const like = await TvLikeModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
         await TvModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
@@ -233,7 +230,7 @@ export const dislike = async (req: Request<RequestParamsWithID>, res: Response, 
     try {
         const { id } = req.params;
 
-        const like = await TvLikeModel.findOneAndDelete({ tv: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const like = await TvLikeModel.findOneAndDelete({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
         if (!like) {
             throw new NotFoundException("like not found!");
@@ -251,7 +248,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const save = await TvSaveModel.create({ tv: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const save = await TvSaveModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
         SuccessResponse(res, 201, { save });
     } catch (err) {
@@ -266,7 +263,7 @@ export const unsave = async (req: Request<RequestParamsWithID>, res: Response, n
     try {
         const { id } = req.params;
 
-        const save = await TvSaveModel.findOneAndDelete({ tv: id, user: (req as RequestWithUser<RequestParamsWithID>).user._id });
+        const save = await TvSaveModel.findOneAndDelete({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
         if (!save) {
             throw new NotFoundException("saved tv not found!");

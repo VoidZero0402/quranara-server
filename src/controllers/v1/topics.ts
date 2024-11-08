@@ -4,10 +4,10 @@ import TopicModel from "@/models/Topic";
 
 import { CreateTopicSchemaType, UpdateTopicOrderSchemaType, UpdateTopicSchemaType } from "@/validators/topics";
 
+import { RequestParamsWithID } from "@/types/request.types";
+
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
-
-type RequestParamsWithID = { id: string };
 
 export const create = async (req: Request<{}, {}, CreateTopicSchemaType>, res: Response, next: NextFunction) => {
     try {

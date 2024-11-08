@@ -3,7 +3,6 @@ import { hash } from "bcryptjs";
 
 import UserModel from "@/models/User";
 import CourseUserModel from "@/models/CourseUser";
-import TicketModel from "@/models/Ticket";
 import BlogLikeModel from "@/models/BlogLike";
 import BlogSaveModel from "@/models/BlogSave";
 import TvLikeModel from "@/models/TvLike";
@@ -12,7 +11,7 @@ import TvSaveModel from "@/models/TvSave";
 import { UpdateAccountSchemaType, ChangePasswordSchemaType } from "@/validators/me";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest } from "@/types/request.types";
 
 import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
@@ -22,7 +21,7 @@ import { updateUserCredentialCookie } from "@/utils/auth";
 
 export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const user = (req as RequestWithUser).user;
+        const user = (req as AuthenticatedRequest).user;
         const { fullname, username, profile } = req.body;
 
         const updatedUser = await UserModel.findByIdAndUpdate(
@@ -54,7 +53,7 @@ export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType
 
 export const changePassword = async (req: Request<{}, {}, ChangePasswordSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const user = (req as RequestWithUser).user;
+        const user = (req as AuthenticatedRequest).user;
         const { past, new: newPassword } = req.body;
 
         const isMatched = await user.comparePassword(past);
@@ -79,7 +78,7 @@ export const changePassword = async (req: Request<{}, {}, ChangePasswordSchemaTy
 
 export const getCourses = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const courseUsers = await CourseUserModel.find({ user: (req as RequestWithUser).user._id })
+        const courseUsers = await CourseUserModel.find({ user: (req as AuthenticatedRequest).user._id })
             .sort({ _id: -1 })
             .populate("course", "metadata.students metadata.rating title slug description cover price discount status")
             .lean();
@@ -96,11 +95,11 @@ export const getCourses = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const getSavedBlog = async (req: Request, res: Response, next: NextFunction) => {
+export const getSavedBlog = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
-        const filters = { user: (req as RequestWithUser).user._id };
+        const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const saves = await BlogSaveModel.find(filters, "blog")
             .populate({
@@ -129,11 +128,11 @@ export const getSavedBlog = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-export const getSavedTv = async (req: Request, res: Response, next: NextFunction) => {
+export const getSavedTv = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
-        const filters = { user: (req as RequestWithUser).user._id };
+        const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const saves = await TvSaveModel.find(filters, "tv")
             .populate({
@@ -162,11 +161,11 @@ export const getSavedTv = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const getLikedBlog = async (req: Request, res: Response, next: NextFunction) => {
+export const getLikedBlog = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
-        const filters = { user: (req as RequestWithUser).user._id };
+        const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const likes = await BlogLikeModel.find(filters, "blog")
             .populate({
@@ -195,11 +194,11 @@ export const getLikedBlog = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-export const getLikedTv = async (req: Request, res: Response, next: NextFunction) => {
+export const getLikedTv = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { page, limit } = req.query as unknown as PaginationQuerySchemaType;
+        const { page, limit } = req.query;
 
-        const filters = { user: (req as RequestWithUser).user._id };
+        const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const likes = await TvLikeModel.find(filters, "tv")
             .populate({

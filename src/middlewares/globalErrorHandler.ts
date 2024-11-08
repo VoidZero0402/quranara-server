@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
 
 import { Exception } from "@/utils/exceptions";
 import { ErrorResponse } from "@/utils/responses";
-import mongoose from "mongoose";
 
 const globalErrorHandler = (err: Error | Exception, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof Exception) {

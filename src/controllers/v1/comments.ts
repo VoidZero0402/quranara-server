@@ -7,12 +7,10 @@ import { STATUS } from "@/constants/comments";
 
 import { CreateCommentSchemaType, ReplyCommentSchemaType, ActionsQuerySchemaType } from "@/validators/comments";
 
-import { RequestWithUser } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
 import { BadRequestException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
-
-type RequestParamsWithID = { id: string };
 
 export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -21,7 +19,7 @@ export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res:
         const comment = await CommentModel.create({
             content,
             rating,
-            user: (req as RequestWithUser).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             blog,
             course,
             tv,
@@ -59,7 +57,7 @@ export const reply = async (req: Request<RequestParamsWithID, {}, ReplyCommentSc
 
         const reply = await ReplyCommentModel.create({
             content,
-            user: (req as RequestWithUser<RequestParamsWithID>).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             replyTo: id,
         });
 
@@ -76,7 +74,7 @@ export const answer = async (req: Request<RequestParamsWithID, {}, ReplyCommentS
 
         const reply = await ReplyCommentModel.create({
             content,
-            user: (req as RequestWithUser<RequestParamsWithID>).user._id,
+            user: (req as AuthenticatedRequest).user._id,
             status: STATUS.ACCEPTED,
             replyTo: id,
         });
@@ -87,9 +85,9 @@ export const answer = async (req: Request<RequestParamsWithID, {}, ReplyCommentS
     }
 };
 
-export const accept = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+export const accept = async (req: Request<RequestParamsWithID, {}, {}, ActionsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { isReply } = req.query as unknown as ActionsQuerySchemaType;
+        const { isReply } = req.query;
         const { id } = req.params;
 
         if (isReply) {
@@ -126,9 +124,9 @@ export const accept = async (req: Request<RequestParamsWithID>, res: Response, n
     }
 };
 
-export const reject = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+export const reject = async (req: Request<RequestParamsWithID, {}, {}, ActionsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { isReply } = req.query as unknown as ActionsQuerySchemaType;
+        const { isReply } = req.query;
         const { id } = req.params;
 
         if (isReply) {

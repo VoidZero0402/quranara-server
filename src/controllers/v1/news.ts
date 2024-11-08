@@ -4,10 +4,10 @@ import NewsModel from "@/models/News";
 
 import { CreateNewsSchemaType, UpdateNewsSchemaType } from "@/validators/news";
 
+import { RequestParamsWithID } from "@/types/request.types";
+
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
-
-type RequestParamsWithID = { id: string };
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {

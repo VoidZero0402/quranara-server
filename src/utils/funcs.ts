@@ -1,8 +1,10 @@
 import fs from "fs/promises";
 import { Request } from "express";
+
 import redis from "@/config/redis";
 import UserModel, { UserDocument } from "@/models/User";
 import { verifySession } from "./auth";
+
 export const removeFile = async (path: string): Promise<void> => {
     await fs.unlink(path);
 };

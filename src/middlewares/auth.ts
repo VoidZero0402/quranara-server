@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
-import UserModel from "@/models/User";
+import UserModel, { UserDocument } from "@/models/User";
 
 import { verifySession } from "@/utils/auth";
 import { UnauthorizedException } from "@/utils/exceptions";
-import { RequestWithUser, UserDocument } from "@/types/request.types";
+import { AuthenticatedRequest } from "@/types/request.types";
 
 const auth = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -22,7 +22,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
             throw new UnauthorizedException("user not found");
         }
 
-        (req as RequestWithUser).user = user;
+        (req as AuthenticatedRequest).user = user;
 
         next();
     } catch (err) {
