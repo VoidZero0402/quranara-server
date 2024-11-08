@@ -22,6 +22,7 @@ export const getQuestions = async (req: Request<{}, {}, {}, PaginationQuerySchem
         const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const questions = await QuestionModel.find(filters)
+            .sort({ _id: -1 })
             .populate("session", "slug")
             .skip((page - 1) * limit)
             .limit(limit);
@@ -59,6 +60,7 @@ export const getAllQuestions = async (req: Request<{}, {}, {}, GetAllQuestionsQu
         const filters = { status };
 
         const questions = await QuestionModel.find(filters)
+            .sort({ _id: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
 

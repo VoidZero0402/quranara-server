@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { REFERENCES } from "@/constants/poll";
+import { REFERENCES } from "@/constants/polls";
 
 export type Ref = (typeof REFERENCES)[keyof typeof REFERENCES];
 

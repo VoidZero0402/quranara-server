@@ -1,9 +1,9 @@
 import express from "express";
-import { voute, getAll, create, getOne, update, remove } from "@/controllers/v1/poll";
+import { voute, getAll, create, getOne, update, remove } from "@/controllers/v1/polls";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
-import { CreatePollSchema, UpdatePollSchema, VoutePollSchema } from "@/validators/poll";
+import { CreatePollSchema, UpdatePollSchema, VoutePollSchema } from "@/validators/polls";
 import { PaginationQuerySchema } from "@/validators/pagination";
 import auth from "@/middlewares/auth";
 import roleGuard from "@/middlewares/roleGuard";

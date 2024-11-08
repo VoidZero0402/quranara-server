@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { REFERENCES } from "@/constants/poll";
+import { REFERENCES } from "@/constants/polls";
 
 const OptionsSchema = z
     .array(

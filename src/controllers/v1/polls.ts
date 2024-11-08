@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import PollModel from "@/models/Poll";
 
-import { CreatePollSchemaType, UpdatePollSchemaType, VoutePollSchemaType } from "@/validators/poll";
+import { CreatePollSchemaType, UpdatePollSchemaType, VoutePollSchemaType } from "@/validators/polls";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestParamsWithID } from "@/types/request.types";

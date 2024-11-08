@@ -11,7 +11,7 @@ import { SuccessResponse } from "@/utils/responses";
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const news = await NewsModel.find({ shown: true }).lean();
+        const news = await NewsModel.find({ shown: true }).sort({ createdAt: -1 }).lean();
         SuccessResponse(res, 200, { news });
     } catch (err) {
         next(err);
@@ -80,6 +80,7 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
         next(err);
     }
 };
+
 export const shown = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;

@@ -102,6 +102,7 @@ export const getSavedBlog = async (req: Request<{}, {}, {}, PaginationQuerySchem
         const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const saves = await BlogSaveModel.find(filters, "blog")
+            .sort({ _id: -1 })
             .populate({
                 path: "blog",
                 select: "-content -relatedCourses -status",
@@ -135,6 +136,7 @@ export const getSavedTv = async (req: Request<{}, {}, {}, PaginationQuerySchemaT
         const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const saves = await TvSaveModel.find(filters, "tv")
+            .sort({ _id: -1 })
             .populate({
                 path: "tv",
                 select: "-content -relatedCourses -status",
@@ -168,6 +170,7 @@ export const getLikedBlog = async (req: Request<{}, {}, {}, PaginationQuerySchem
         const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const likes = await BlogLikeModel.find(filters, "blog")
+            .sort({ _id: -1 })
             .populate({
                 path: "blog",
                 select: "-content -relatedCourses -status",
@@ -201,6 +204,7 @@ export const getLikedTv = async (req: Request<{}, {}, {}, PaginationQuerySchemaT
         const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const likes = await TvLikeModel.find(filters, "tv")
+            .sort({ _id: -1 })
             .populate({
                 path: "tv",
                 select: "-content -attached -video",
