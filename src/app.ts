@@ -1,8 +1,9 @@
-import express from "express";
+import express, { Request } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import globalErrorHandler from "./middlewares/globalErrorHandler";
+import notFound from "./middlewares/notFound";
 
 import authRouter from "@/routes/v1/auth";
 import coursesRouter from "@/routes/v1/courses";
@@ -30,10 +31,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-app.get("/api/testing", (req, res) => {
-    res.json({ query: req.query });
-});
-
 app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);
 app.use("/api/topics", topicsRouter);
@@ -52,6 +49,7 @@ app.use("/api/orders", ordersRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/ui", uiRouter);
 
+app.use(notFound);
 app.use(globalErrorHandler);
 
 export default app;

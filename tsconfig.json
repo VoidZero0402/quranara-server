@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "ES2022",
+        "target": "ESNext",
         "module": "commonjs",
         "outDir": "./dist",
         "rootDir": "./src",
@@ -8,11 +8,19 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
+        "typeRoots": [
+            "./node_modules/@types",
+            "./src/types"
+        ],
+        "types": [
+            "node",
+            "express"
+        ],
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"]
         }
     },
-    "include": ["src", "temp/validators/users.ts"],
+    "include": ["src"],
     "exclude": ["node_modules"]
 }

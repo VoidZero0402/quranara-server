@@ -25,7 +25,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
         }
 
         if (!matched) {
-            throw new BadRequestException("otp is not matched");
+            throw new BadRequestException("otp is not matched", { key: "otp" });
         }
 
         const isBanned = await BanModel.findOne({ $or: [{ phone }, { email }] });
@@ -94,7 +94,7 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
         }
 
         if (!matched) {
-            throw new BadRequestException("otp is not matched");
+            throw new BadRequestException("otp is not matched", { key: "otp" });
         }
 
         const user = await UserModel.findOne({ phone });

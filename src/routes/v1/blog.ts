@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.route("/").get(validator("query", GetAllBlogsQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
 router.get("/search", validator("query", SearchBlogsQuerySchame), search);
-router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", CreateBlogSchema), update)
+router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", CreateBlogSchema), update);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
