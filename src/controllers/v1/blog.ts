@@ -123,9 +123,10 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     }
 };
 
-export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
+export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType, CreateBlogQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
+        const { status } = req.query;
         const { title, description, slug, category, cover, content, tags, relatedCourses } = req.body;
 
         const timeToRead = Math.ceil(content.length / 1500);
@@ -140,6 +141,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSch
                     category,
                     cover,
                     content,
+                    status,
                     tags,
                     timeToRead,
                     relatedCourses,
@@ -153,6 +155,27 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSch
         }
 
         SuccessResponse(res, 200, { blog });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAllDrafted = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit } = req.query;
+
+        const filters = { status: STATUS.DRAFTED };
+
+        const blogs = await BlogModel.find(filters)
+            .sort({ _id: -1 })
+            .populate("author", "username profile")
+            .populate("category", "title")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const blogsCount = await BlogModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
     } catch (err) {
         next(err);
     }
