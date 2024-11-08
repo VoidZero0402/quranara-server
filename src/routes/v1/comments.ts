@@ -9,13 +9,18 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.post("/", auth, validator("body", CreateCommentSchema), create);
-router.get("/:id", auth, roleGuard(ROLES.MANAGER), getOne);
-router.post("/:id/reply", auth, validator("body", ReplyCommentSchema), reply);
-router.post("/:id/answer", auth, roleGuard(ROLES.MANAGER), validator("body", ReplyCommentSchema), answer);
-router.patch("/:id/accept", auth, roleGuard(ROLES.MANAGER), validator("query", ActionsQuerySchema), accept);
-router.patch("/:id/reject", auth, roleGuard(ROLES.MANAGER), validator("query", ActionsQuerySchema), reject);
-router.patch("/:id/pin", auth, roleGuard(ROLES.MANAGER), pin);
-router.patch("/:id/unpin", auth, roleGuard(ROLES.MANAGER), unpin);
+router.use(auth);
+
+router.post("/", validator("body", CreateCommentSchema), create);
+router.post("/:id/reply", validator("body", ReplyCommentSchema), reply);
+
+router.use(roleGuard(ROLES.MANAGER));
+
+router.get("/:id", getOne);
+router.post("/:id/answer", validator("body", ReplyCommentSchema), answer);
+router.patch("/:id/accept", validator("query", ActionsQuerySchema), accept);
+router.patch("/:id/reject", validator("query", ActionsQuerySchema), reject);
+router.patch("/:id/pin", pin);
+router.patch("/:id/unpin", unpin);
 
 export default router;

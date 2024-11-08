@@ -10,16 +10,20 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(validator("query", GetAllCoursesQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("body", CreateCourseSchema), create);
-router.get('/search', validator('query', SearchCoursesQuerySchame), search)
-router.put("/:id", auth, roleGuard(ROLES.MANAGER), validator("body", UpdateCourseSchema), update);
+router.get("/", validator("query", GetAllCoursesQuerySchema), getAll);
+router.get("/search", validator("query", SearchCoursesQuerySchame), search);
 router.get("/:slug", getOne);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
 router.get("/:id/topics", getTopics);
-router.patch("/:id/shown", auth, roleGuard(ROLES.MANAGER), shown);
-router.patch("/:id/unshown", auth, roleGuard(ROLES.MANAGER), unshown);
-router.patch("/:id/order", auth, roleGuard(ROLES.MANAGER), validator("body", UpdateCourseOrderSchema), updateOrder);
-router.patch('/all/discount/apply', validator("body", DiscountAllSchema), applyDiscountAll)
-router.patch('/all/discount/remove', removeDiscountAll)
+
+router.use(auth, roleGuard(ROLES.MANAGER));
+
+router.post("/", validator("body", CreateCourseSchema), create);
+router.put("/:id", validator("body", UpdateCourseSchema), update);
+router.patch("/:id/shown", shown);
+router.patch("/:id/unshown", unshown);
+router.patch("/:id/order", validator("body", UpdateCourseOrderSchema), updateOrder);
+router.patch("/all/discount/apply", validator("body", DiscountAllSchema), applyDiscountAll);
+router.patch("/all/discount/remove", removeDiscountAll);
 
 export default router;

@@ -1,5 +1,5 @@
 import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
-import { STATUS, ROLES } from "@/constants/comments";
+import { STATUS } from "@/constants/comments";
 import { ICourse } from "./Course";
 import { IBlog } from "./Blog";
 import { ITv } from "./Tv";

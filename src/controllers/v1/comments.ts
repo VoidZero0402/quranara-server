@@ -9,7 +9,7 @@ import { CreateCommentSchemaType, ReplyCommentSchemaType, ActionsQuerySchemaType
 
 import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
-import { BadRequestException, NotFoundException } from "@/utils/exceptions";
+import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 
 export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res: Response, next: NextFunction) => {

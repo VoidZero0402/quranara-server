@@ -17,6 +17,7 @@ export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>
         const { page, limit } = req.query;
 
         const discounts = await DiscountModel.find()
+            .sort({ _id: -1 })
             .populate("creator", "username profile")
             .skip((page - 1) * limit)
             .limit(limit);

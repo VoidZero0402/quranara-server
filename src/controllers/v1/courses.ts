@@ -77,7 +77,7 @@ export const search = async (req: Request<{}, {}, {}, SearchCoursesQuerySchameTy
     try {
         const { page, limit, q } = req.query;
 
-        const filters = { $or: [{ title: { $regex: q } }, { description: { $regex: q } }], shown: true };
+        const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
         const blogs = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
             .sort({ order: 1 })
@@ -162,7 +162,7 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
             throw new NotFoundException("course not found");
         }
 
-        const filters = { course: course._id, status: COMMENT_STATUS.ACCEPTED, pin: false };
+        const filters = { course: course._id, status: COMMENT_STATUS.ACCEPTED };
 
         const comments = await CommentModel.find(filters)
             .sort({ pin: -1, createdAt: -1 })

@@ -17,6 +17,7 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCategoriesQuerySchem
         const filters = { ref };
 
         const categories = await CategoryModel.find(filters)
+            .sort({ _id: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
 
@@ -56,22 +57,6 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCategor
             },
             { new: true }
         );
-
-        if (!category) {
-            throw new NotFoundException("category not found");
-        }
-
-        SuccessResponse(res, 200, { category });
-    } catch (err) {
-        next(err);
-    }
-};
-
-export const remove = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
-    try {
-        const { id } = req.params;
-
-        const category = await CategoryModel.findByIdAndDelete(id);
 
         if (!category) {
             throw new NotFoundException("category not found");
