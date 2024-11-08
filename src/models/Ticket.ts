@@ -27,6 +27,7 @@ const schema = new Schema<ITicket>(
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
 
         course: {
@@ -38,6 +39,7 @@ const schema = new Schema<ITicket>(
             type: String,
             enum: [STATUS.ACTIVE, STATUS.COLSED, STATUS.SLEEP],
             default: STATUS.ACTIVE,
+            index: true,
         },
 
         type: {

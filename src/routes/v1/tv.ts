@@ -10,17 +10,24 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(validator("query", GetAllTvsQuerySchema), getAll).post(auth, roleGuard(ROLES.MANAGER), validator("body", CreateTvSchema), create);
+router.get("/", validator("query", GetAllTvsQuerySchema), getAll);
 router.get("/search", validator("query", SearchTvsQuerySchame), search);
-router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", CreateTvSchema), update)
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
-router.post("/:id/like", auth, like);
-router.delete("/:id/dislike", auth, dislike);
-router.post("/:id/save", auth, save);
-router.delete("/:id/unsave", auth, unsave);
-router.patch("/:id/shown", auth, roleGuard(ROLES.MANAGER), shown);
-router.patch("/:id/unshown", auth, roleGuard(ROLES.MANAGER), unshown);
+
+router.use(auth);
+
+router.post("/:id/like", like);
+router.delete("/:id/dislike", dislike);
+router.post("/:id/save", save);
+router.delete("/:id/unsave", unsave);
+
+router.use(roleGuard(ROLES.MANAGER));
+
+router.post("/", validator("body", CreateTvSchema), create);
+router.route("/:id").put(validator("body", CreateTvSchema), update);
+router.patch("/:id/shown", shown);
+router.patch("/:id/unshown", unshown);
 
 export default router;

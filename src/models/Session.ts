@@ -1,8 +1,6 @@
 import { Schema, model, PopulatedDoc, Document, ObjectId, Model, Types } from "mongoose";
 import { ICourse } from "./Course";
 import { ITopic } from "./Topic";
-
-import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import CourseUserModel from "./CourseUser";
 
 export interface ISession {

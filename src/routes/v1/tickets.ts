@@ -10,10 +10,15 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.route("/").get(auth, validator("query", PaginationQuerySchema), getTickets).post(auth, validator("body", CreateTicketSchema), create);
-router.get("/all", auth, roleGuard(ROLES.MANAGER), validator("query", GetAllTicketsQuerySchema), getAllTickets);
-router.get("/:id", auth, getTicket);
-router.post("/:id/message", auth, validator("body", AnswerTicketSchema), message);
-router.post("/:id/answer", auth, roleGuard(ROLES.MANAGER), validator("body", AnswerTicketSchema), answer);
+router.use(auth);
+
+router.route("/").get(validator("query", PaginationQuerySchema), getTickets).post(validator("body", CreateTicketSchema), create);
+router.get("/:id", getTicket);
+router.post("/:id/message", validator("body", AnswerTicketSchema), message);
+
+router.use(roleGuard(ROLES.MANAGER));
+
+router.get("/all", validator("query", GetAllTicketsQuerySchema), getAllTickets);
+router.post("/:id/answer", validator("body", AnswerTicketSchema), answer);
 
 export default router;

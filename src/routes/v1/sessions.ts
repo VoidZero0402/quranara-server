@@ -9,10 +9,13 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.post("/", auth, roleGuard(ROLES.MANAGER), validator("body", CreateSessionSchema), create);
-router.route("/:id").put(auth, roleGuard(ROLES.MANAGER), validator("body", UpdateSessionSchema), update).delete(auth, roleGuard(ROLES.MANAGER), remove);
 router.get("/:slug", getOne);
 router.get("/:slug/question", getQuestion);
-router.route("/:id/order").patch(auth, roleGuard(ROLES.MANAGER), validator("body", UpdateSessionOrderSchema), updateOrder);
+
+router.use(auth, roleGuard(ROLES.MANAGER));
+
+router.post("/", validator("body", CreateSessionSchema), create);
+router.route("/:id").put(validator("body", UpdateSessionSchema), update).delete(remove);
+router.route("/:id/order").patch(validator("body", UpdateSessionOrderSchema), updateOrder);
 
 export default router;

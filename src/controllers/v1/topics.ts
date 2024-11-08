@@ -79,8 +79,6 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
 
         const topic = await TopicModel.findByIdAndDelete(id);
 
-        // TODO: handle side effects
-
         if (!topic) {
             throw new NotFoundException("topic not found");
         }

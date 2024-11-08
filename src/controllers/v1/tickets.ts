@@ -22,6 +22,7 @@ export const getTickets = async (req: Request<{}, {}, {}, PaginationQuerySchemaT
         const filters = { user: (req as AuthenticatedRequest).user._id };
 
         const tickets = await TicketModel.find(filters)
+            .sort({ _id: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
 
@@ -62,6 +63,7 @@ export const getAllTickets = async (req: Request<{}, {}, {}, GetAllTicketsQueryS
         const filters = { status };
 
         const tickets = await TicketModel.find(filters)
+            .sort({ _id: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
 

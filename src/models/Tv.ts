@@ -24,7 +24,6 @@ const schema = new Schema<ITv>(
             required: true,
             trim: true,
             unique: true,
-            index: true,
         },
 
         description: {
@@ -80,7 +79,7 @@ const schema = new Schema<ITv>(
         shown: {
             type: Boolean,
             required: true,
-            index: 1,
+            index: true,
         },
     },
     { timestamps: { createdAt: true, updatedAt: false } }

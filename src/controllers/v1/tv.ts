@@ -92,7 +92,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const tv = await TvModel.findOne({ slug }).populate("publisher").populate("category");
+        const tv = await TvModel.findOne({ slug, shown: true }).populate("publisher").populate("category");
 
         if (!tv) {
             throw new NotFoundException("tv not found");
@@ -165,7 +165,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
                 $match: { shown: true, category: tv.category, _id: { $ne: tv._id } },
             },
             {
-                $sample: { size: 8 },
+                $sample: { size: 4 },
             },
         ]);
 
