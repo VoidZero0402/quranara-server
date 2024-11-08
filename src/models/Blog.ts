@@ -63,19 +63,28 @@ const schema = new Schema<IBlog>(
 
         content: [
             {
-                type: { type: String, enum: [CONTENT_TYPE.HTML, CONTENT_TYPE.IMAGE, CONTENT_TYPE.POLL], required: true },
+                type: {
+                    type: String,
+                    enum: [CONTENT_TYPE.HTML, CONTENT_TYPE.IMAGE, CONTENT_TYPE.POLL],
+                    required: true,
+                },
+
                 html: {
                     type: String,
                     trim: true,
                 },
+
                 urls: {
                     type: [String],
                     default: undefined,
                 },
+
                 poll: {
                     type: Schema.Types.ObjectId,
                     ref: "Poll",
                 },
+
+                _id: false,
             },
         ],
 

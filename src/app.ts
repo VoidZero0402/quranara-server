@@ -22,6 +22,7 @@ import meRouter from "@/routes/v1/me";
 import ordersRouter from "@/routes/v1/orders";
 import newsRouter from "@/routes/v1/news";
 import uiRouter from "@/routes/v1/ui";
+import pollRouter from "@/routes/v1/poll";
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use("/api/me", meRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/ui", uiRouter);
+app.use("/api/poll", pollRouter);
 
 app.use(notFound);
 app.use(globalErrorHandler);

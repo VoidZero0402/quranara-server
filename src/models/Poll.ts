@@ -16,6 +16,8 @@ const schema = new Schema<IPoll>({
         type: String,
         required: true,
         trim: true,
+        unique: true,
+        index: true,
     },
 
     title: {
@@ -33,6 +35,7 @@ const schema = new Schema<IPoll>({
         type: String,
         enum: [REFERENCES.BLOG],
         default: REFERENCES.BLOG,
+        index: true,
     },
 
     options: [
@@ -47,6 +50,8 @@ const schema = new Schema<IPoll>({
                 type: Number,
                 default: 0,
             },
+
+            _id: false,
         },
     ],
 });
