@@ -1,9 +1,12 @@
-import express, { Request } from "express";
+import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 
-import globalErrorHandler from "./middlewares/globalErrorHandler";
+import secure from "./middlewares/secure";
 import notFound from "./middlewares/notFound";
+import globalErrorHandler from "./middlewares/globalErrorHandler";
 
 import authRouter from "@/routes/v1/auth";
 import coursesRouter from "@/routes/v1/courses";
@@ -26,7 +29,10 @@ import pollRouter from "@/routes/v1/polls";
 
 const app = express();
 
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
 app.use(cors());
+app.use(secure);
+app.use(helmet());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
