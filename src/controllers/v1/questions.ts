@@ -174,3 +174,25 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerQuestio
         next(err);
     }
 };
+
+export const close = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const question = await QuestionModel.findByIdAndUpdate(
+            id,
+            {
+                $set: { status: STATUS.COLSED },
+            },
+            { new: true }
+        );
+
+        if (!question) {
+            throw new NotFoundException("question not found");
+        }
+
+        SuccessResponse(res, 200, { question });
+    } catch (err) {
+        next(err);
+    }
+};

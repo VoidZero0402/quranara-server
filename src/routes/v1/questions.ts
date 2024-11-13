@@ -1,5 +1,5 @@
 import express from "express";
-import { getQuestions, getQuestion, getAllQuestions, create, message, answer } from "@/controllers/v1/questions";
+import { getQuestions, getQuestion, getAllQuestions, create, message, answer, close } from "@/controllers/v1/questions";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
@@ -20,5 +20,6 @@ router.use(roleGuard(ROLES.MANAGER));
 
 router.get("/all", validator("query", GetAllQuestionsQuerySchema), getAllQuestions);
 router.post("/:id/answer", validator("body", AnswerQuestionSchema), answer);
+router.post("/:id/close", close);
 
 export default router;

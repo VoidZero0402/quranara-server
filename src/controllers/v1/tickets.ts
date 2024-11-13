@@ -153,3 +153,25 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerTicketS
         next(err);
     }
 };
+
+export const close = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const ticket = await TicketModel.findByIdAndUpdate(
+            id,
+            {
+                $set: { status: STATUS.COLSED },
+            },
+            { new: true }
+        );
+
+        if (!ticket) {
+            throw new NotFoundException("ticket not found");
+        }
+
+        SuccessResponse(res, 200, { ticket });
+    } catch (err) {
+        next(err);
+    }
+};

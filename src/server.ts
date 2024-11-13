@@ -6,6 +6,7 @@ if (!isProduction) {
     dotenv.config();
 }
 
+import "@/config/cronJobs";
 import http from "node:http";
 import app from "@/app";
 import connectToDatabase from "@/config/database";
