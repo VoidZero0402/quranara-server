@@ -14,11 +14,10 @@ import { SuccessResponse } from "@/utils/responses";
 
 export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { content, rating, blog, course, tv } = req.body;
+        const { content, blog, course, tv } = req.body;
 
         const comment = await CommentModel.create({
             content,
-            rating,
             user: (req as AuthenticatedRequest).user._id,
             blog,
             course,

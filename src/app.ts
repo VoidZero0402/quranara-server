@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 
 import secure from "./middlewares/secure";
+import parseQuery from "./middlewares/parseQuery";
 import notFound from "./middlewares/notFound";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 
@@ -37,6 +38,7 @@ app.use(helmet());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
+app.use(parseQuery)
 
 app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);

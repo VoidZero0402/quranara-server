@@ -13,7 +13,6 @@ export interface IComment {
     course?: PopulatedDoc<Document<ObjectId> & ICourse>;
     tv?: PopulatedDoc<Document<ObjectId> & ITv>;
     user: PopulatedDoc<Document<ObjectId> & IUser>;
-    rating: Number;
     pin: boolean;
     status: Status;
 }
@@ -47,11 +46,6 @@ const schema = new Schema<IComment>(
         user: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true,
-        },
-
-        rating: {
-            type: Number,
             required: true,
         },
 
