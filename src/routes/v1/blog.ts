@@ -15,12 +15,15 @@ router.get("/search", validator("query", SearchBlogsQuerySchame), search);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
-router.post("/:id/like", auth, like);
-router.delete("/:id/dislike", auth, dislike);
-router.post("/:id/save", auth, save);
-router.delete("/:id/unsave", auth, unsave);
 
-router.use(auth, roleGuard(ROLES.MANAGER));
+router.use(auth);
+
+router.post("/:id/like", like);
+router.delete("/:id/dislike", dislike);
+router.post("/:id/save", save);
+router.delete("/:id/unsave", unsave);
+
+router.use(roleGuard(ROLES.MANAGER));
 
 router.post("/", validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
 router.get("/drafted", validator("query", PaginationQuerySchema), getAllDrafted);

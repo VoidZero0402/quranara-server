@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express from "express";
 import { getTickets, getAllTickets, getTicket, create, message, answer, close } from "@/controllers/v1/tickets";
 
 import { ROLES } from "@/constants/roles";

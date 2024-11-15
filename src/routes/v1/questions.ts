@@ -20,6 +20,6 @@ router.use(roleGuard(ROLES.MANAGER));
 
 router.get("/all", validator("query", GetAllQuestionsQuerySchema), getAllQuestions);
 router.post("/:id/answer", validator("body", AnswerQuestionSchema), answer);
-router.post("/:id/close", close);
+router.patch("/:id/close", close);
 
 export default router;

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { REFERENCES } from "@/constants/categories";
 import { PaginationQuerySchema } from "./pagination";
+import { REFERENCES } from "@/constants/categories";
 
 export const CreateCategorySchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 25 character" }).trim(),

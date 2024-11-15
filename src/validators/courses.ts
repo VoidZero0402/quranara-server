@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { slugRefiner } from "@/utils/validations";
-import { SORTING, STATUS } from "@/constants/courses";
 import { PaginationQuerySchema } from "./pagination";
+import { SORTING, STATUS } from "@/constants/courses";
 
 const CreateCourseObject = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),

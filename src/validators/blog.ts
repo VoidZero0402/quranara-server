@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sanitizeHtmlContent, slugRefiner, validateObjectId } from "@/utils/validations";
-import { PaginationQuerySchema } from "./pagination";
 import { SORTING, STATUS } from "@/constants/blog";
+import { PaginationQuerySchema } from "./pagination";
 
 export const CreateBlogSchema = z
     .object({

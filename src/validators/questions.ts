@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
-import { ATTACHED_FILE_TYPES } from "@/constants/files";
 import { PaginationQuerySchema } from "./pagination";
+import { ATTACHED_FILE_TYPES } from "@/constants/files";
 import { STATUS } from "@/constants/questions";
 
 export const CreateQuestionSchema = z.object({

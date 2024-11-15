@@ -16,6 +16,6 @@ router.use(auth, roleGuard(ROLES.MANAGER));
 
 router.post("/", validator("body", CreateSessionSchema), create);
 router.route("/:id").put(validator("body", UpdateSessionSchema), update).delete(remove);
-router.route("/:id/order").patch(validator("body", UpdateSessionOrderSchema), updateOrder);
+router.patch("/:id/order", validator("body", UpdateSessionOrderSchema), updateOrder);
 
 export default router;
