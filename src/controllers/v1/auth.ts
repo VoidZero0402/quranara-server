@@ -5,7 +5,7 @@ import BanModel from "@/models/Ban";
 
 import { sendOtp } from "@/services/melipayamak";
 
-import { SignupShcemaType, SendOtpSchemaType, LoginWithOtpSchemaType, LoginWithEmailSchemaType } from "@/validators/auth";
+import { SignupShcemaType, SendOtpSchemaType, LoginWithOtpSchemaType, LoginWithPasswordSchemaType } from "@/validators/auth";
 
 import { AuthenticatedRequest } from "@/types/request.types";
 
@@ -16,7 +16,7 @@ import { createSession, generateOtp, getOtp, removeSessionFromRedis, saveSession
 
 export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Response, next: NextFunction) => {
     try {
-        const { phone, email, fullname, password, otp } = req.body;
+        const { phone, fullname, password, otp } = req.body;
 
         const { expired, matched } = await verifyOtp(phone, otp);
 
@@ -28,7 +28,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
             throw new BadRequestException("otp is not matched", { key: "otp" });
         }
 
-        const isBanned = await BanModel.findOne({ $or: [{ phone }, { email }] });
+        const isBanned = await BanModel.findOne({ phone });
 
         if (isBanned) {
             throw new ForbiddenException("this account has been blocked");
@@ -36,7 +36,6 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
 
         const user = await UserModel.create({
             phone,
-            email,
             fullname,
             username: fullname,
             password,
@@ -115,17 +114,17 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
     }
 };
 
-export const loginWithEmail = async (req: Request<{}, {}, LoginWithEmailSchemaType>, res: Response, next: NextFunction) => {
+export const loginWithPassword = async (req: Request<{}, {}, LoginWithPasswordSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { email, password } = req.body;
+        const { phone, password } = req.body;
 
-        const isBanned = await BanModel.findOne({ email });
+        const isBanned = await BanModel.findOne({ phone });
 
         if (isBanned) {
             throw new ForbiddenException("this account has been blocked");
         }
 
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ phone });
 
         if (!user) {
             throw new NotFoundException("user not found");

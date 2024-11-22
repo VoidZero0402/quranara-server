@@ -46,7 +46,7 @@ export const create = async (req: Request<{}, {}, CreateTvSchemaType>, res: Resp
     try {
         const { title, description, slug, category, cover, video, attached, content } = req.body;
 
-        const tv = await TvModel.create({
+        await TvModel.create({
             title,
             description,
             slug,
@@ -213,7 +213,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const like = await TvLikeModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
+        await TvLikeModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
         await TvModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
@@ -248,7 +248,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const save = await TvSaveModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
+        await TvSaveModel.create({ tv: id, user: (req as AuthenticatedRequest).user._id });
 
         SuccessResponse(res, 201, { message: "tv saved successfully" });
     } catch (err) {

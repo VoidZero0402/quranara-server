@@ -23,6 +23,7 @@ export const getTickets = async (req: Request<{}, {}, {}, PaginationQuerySchemaT
 
         const tickets = await TicketModel.find(filters)
             .sort({ _id: -1 })
+            .populate("course", "title")
             .skip((page - 1) * limit)
             .limit(limit);
 
@@ -40,6 +41,7 @@ export const getTicket = async (req: Request<RequestParamsWithID>, res: Response
 
         const ticket = await TicketModel.findById(id)
             .populate({ path: "messages", populate: { path: "user" } })
+            .populate("course", "title")
             .lean();
 
         if (!ticket) {
@@ -64,6 +66,7 @@ export const getAllTickets = async (req: Request<{}, {}, {}, GetAllTicketsQueryS
 
         const tickets = await TicketModel.find(filters)
             .sort({ _id: -1 })
+            .populate("course", "title")
             .skip((page - 1) * limit)
             .limit(limit);
 

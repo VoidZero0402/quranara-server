@@ -48,7 +48,7 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
 
         const order = await CourseModel.countDocuments({});
 
-        const course = await CourseModel.create({
+        await CourseModel.create({
             title,
             slug,
             description,

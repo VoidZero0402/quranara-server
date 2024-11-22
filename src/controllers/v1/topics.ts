@@ -15,7 +15,7 @@ export const create = async (req: Request<{}, {}, CreateTopicSchemaType>, res: R
 
         const topicCounts = await TopicModel.countDocuments({ course });
 
-        const topic = await TopicModel.create({ title, order: topicCounts + 1, course });
+        await TopicModel.create({ title, order: topicCounts + 1, course });
 
         SuccessResponse(res, 201, { message: "topic created successfully" });
     } catch (err) {
@@ -28,7 +28,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateTopicSc
         const { id } = req.params;
         const { title } = req.body;
 
-        const updatedTopic = await TopicModel.findByIdAndUpdate(
+        await TopicModel.findByIdAndUpdate(
             id,
             {
                 $set: { title },

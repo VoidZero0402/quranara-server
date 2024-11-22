@@ -8,7 +8,6 @@ export type Role = (typeof ROLES)[keyof typeof ROLES];
 
 export interface IUser {
     phone: string;
-    email: string;
     fullname: string;
     username: string;
     role: Role;
@@ -35,14 +34,6 @@ type UserModel = Model<IUser, {}, IUserMethods>;
 
 const schema = new Schema<IUser, UserModel, IUserMethods>({
     phone: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        index: true,
-    },
-
-    email: {
         type: String,
         required: true,
         unique: true,

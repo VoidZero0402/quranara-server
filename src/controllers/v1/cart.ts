@@ -81,7 +81,7 @@ export const removeItem = async (req: Request, res: Response, next: NextFunction
     try {
         const { course } = req.body;
 
-        const cart = await CartModel.findOneAndUpdate(
+        await CartModel.findOneAndUpdate(
             { user: (req as AuthenticatedRequest).user._id },
             {
                 $pull: { items: course },

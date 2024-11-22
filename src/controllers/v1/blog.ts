@@ -247,7 +247,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const like = await BlogLikeModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
+        await BlogLikeModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
@@ -282,7 +282,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
     try {
         const { id } = req.params;
 
-        const save = await BlogSaveModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
+        await BlogSaveModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
         SuccessResponse(res, 201, { message: "blog saved successfully" });
     } catch (err) {

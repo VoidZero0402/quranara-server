@@ -64,7 +64,7 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
             shortId,
         });
 
-        const payment = await createPayment({ amount: payableAmount, description: `سفارش با شناسه #${shortId}`, mobile: user.phone, email: user.email });
+        const payment = await createPayment({ amount: payableAmount, description: `سفارش با شناسه #${shortId}`, mobile: user.phone });
 
         order.authority = payment.authority;
 

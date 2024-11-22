@@ -19,7 +19,7 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
     try {
         const { title, course: courseId, topic, isPublic, video, time, attached } = req.body;
 
-        const course = await CourseModel.findById(courseId);
+        const course = await CourseModel.findByIdAndUpdate(courseId, {});
 
         if (!course) {
             throw new NotFoundException("course not found");
@@ -33,7 +33,7 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
 
         const seconds = timeToSeconds(time);
 
-        const session = await SessionModel.create({
+        await SessionModel.create({
             title,
             slug,
             course: course._id,
@@ -57,7 +57,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateSession
         const { id } = req.params;
         const { title, isPublic, video, time, attached } = req.body;
 
-        const session = await SessionModel.findByIdAndUpdate(
+        await SessionModel.findByIdAndUpdate(
             id,
             {
                 $set: {

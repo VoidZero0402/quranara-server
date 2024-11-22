@@ -36,7 +36,7 @@ export const create = async (req: Request<{}, {}, CreateDiscountSchemaType>, res
 
         const expireAt = new Date(expireAtTime);
 
-        const discount = await DiscountModel.create({
+        await DiscountModel.create({
             code,
             percent,
             course,

@@ -20,10 +20,9 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const create = async (req: Request<{}, {}, CreateNewsSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { type, cover, title, description, link, shown } = req.body;
+        const { cover, title, description, link, shown } = req.body;
 
         await NewsModel.create({
-            type,
             cover,
             title,
             description,

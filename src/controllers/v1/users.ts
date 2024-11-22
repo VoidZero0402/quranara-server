@@ -33,15 +33,15 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllUsersQuerySchemaType
 
 export const create = async (req: Request<{}, {}, CreateUserSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { phone, email, fullname, password } = req.body;
+        const { phone, fullname, password } = req.body;
 
-        const isBanned = await BanModel.findOne({ $or: [{ phone }, { email }] });
+        const isBanned = await BanModel.findOne({ phone });
 
         if (isBanned) {
             throw new ForbiddenException("this account has been blocked");
         }
 
-        const user = await UserModel.create({ phone, email, fullname, username: fullname, password });
+        await UserModel.create({ phone, fullname, username: fullname, password });
 
         SuccessResponse(res, 201, { message: "user created successfully" });
     } catch (err) {
@@ -77,7 +77,7 @@ export const banUser = async (req: Request<{}, {}, BanUserSchemaType>, res: Resp
             throw new NotFoundException("user not found");
         }
 
-        const ban = await BanModel.create({ phone: user.phone, email: user.email, user: user._id });
+        await BanModel.create({ phone: user.phone, user: user._id });
 
         await removeSessionFromRedis(user._id.toString());
 
