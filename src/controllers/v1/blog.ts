@@ -251,7 +251,7 @@ export const like = async (req: Request<RequestParamsWithID>, res: Response, nex
 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: 1 } });
 
-        SuccessResponse(res, 201, { message: "blog like is successfully" });
+        SuccessResponse(res, 201, { message: "blog liked successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("like already exists with this information"));
@@ -272,7 +272,7 @@ export const dislike = async (req: Request<RequestParamsWithID>, res: Response, 
 
         await BlogModel.updateOne({ _id: id }, { $inc: { likes: -1 } });
 
-        SuccessResponse(res, 200, { message: "blog dislike is successfully" });
+        SuccessResponse(res, 200, { message: "blog disliked successfully" });
     } catch (err) {
         next(err);
     }
@@ -284,7 +284,7 @@ export const save = async (req: Request<RequestParamsWithID>, res: Response, nex
 
         const save = await BlogSaveModel.create({ blog: id, user: (req as AuthenticatedRequest).user._id });
 
-        SuccessResponse(res, 201, { message: "blog save is successfully" });
+        SuccessResponse(res, 201, { message: "blog saved successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("blog saved already with this information"));
@@ -303,7 +303,7 @@ export const unsave = async (req: Request<RequestParamsWithID>, res: Response, n
             throw new NotFoundException("saved blog not found!");
         }
 
-        SuccessResponse(res, 200, { message: "blog unsave is successfully" });
+        SuccessResponse(res, 200, { message: "blog unsaved successfully" });
     } catch (err) {
         next(err);
     }

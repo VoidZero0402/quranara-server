@@ -52,7 +52,7 @@ export const create = async (req: Request<{}, {}, CreatePollSchemaType>, res: Re
     try {
         const { title, identifier, description, ref, options } = req.body;
 
-        const poll = await PollModel.create({
+        await PollModel.create({
             title,
             identifier,
             description,
@@ -60,7 +60,7 @@ export const create = async (req: Request<{}, {}, CreatePollSchemaType>, res: Re
             options,
         });
 
-        SuccessResponse(res, 201, { poll });
+        SuccessResponse(res, 201, { message: "poll created successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("poll already exists with this information"));
@@ -104,9 +104,9 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdatePollSch
 
         poll.$set({ options: updatedOptions });
 
-        const updatedPoll = await poll.save();
+        await poll.save();
 
-        SuccessResponse(res, 200, { poll: updatedPoll });
+        SuccessResponse(res, 200, { message: "poll updated successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("poll already exists with this information"));
@@ -125,7 +125,7 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
             throw new NotFoundException("poll not found");
         }
 
-        SuccessResponse(res, 200, { poll });
+        SuccessResponse(res, 200, { message: "poll removed successfully" });
     } catch (err) {
         next(err);
     }

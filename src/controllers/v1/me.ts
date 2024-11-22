@@ -42,7 +42,7 @@ export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType
 
         await updateUserCredentialCookie(res, updatedUser);
 
-        SuccessResponse(res, 200, { user: updatedUser });
+        SuccessResponse(res, 200, { message: "account updated successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("user already exists with this information", { field: Object.keys((err as any).keyPattern)[0] }));
@@ -64,13 +64,13 @@ export const changePassword = async (req: Request<{}, {}, ChangePasswordSchemaTy
 
         const hashedPassword = await hash(newPassword, 12);
 
-        const updatedUser = await UserModel.findByIdAndUpdate(user._id, {
+        await UserModel.findByIdAndUpdate(user._id, {
             $set: {
                 password: hashedPassword,
             },
         });
 
-        SuccessResponse(res, 200, { user: updatedUser });
+        SuccessResponse(res, 200, { message: "password updated successfully" });
     } catch (err) {
         next(err);
     }
@@ -85,7 +85,7 @@ export const getCourses = async (req: Request, res: Response, next: NextFunction
 
         const courses = [];
 
-        for (let courseUser of courseUsers) {
+        for (const courseUser of courseUsers) {
             courses.push(courseUser.course);
         }
 
@@ -119,7 +119,7 @@ export const getSavedBlog = async (req: Request<{}, {}, {}, PaginationQuerySchem
 
         const savedBlogs = [];
 
-        for (let save of saves) {
+        for (const save of saves) {
             savedBlogs.push(save.blog);
         }
 
@@ -153,7 +153,7 @@ export const getSavedTv = async (req: Request<{}, {}, {}, PaginationQuerySchemaT
 
         const savedTvs = [];
 
-        for (let save of saves) {
+        for (const save of saves) {
             savedTvs.push(save.tv);
         }
 
@@ -187,7 +187,7 @@ export const getLikedBlog = async (req: Request<{}, {}, {}, PaginationQuerySchem
 
         const likedBlogs = [];
 
-        for (let like of likes) {
+        for (const like of likes) {
             likedBlogs.push(like.blog);
         }
 
@@ -221,7 +221,7 @@ export const getLikedTv = async (req: Request<{}, {}, {}, PaginationQuerySchemaT
 
         const likedTvs = [];
 
-        for (let like of likes) {
+        for (const like of likes) {
             likedTvs.push(like.tv);
         }
 

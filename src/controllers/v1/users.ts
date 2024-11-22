@@ -43,7 +43,7 @@ export const create = async (req: Request<{}, {}, CreateUserSchemaType>, res: Re
 
         const user = await UserModel.create({ phone, email, fullname, username: fullname, password });
 
-        SuccessResponse(res, 201, { user });
+        SuccessResponse(res, 201, { message: "user created successfully" });
     } catch (err) {
         next(err);
     }
@@ -81,7 +81,7 @@ export const banUser = async (req: Request<{}, {}, BanUserSchemaType>, res: Resp
 
         await removeSessionFromRedis(user._id.toString());
 
-        SuccessResponse(res, 201, { ban });
+        SuccessResponse(res, 201, { message: "user banned successfully" });
     } catch (err) {
         next(err);
     }
@@ -97,7 +97,7 @@ export const unbanUser = async (req: Request<{}, {}, UnbanUserSchemaType>, res: 
             throw new NotFoundException("ban not found");
         }
 
-        SuccessResponse(res, 201, { ban });
+        SuccessResponse(res, 201, { message: "user unbanned successfully" });
     } catch (err) {
         next(err);
     }
@@ -107,9 +107,9 @@ export const signingCourse = async (req: Request<{}, {}, SigningCourseSchemaType
     try {
         const { user, course } = req.body;
 
-        const courseUser = await CourseUserModel.create({ user, course });
+        await CourseUserModel.create({ user, course });
 
-        SuccessResponse(res, 201, { courseUser });
+        SuccessResponse(res, 201, { message: "course signed successfully" });
     } catch (err) {
         next(err);
     }

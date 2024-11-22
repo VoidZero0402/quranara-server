@@ -24,14 +24,14 @@ export const getCart = async (req: Request, res: Response, next: NextFunction) =
         let totalPrice = 0;
         let discount = 0;
 
-        for (let course of cart.items) {
+        for (const course of cart.items) {
             totalPrice += course.price;
             discount += (course.price * course.discount) / 100;
         }
 
         const payableAmount = totalPrice - discount;
 
-        SuccessResponse(res, 200, { ...cart, totalPrice, discount, payableAmount });
+        SuccessResponse(res, 200, { cart: { ...cart, totalPrice, discount, payableAmount } });
     } catch (err) {
         next(err);
     }
@@ -69,9 +69,9 @@ export const updateCart = async (req: Request<{}, {}, UpdateCartSchemaType>, res
 
         cart.items.push(course._id);
 
-        const updatedCart = await cart.save();
+        await cart.save();
 
-        SuccessResponse(res, 200, { cart: updatedCart });
+        SuccessResponse(res, 200, { message: "cart updated successfully" });
     } catch (err) {
         next(err);
     }
@@ -91,7 +91,7 @@ export const removeItem = async (req: Request, res: Response, next: NextFunction
             }
         );
 
-        SuccessResponse(res, 200, { cart });
+        SuccessResponse(res, 200, { message: "cart updated successfully" });
     } catch (err) {
         next(err);
     }

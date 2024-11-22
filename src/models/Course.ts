@@ -164,7 +164,7 @@ schema.method("getTime", async function () {
 
     let seconds = 0;
 
-    for (let session of sessions) {
+    for (const session of sessions) {
         seconds += session.seconds;
     }
 

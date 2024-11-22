@@ -40,7 +40,7 @@ export const getQuestion = async (req: Request<RequestParamsWithID>, res: Respon
         const { id } = req.params;
 
         const question = await QuestionModel.findById(id)
-            .populate({ path: "messages", populate: { path: "user" } })
+            .populate({ path: "messages", populate: { path: "user", select: "username profile role" } })
             .lean();
 
         if (!question) {
@@ -97,14 +97,14 @@ export const create = async (req: Request<{}, {}, CreateQuestionSchemaType>, res
             title,
         });
 
-        const message = await QuestionMessageModel.create({
+        await QuestionMessageModel.create({
             user: user._id,
             content,
             question: question._id,
             attached,
         });
 
-        SuccessResponse(res, 201, { question, message });
+        SuccessResponse(res, 201, { message: "question created successfully" });
     } catch (err) {
         next(err);
     }
@@ -136,14 +136,14 @@ export const message = async (req: Request<RequestParamsWithID, {}, CreateQuesti
             throw new NotFoundException("question not found");
         }
 
-        const message = await QuestionMessageModel.create({
+        await QuestionMessageModel.create({
             user: user._id,
             content,
             question: question._id,
             attached,
         });
 
-        SuccessResponse(res, 201, { message });
+        SuccessResponse(res, 201, { message: "message submited successfully" });
     } catch (err) {
         next(err);
     }
@@ -162,14 +162,14 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerQuestio
             throw new NotFoundException("question not found");
         }
 
-        const answer = await QuestionMessageModel.create({
+        await QuestionMessageModel.create({
             user: (req as AuthenticatedRequest).user,
             question: question._id,
             content,
             attached,
         });
 
-        SuccessResponse(res, 201, { answer });
+        SuccessResponse(res, 201, { message: "answer message submited successfully" });
     } catch (err) {
         next(err);
     }
@@ -191,7 +191,7 @@ export const close = async (req: Request<RequestParamsWithID>, res: Response, ne
             throw new NotFoundException("question not found");
         }
 
-        SuccessResponse(res, 200, { question });
+        SuccessResponse(res, 200, { message: "question closed successfully" });
     } catch (err) {
         next(err);
     }

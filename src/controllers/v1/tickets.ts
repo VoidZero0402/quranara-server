@@ -89,14 +89,14 @@ export const create = async (req: Request<{}, {}, CreateTicketSchemaType>, res: 
             shortId,
         });
 
-        const message = await TicketMessageModel.create({
+        await TicketMessageModel.create({
             user: (req as AuthenticatedRequest).user._id,
             content,
             ticket: ticket._id,
             attached,
         });
 
-        SuccessResponse(res, 201, { ticket, message });
+        SuccessResponse(res, 201, { message: "ticket created successfully" });
     } catch (err) {
         next(err);
     }
@@ -115,14 +115,14 @@ export const message = async (req: Request<RequestParamsWithID, {}, AnswerTicket
             throw new NotFoundException("ticket not found");
         }
 
-        const message = await TicketMessageModel.create({
+        await TicketMessageModel.create({
             user: (req as AuthenticatedRequest).user._id,
             content,
             ticket: ticket._id,
             attached,
         });
 
-        SuccessResponse(res, 201, { message });
+        SuccessResponse(res, 201, { message: "message submited successfully" });
     } catch (err) {
         next(err);
     }
@@ -141,14 +141,14 @@ export const answer = async (req: Request<RequestParamsWithID, {}, AnswerTicketS
             throw new NotFoundException("ticket not found");
         }
 
-        const message = await TicketMessageModel.create({
+        await TicketMessageModel.create({
             user: (req as AuthenticatedRequest).user._id,
             content,
             ticket: ticket._id,
             attached,
         });
 
-        SuccessResponse(res, 201, { message });
+        SuccessResponse(res, 201, { message: "answer message submited successfully" });
     } catch (err) {
         next(err);
     }
@@ -170,7 +170,7 @@ export const close = async (req: Request<RequestParamsWithID>, res: Response, ne
             throw new NotFoundException("ticket not found");
         }
 
-        SuccessResponse(res, 200, { ticket });
+        SuccessResponse(res, 200, { message: "ticket closed successfully" });
     } catch (err) {
         next(err);
     }

@@ -22,7 +22,7 @@ export const create = async (req: Request<{}, {}, CreateNewsSchemaType>, res: Re
     try {
         const { type, cover, title, description, link, shown } = req.body;
 
-        const news = await NewsModel.create({
+        await NewsModel.create({
             type,
             cover,
             title,
@@ -31,7 +31,7 @@ export const create = async (req: Request<{}, {}, CreateNewsSchemaType>, res: Re
             shown,
         });
 
-        SuccessResponse(res, 201, { news });
+        SuccessResponse(res, 201, { message: "news created successfully" });
     } catch (err) {
         next(err);
     }
@@ -59,7 +59,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateNewsSch
             throw new NotFoundException("news not found");
         }
 
-        SuccessResponse(res, 200, { news });
+        SuccessResponse(res, 200, { message: "news updated successfully" });
     } catch (err) {
         next(err);
     }
@@ -75,7 +75,7 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
             throw new NotFoundException("news not found");
         }
 
-        SuccessResponse(res, 200, { news });
+        SuccessResponse(res, 200, { message: "news removed successfully" });
     } catch (err) {
         next(err);
     }
@@ -97,7 +97,7 @@ export const shown = async (req: Request<RequestParamsWithID>, res: Response, ne
             throw new NotFoundException("news not found");
         }
 
-        SuccessResponse(res, 200, { news });
+        SuccessResponse(res, 200, { message: "shown set successfully" });
     } catch (err) {
         next(err);
     }
@@ -119,7 +119,7 @@ export const unshown = async (req: Request<RequestParamsWithID>, res: Response, 
             throw new NotFoundException("news not found");
         }
 
-        SuccessResponse(res, 200, { news });
+        SuccessResponse(res, 200, { message: "shown unset successfully" });
     } catch (err) {
         next(err);
     }

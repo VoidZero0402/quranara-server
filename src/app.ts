@@ -31,7 +31,7 @@ import pollRouter from "@/routes/v1/polls";
 const app = express();
 
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(secure);
 app.use(helmet());
 

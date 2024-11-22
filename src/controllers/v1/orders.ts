@@ -49,7 +49,7 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
 
         let payableAmount = 0;
 
-        for (let course of cart.items) {
+        for (const course of cart.items) {
             payableAmount += course.price - (course.price * course.discount) / 100;
         }
 
@@ -57,7 +57,7 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
 
         const shortId = await getOrdersUnique();
 
-        const orderInstance = new OrderModel({
+        const order = new OrderModel({
             user: user._id,
             items: cart.items,
             amount: payableAmount,
@@ -66,11 +66,11 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
 
         const payment = await createPayment({ amount: payableAmount, description: `سفارش با شناسه #${shortId}`, mobile: user.phone, email: user.email });
 
-        orderInstance.authority = payment.authority;
+        order.authority = payment.authority;
 
-        const order = await orderInstance.save();
+        await order.save();
 
-        SuccessResponse(res, 201, { order, paymentUrl: payment.paymentUrl });
+        SuccessResponse(res, 201, { message: "order created and ready for payment", paymentUrl: payment.paymentUrl });
     } catch (err) {
         next(err);
     }

@@ -45,7 +45,7 @@ export const create = async (req: Request<{}, {}, CreateDiscountSchemaType>, res
             expireAt,
         });
 
-        SuccessResponse(res, 201, { discount });
+        SuccessResponse(res, 201, { message: "discount created successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("discount already exists with this information"));
@@ -79,7 +79,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateDiscoun
             throw new NotFoundException("discount not found");
         }
 
-        SuccessResponse(res, 200, { discount });
+        SuccessResponse(res, 200, { message: "discount updated successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("discount already exists with this information"));
@@ -98,7 +98,7 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
             throw new NotFoundException("discount not found");
         }
 
-        SuccessResponse(res, 200, { discount });
+        SuccessResponse(res, 200, { message: "discount removed successfully" });
     } catch (err) {
         next(err);
     }

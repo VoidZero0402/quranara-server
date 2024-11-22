@@ -48,7 +48,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
 
         setCredentialCookies(res, { session, user });
 
-        SuccessResponse(res, 201, { user });
+        SuccessResponse(res, 201, { message: "signup was successful", username: user.username });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("user already exists with this information", { field: Object.keys((err as any).keyPattern)[0] }));
@@ -77,7 +77,7 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
 
         await sendOtp(phone, otp);
 
-        SuccessResponse(res, 200, { message: "otp sent successfully!", otp });
+        SuccessResponse(res, 200, { message: "otp sent successfully!" });
     } catch (err) {
         next(err);
     }
@@ -109,7 +109,7 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
 
         setCredentialCookies(res, { session, user });
 
-        SuccessResponse(res, 200, { user });
+        SuccessResponse(res, 200, { message: "login was successful", username: user.username });
     } catch (err) {
         next(err);
     }
@@ -143,7 +143,7 @@ export const loginWithEmail = async (req: Request<{}, {}, LoginWithEmailSchemaTy
 
         setCredentialCookies(res, { session, user });
 
-        SuccessResponse(res, 200, { user });
+        SuccessResponse(res, 200, { message: "login was successful", username: user.username });
     } catch (err) {
         next(err);
     }

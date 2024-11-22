@@ -17,7 +17,7 @@ export const create = async (req: Request<{}, {}, CreateTopicSchemaType>, res: R
 
         const topic = await TopicModel.create({ title, order: topicCounts + 1, course });
 
-        SuccessResponse(res, 201, { topic });
+        SuccessResponse(res, 201, { message: "topic created successfully" });
     } catch (err) {
         next(err);
     }
@@ -36,7 +36,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateTopicSc
             { new: true }
         );
 
-        SuccessResponse(res, 200, { topic: updatedTopic });
+        SuccessResponse(res, 200, { message: "topic updated successfully" });
     } catch (err) {
         next(err);
     }
@@ -90,7 +90,7 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
             }
         );
 
-        SuccessResponse(res, 200, { topic });
+        SuccessResponse(res, 200, { message: "topic removed successfully" });
     } catch (err) {
         next(err);
     }

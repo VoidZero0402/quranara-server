@@ -63,7 +63,7 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
             shortId,
         });
 
-        SuccessResponse(res, 201, { course });
+        SuccessResponse(res, 201, { message: "course created successfully" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             await decreaseCoursesUnique();

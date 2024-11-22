@@ -46,7 +46,7 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
             attached,
         });
 
-        SuccessResponse(res, 201, { session });
+        SuccessResponse(res, 201, { message: "session created successfully" });
     } catch (err) {
         next(err);
     }
@@ -71,7 +71,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateSession
             { new: true }
         );
 
-        SuccessResponse(res, 200, { session });
+        SuccessResponse(res, 200, { message: "session updated successfully" });
     } catch (err) {
         next(err);
     }
@@ -177,7 +177,7 @@ export const remove = async (req: Request<RequestParamsWithID>, res: Response, n
             }
         );
 
-        SuccessResponse(res, 200, { session });
+        SuccessResponse(res, 200, { message: "session removed successfully" });
     } catch (err) {
         next(err);
     }

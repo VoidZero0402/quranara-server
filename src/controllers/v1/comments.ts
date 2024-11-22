@@ -16,7 +16,7 @@ export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res:
     try {
         const { content, blog, course, tv } = req.body;
 
-        const comment = await CommentModel.create({
+        await CommentModel.create({
             content,
             user: (req as AuthenticatedRequest).user._id,
             blog,
@@ -24,7 +24,7 @@ export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res:
             tv,
         });
 
-        SuccessResponse(res, 201, { comment });
+        SuccessResponse(res, 201, { message: "comment created successfully" });
     } catch (err) {
         next(err);
     }
@@ -54,13 +54,13 @@ export const reply = async (req: Request<RequestParamsWithID, {}, ReplyCommentSc
         const { id } = req.params;
         const { content } = req.body;
 
-        const reply = await ReplyCommentModel.create({
+        await ReplyCommentModel.create({
             content,
             user: (req as AuthenticatedRequest).user._id,
             replyTo: id,
         });
 
-        SuccessResponse(res, 201, { reply });
+        SuccessResponse(res, 201, { message: "reply created successfully" });
     } catch (err) {
         next(err);
     }
@@ -71,14 +71,14 @@ export const answer = async (req: Request<RequestParamsWithID, {}, ReplyCommentS
         const { id } = req.params;
         const { content } = req.body;
 
-        const reply = await ReplyCommentModel.create({
+        await ReplyCommentModel.create({
             content,
             user: (req as AuthenticatedRequest).user._id,
             status: STATUS.ACCEPTED,
             replyTo: id,
         });
 
-        SuccessResponse(res, 201, { reply });
+        SuccessResponse(res, 201, { message: "reply answer created successfully" });
     } catch (err) {
         next(err);
     }
@@ -116,7 +116,7 @@ export const accept = async (req: Request<RequestParamsWithID, {}, {}, ActionsQu
                 throw new NotFoundException("comment not found");
             }
 
-            SuccessResponse(res, 200, { comment });
+            SuccessResponse(res, 200, { message: "comment accepted successfully" });
         }
     } catch (err) {
         next(err);
@@ -155,7 +155,7 @@ export const reject = async (req: Request<RequestParamsWithID, {}, {}, ActionsQu
                 throw new NotFoundException("comment not found");
             }
 
-            SuccessResponse(res, 200, { comment });
+            SuccessResponse(res, 200, { message: "comment rejected successfully" });
         }
     } catch (err) {
         next(err);
@@ -178,7 +178,7 @@ export const pin = async (req: Request<RequestParamsWithID>, res: Response, next
             throw new NotFoundException("comment not found");
         }
 
-        SuccessResponse(res, 200, { comment });
+        SuccessResponse(res, 200, { message: "comment pinned successfully" });
     } catch (err) {
         next(err);
     }
@@ -200,7 +200,7 @@ export const unpin = async (req: Request<RequestParamsWithID>, res: Response, ne
             throw new NotFoundException("comment not found");
         }
 
-        SuccessResponse(res, 200, { comment });
+        SuccessResponse(res, 200, { message: "comment unpinned successfully" });
     } catch (err) {
         next(err);
     }

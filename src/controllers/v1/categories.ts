@@ -9,6 +9,7 @@ import { RequestParamsWithID } from "@/types/request.types";
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
+import { message } from "./questions";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllCategoriesQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -33,13 +34,13 @@ export const create = async (req: Request<{}, {}, CreateCategorySchemaType>, res
     try {
         const { title, caption, ref } = req.body;
 
-        const category = await CategoryModel.create({
+        await CategoryModel.create({
             title,
             caption,
             ref,
         });
 
-        SuccessResponse(res, 201, { category });
+        SuccessResponse(res, 201, { message: "category created successfully" });
     } catch (err) {
         next(err);
     }
@@ -62,7 +63,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCategor
             throw new NotFoundException("category not found");
         }
 
-        SuccessResponse(res, 200, { category });
+        SuccessResponse(res, 200, { message: "category updated successfully" });
     } catch (err) {
         next(err);
     }
