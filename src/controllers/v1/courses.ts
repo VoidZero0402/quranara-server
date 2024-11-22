@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import CourseModel from "@/models/Course";
 import CommentModel from "@/models/Comment";
 import TopicModel from "@/models/Topic";
+import CourseUserModel from "@/models/CourseUser";
 
 import { SORTING } from "@/constants/courses";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
@@ -16,7 +17,7 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { decreaseCoursesUnique, getCoursesUnique } from "@/utils/metadata";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createPaginationData } from "@/utils/funcs";
+import { createPaginationData, getUser } from "@/utils/funcs";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -180,16 +181,40 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
     }
 };
 
-export const getTopics = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+export const getTopics = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
+        const { slug } = req.params;
 
-        const topics = await TopicModel.find({ course: id })
+        const course = await CourseModel.findOne({ slug }, "_id");
+
+        if (!course) {
+            throw new NotFoundException("course not found");
+        }
+
+        const topics = await TopicModel.find({ course: course._id })
             .populate({ path: "sessions", select: "title slug order time isPublic", options: { sort: { order: 1 } } })
             .sort({ order: 1 })
             .lean();
 
         SuccessResponse(res, 200, { topics });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const checkAccess = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const user = await getUser(req);
+
+        if (!user) {
+            SuccessResponse(res, 200, { hasAccess: false });
+            return;
+        }
+
+        const existCourseUser = await CourseUserModel.exists({ course: id, user: user._id });
+
+        SuccessResponse(res, 200, { hasAccess: Boolean(existCourseUser) });
     } catch (err) {
         next(err);
     }

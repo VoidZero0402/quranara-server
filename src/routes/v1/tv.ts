@@ -1,5 +1,5 @@
 import express from "express";
-import { getAll, create, search, getOne, update, getRelated, getComments, like, dislike, save, unsave, shown, unshown } from "@/controllers/v1/tv";
+import { getAll, create, search, getOne, update, getRelated, getComments, getDetails, like, dislike, save, unsave, shown, unshown } from "@/controllers/v1/tv";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
@@ -15,6 +15,7 @@ router.get("/search", validator("query", SearchTvsQuerySchame), search);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
+router.get("/:id/details", getDetails);
 
 router.use(auth);
 

@@ -47,6 +47,10 @@ export const getQuestion = async (req: Request<RequestParamsWithID>, res: Respon
             throw new NotFoundException("question not found");
         }
 
+        if (question.user !== (req as AuthenticatedRequest).user._id) {
+            throw new ForbiddenException("you can not acccess this question");
+        }
+
         SuccessResponse(res, 200, { question });
     } catch (err) {
         next(err);

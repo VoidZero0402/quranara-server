@@ -100,16 +100,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         await increaseViews("tv", tv._id.toString());
 
-        const user = await getUser(req);
-
-        if (user) {
-            const isLiked = await TvLikeModel.exists({ user: user._id, tv: tv._id });
-            const isSaved = await TvSaveModel.exists({ user: user._id, tv: tv._id });
-
-            SuccessResponse(res, 200, { blog: { ...tv.toObject(), isLiked: Boolean(isLiked), isSaved: Boolean(isSaved) } });
-        } else {
-            SuccessResponse(res, 200, { tv });
-        }
+        SuccessResponse(res, 200, { tv });
     } catch (err) {
         next(err);
     }
@@ -204,6 +195,25 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
         const commentsCount = await CommentModel.countDocuments(filters);
 
         SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getDetails = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const user = await getUser(req);
+
+        if (!user) {
+            SuccessResponse(res, 200, { isLiked: false, isSaved: false, disabled: true });
+            return;
+        }
+
+        const isLiked = await TvLikeModel.exists({ user: user._id, tv: id });
+        const isSaved = await TvSaveModel.exists({ user: user._id, tv: id });
+
+        SuccessResponse(res, 200, { isLiked: Boolean(isLiked), isSaved: Boolean(isSaved), disabled: false });
     } catch (err) {
         next(err);
     }

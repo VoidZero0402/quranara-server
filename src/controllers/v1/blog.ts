@@ -108,16 +108,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         await increaseViews("blog", blog._id.toString());
 
-        const user = await getUser(req);
-
-        if (user) {
-            const isLiked = await BlogLikeModel.exists({ user: user._id, blog: blog._id });
-            const isSaved = await BlogSaveModel.exists({ user: user._id, blog: blog._id });
-
-            SuccessResponse(res, 200, { blog: { ...blog.toObject(), isLiked: Boolean(isLiked), isSaved: Boolean(isSaved) } });
-        } else {
-            SuccessResponse(res, 200, { blog });
-        }
+        SuccessResponse(res, 200, { blog });
     } catch (err) {
         next(err);
     }
@@ -181,6 +172,22 @@ export const getAllDrafted = async (req: Request<{}, {}, {}, PaginationQuerySche
     }
 };
 
+export const getOneDrafted = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const draftedBlog = await BlogModel.findOne({ _id: id, status: STATUS.DRAFTED });
+
+        if (!draftedBlog) {
+            throw new NotFoundException("drafted blog not found");
+        }
+
+        SuccessResponse(res, 200, { blog: draftedBlog });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
@@ -238,6 +245,25 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
         const commentsCount = await CommentModel.countDocuments(filters);
 
         SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getDetails = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const user = await getUser(req);
+
+        if (!user) {
+            SuccessResponse(res, 200, { isLiked: false, isSaved: false, disabled: true });
+            return;
+        }
+
+        const isLiked = await BlogLikeModel.exists({ user: user._id, blog: id });
+        const isSaved = await BlogSaveModel.exists({ user: user._id, blog: id });
+
+        SuccessResponse(res, 200, { isLiked: Boolean(isLiked), isSaved: Boolean(isSaved), disabled: false });
     } catch (err) {
         next(err);
     }
