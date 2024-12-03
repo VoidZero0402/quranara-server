@@ -4,6 +4,7 @@ export const STATUS = {
 } as const;
 
 export const SORTING = {
+    DEFAULT: "default",
     NEWEST: "newest",
     OLDEST: "oldest",
     POPULAR: "popular",

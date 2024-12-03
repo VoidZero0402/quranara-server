@@ -13,6 +13,8 @@ export interface IUser {
     role: Role;
     password: string;
     profile?: string;
+    age?: number;
+    city?: string;
 }
 
 export type UserDocument = Document<unknown, {}, IUser> &
@@ -66,6 +68,14 @@ const schema = new Schema<IUser, UserModel, IUserMethods>({
     },
 
     profile: String,
+
+    age: {
+        type: Number,
+        min: 2,
+        max: 100,
+    },
+
+    city: String,
 });
 
 schema.pre("save", async function (next) {

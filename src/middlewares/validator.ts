@@ -12,7 +12,7 @@ const validator = (type: Type, schema: ZodSchema) => async (req: Request, res: R
         const { success, error, data } = await schema.safeParseAsync(raw);
 
         if (!success) {
-            throw new BadRequestException(`Request ${type} is not valid!`, { errors: error.flatten().fieldErrors });
+            throw new BadRequestException(`Request ${type} is not valid!`, { errors: error.flatten().fieldErrors, key: "validation" });
         }
 
         if (type !== "params") {

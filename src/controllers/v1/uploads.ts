@@ -14,7 +14,7 @@ export const getPreSignedUrl = async (req: Request<{}, {}, {}, GetPreSignedUrlQu
 
         const url = await generatePreSignedUrl(uniqueKey, type);
 
-        SuccessResponse(res, 200, { url });
+        SuccessResponse(res, 200, { url, filename: uniqueKey });
     } catch (err) {
         next(err);
     }

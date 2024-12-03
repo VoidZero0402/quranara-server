@@ -100,7 +100,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title");
+        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title").populate("relatedCourses", "title slug description status metadata.rating metadata.students");
 
         if (!blog) {
             throw new NotFoundException("blog not found");

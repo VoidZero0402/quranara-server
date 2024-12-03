@@ -18,6 +18,10 @@ export const getUser = async (req: Request) => {
 
     const payload = await verifySession(session);
 
+    if (!payload) {
+        return null;
+    }
+
     const user = (await UserModel.findById(payload._id, "-__v")) as UserDocument;
 
     return user;

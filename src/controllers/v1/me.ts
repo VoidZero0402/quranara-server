@@ -22,7 +22,7 @@ import { updateUserCredentialCookie } from "@/utils/auth";
 export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType>, res: Response, next: NextFunction) => {
     try {
         const user = (req as AuthenticatedRequest).user;
-        const { fullname, username, profile } = req.body;
+        const { fullname, username, profile, age, city } = req.body;
 
         const updatedUser = await UserModel.findByIdAndUpdate(
             user._id,
@@ -31,6 +31,8 @@ export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType
                     fullname,
                     username,
                     profile,
+                    age,
+                    city
                 },
             },
             { new: true }

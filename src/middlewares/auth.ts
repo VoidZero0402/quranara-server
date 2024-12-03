@@ -16,6 +16,10 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
 
         const payload = await verifySession(session);
 
+        if (!payload) {
+            throw new UnauthorizedException("session is expired");
+        }
+
         const user = (await UserModel.findById(payload._id, "-__v")) as UserDocument;
 
         if (!user) {

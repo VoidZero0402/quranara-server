@@ -30,7 +30,7 @@ export type CreateBlogQuerySchemaType = z.infer<typeof CreateBlogQuerySchema>;
 
 export const GetAllBlogsQuerySchema = PaginationQuerySchema.extend({
     category: validateObjectId.or(z.array(validateObjectId)).optional(),
-    sort: z.enum([SORTING.NEWEST, SORTING.OLDEST, SORTING.POPULAR]).default(SORTING.NEWEST),
+    sort: z.enum([SORTING.DEFAULT, SORTING.NEWEST, SORTING.OLDEST, SORTING.POPULAR]).default(SORTING.NEWEST),
     search: z.string().min(1, { message: "search should not be empty" }).optional(),
 });
 

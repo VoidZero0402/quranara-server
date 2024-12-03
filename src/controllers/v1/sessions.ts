@@ -112,7 +112,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const session = await SessionModel.findOne({ slug });
+        const session = await SessionModel.findOne({ slug }).populate("topic").populate("course", "title slug cover");
 
         if (!session) {
             throw new NotFoundException("session not found");

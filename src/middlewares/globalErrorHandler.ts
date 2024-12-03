@@ -11,7 +11,7 @@ const globalErrorHandler = (err: Error | Exception, req: Request, res: Response,
     }
 
     if (err instanceof mongoose.Error.CastError) {
-        ErrorResponse(res, 400, "objectId is not valid");
+        ErrorResponse(res, 400, "objectId is not valid", { key: "cast-error" });
         return;
     }
 

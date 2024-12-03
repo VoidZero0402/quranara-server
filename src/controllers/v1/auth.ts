@@ -21,7 +21,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
         const { expired, matched } = await verifyOtp(phone, otp);
 
         if (expired) {
-            throw new ConflictException("otp is expired");
+            throw new ConflictException("otp is expired", { key: "otp" });
         }
 
         if (!matched) {
@@ -50,7 +50,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
         SuccessResponse(res, 201, { message: "signup was successful", username: user.username });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
-            next(new ConflictException("user already exists with this information", { field: Object.keys((err as any).keyPattern)[0] }));
+            next(new ConflictException("user already exists with this information", { field: Object.keys((err as any).keyPattern)[0], key: "duplicate" }));
         }
         next(err);
     }

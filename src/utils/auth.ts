@@ -3,7 +3,6 @@ import * as jose from "jose";
 
 import redis from "@/config/redis";
 import { UserDocument } from "@/models/User";
-import { UnauthorizedException } from "./exceptions";
 
 const TWO_MINUTES_IN_SECONDS = 120;
 
@@ -60,12 +59,12 @@ export const createSession = async (payload: jose.JWTPayload): Promise<string> =
     return jwt;
 };
 
-export const verifySession = async (session: string): Promise<jose.JWTPayload> => {
-    try {
+export const verifySession = async (session: string): Promise<jose.JWTPayload | null> => {
+    try {        
         const { payload } = await jose.jwtVerify(session, JWT_SECRET);
         return payload;
-    } catch (err) {
-        throw new UnauthorizedException("session is expired");
+    } catch {
+        return null;
     }
 };
 
@@ -97,7 +96,7 @@ export const setCredentialCookies = (res: Response, credentials: { session: stri
     Reflect.deleteProperty(credentials.user, "password");
     Reflect.deleteProperty(credentials.user, "_id");
 
-    res.cookie("_user", credentials.user.toObject(), {
+    res.cookie("_user", JSON.stringify(credentials.user.toObject()), {
         ...cookiesOption,
         expires,
     });
@@ -111,7 +110,7 @@ export const updateUserCredentialCookie = async (res: Response, user: UserDocume
     Reflect.deleteProperty(user, "password");
     Reflect.deleteProperty(user, "_id");
 
-    res.cookie("_user", user.toObject(), {
+    res.cookie("_user", JSON.stringify(user.toObject()), {
         ...cookiesOption,
         expires,
     });

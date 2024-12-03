@@ -30,15 +30,20 @@ import pollRouter from "@/routes/v1/polls";
 
 const app = express();
 
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
-app.use(secure);
+// app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
+app.use(cors({ origin: "http://localhost:3000", methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization", "x-quranara-secret"], credentials: true }));
+// app.use(secure);
 app.use(helmet());
+
+app.use(async (req, res, next) => {
+    await new Promise((res) => setTimeout(res, 1000));
+    next();
+});
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
-app.use(parseQuery)
+app.use(parseQuery);
 
 app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);
