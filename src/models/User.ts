@@ -34,49 +34,52 @@ interface IUserMethods {
 
 type UserModel = Model<IUser, {}, IUserMethods>;
 
-const schema = new Schema<IUser, UserModel, IUserMethods>({
-    phone: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        index: true,
+const schema = new Schema<IUser, UserModel, IUserMethods>(
+    {
+        phone: {
+            type: String,
+            required: true,
+            unique: true,
+            trim: true,
+            index: true,
+        },
+
+        fullname: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        username: {
+            type: String,
+            required: true,
+            trim: true,
+            unique: true,
+        },
+
+        role: {
+            type: String,
+            enum: [ROLES.MANAGER, ROLES.ADMIN, ROLES.USER],
+            default: ROLES.USER,
+        },
+
+        password: {
+            type: String,
+            required: true,
+        },
+
+        profile: String,
+
+        age: {
+            type: Number,
+            min: 2,
+            max: 100,
+        },
+
+        city: String,
     },
-
-    fullname: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-
-    username: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true,
-    },
-
-    role: {
-        type: String,
-        enum: [ROLES.MANAGER, ROLES.ADMIN, ROLES.USER],
-        default: ROLES.USER,
-    },
-
-    password: {
-        type: String,
-        required: true,
-    },
-
-    profile: String,
-
-    age: {
-        type: Number,
-        min: 2,
-        max: 100,
-    },
-
-    city: String,
-});
+    { timestamps: { createdAt: true, updatedAt: false } }
+);
 
 schema.pre("save", async function (next) {
     this.password = await hash(this.password, 12);

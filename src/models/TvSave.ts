@@ -23,7 +23,7 @@ const schema = new Schema<ITvSave>({
     },
 });
 
-schema.index({ blog: 1, user: 1 }, { unique: true });
+schema.index({ tv: 1, user: 1 }, { unique: true });
 
 const TvSaveModel = model<ITvSave>("TvSave", schema);
 
