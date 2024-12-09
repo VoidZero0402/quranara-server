@@ -7,6 +7,7 @@ import TicketModel from "@/models/Ticket";
 import QuestionModel from "@/models/Question";
 import BlogModel from "@/models/Blog";
 import TvModel from "@/models/Tv";
+import NotificationUserModel from "@/models/NotificationUser";
 
 import { STATUS as TICKET_STATUS } from "@/constants/tickets";
 import { STATUS as QUESTION_STATUS } from "@/constants/questions";
@@ -29,6 +30,10 @@ const updateQuestionsStatus = async (date: Date) => {
             $set: { status: QUESTION_STATUS.COLSED },
         }
     );
+};
+
+const cleanUpNotifications = async (date: Date) => {
+    await NotificationUserModel.deleteMany({ isSeen: true, updatedAt: { $lte: date } });
 };
 
 const saveViewsIntoMongoDB = async (entity: string, Model: Model<any>): Promise<void> => {
@@ -59,9 +64,14 @@ cron.schedule("0 0 * * *", async () => {
         const threeDaysAgo = new Date();
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
         await updateTicketsStatus(threeDaysAgo);
 
         await updateQuestionsStatus(threeDaysAgo);
+
+        await cleanUpNotifications(sevenDaysAgo);
 
         await saveViewsIntoMongoDB("blog", BlogModel);
 

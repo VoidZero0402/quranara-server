@@ -19,10 +19,10 @@ router.patch("/:id/seen", seen);
 
 router.use(roleGuard(ROLES.MANAGER));
 
-router.get("/all", getAllNotifications);
-router.post("send-all", sendAll);
-router.post("send-course-registers", sendCourseRegisters);
-router.post("send-one", sendOne);
-router.route("/:id").put(update).delete(remove);
+router.get("/all", validator("query", PaginationQuerySchema), getAllNotifications);
+router.post("/send-all", validator("body", SendAllNotificationSchema), sendAll);
+router.post("/send-course-registers", validator("body", SendCourseRegistersNotificationSchema), sendCourseRegisters);
+router.post("/send-one", validator("body", SendOneNotificationSchema), sendOne);
+router.route("/:id").put(validator("body", CreateNotificationSchema), update).delete(remove);
 
 export default router;

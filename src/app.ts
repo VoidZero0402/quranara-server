@@ -27,6 +27,7 @@ import ordersRouter from "@/routes/v1/orders";
 import newsRouter from "@/routes/v1/news";
 import uiRouter from "@/routes/v1/ui";
 import pollRouter from "@/routes/v1/polls";
+import notificationsRouter from "@/routes/v1/notifications";
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use("/api/orders", ordersRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/ui", uiRouter);
 app.use("/api/poll", pollRouter);
+app.use("/api/notifications", notificationsRouter);
 
 app.use(notFound);
 app.use(globalErrorHandler);

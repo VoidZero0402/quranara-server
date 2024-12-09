@@ -26,9 +26,10 @@ const schema = new Schema<INotificationUser>(
         isSeen: {
             type: Boolean,
             default: false,
+            index: true,
         },
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 const NotificationUserModel = model<INotificationUser>("NotificationUser", schema);
