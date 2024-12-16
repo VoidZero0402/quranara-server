@@ -2,14 +2,13 @@ import { NextFunction, Request, Response } from "express";
 
 import CategoryModel from "@/models/Category";
 
-import { CreateCategorySchemaType, UpdateCategorySchemaType, GetAllCategoriesQuerySchemaType } from "@/validators/categories";
+import { CreateCategorySchemaType, UpdateCategorySchemaType, GetAllCategoriesQuerySchemaType, GetCategoriesSummarySchemaType } from "@/validators/categories";
 
 import { RequestParamsWithID } from "@/types/request.types";
 
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
-import { message } from "./questions";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllCategoriesQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -25,6 +24,18 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCategoriesQuerySchem
         const categoriesCount = await CategoryModel.countDocuments(filters);
 
         SuccessResponse(res, 200, { categories, pagination: createPaginationData(page, limit, categoriesCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAllSummary = async (req: Request<{}, {}, {}, GetCategoriesSummarySchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { ref } = req.query;
+
+        const categories = await CategoryModel.find({ ref }, "title").lean();
+
+        SuccessResponse(res, 200, { categories })
     } catch (err) {
         next(err);
     }

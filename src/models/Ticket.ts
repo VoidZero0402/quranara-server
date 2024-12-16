@@ -8,6 +8,7 @@ export type TicketType = (typeof TYPE)[keyof typeof TYPE];
 
 export interface ITicket {
     title: string;
+    description: string;
     user: PopulatedDoc<Document<ObjectId> & IUser>;
     course?: PopulatedDoc<Document<ObjectId> & ICourse>;
     status: Status;
@@ -18,6 +19,12 @@ export interface ITicket {
 const schema = new Schema<ITicket>(
     {
         title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        description: {
             type: String,
             required: true,
             trim: true,

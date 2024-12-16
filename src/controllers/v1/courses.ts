@@ -41,6 +41,16 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchemaTy
     }
 };
 
+export const getAllSummary = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const courses = await CourseModel.find({}, "title").lean();
+
+        SuccessResponse(res, 200, { courses });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { title, slug, cover, description, price, status, shown, introduction, metadata } = req.body;

@@ -32,7 +32,7 @@ export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType
                     username,
                     profile,
                     age,
-                    city
+                    city,
                 },
             },
             { new: true }
@@ -83,6 +83,26 @@ export const getCourses = async (req: Request, res: Response, next: NextFunction
         const courseUsers = await CourseUserModel.find({ user: (req as AuthenticatedRequest).user._id })
             .sort({ _id: -1 })
             .populate("course", "metadata.students metadata.rating title slug description cover price discount status")
+            .lean();
+
+        const courses = [];
+
+        for (const courseUser of courseUsers) {
+            courses.push(courseUser.course);
+        }
+
+        SuccessResponse(res, 200, { courses });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getLastCourses = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const courseUsers = await CourseUserModel.find({ user: (req as AuthenticatedRequest).user._id })
+            .sort({ _id: -1 })
+            .populate("course", "metadata.students metadata.rating title slug description cover price discount status")
+            .limit(4)
             .lean();
 
         const courses = [];

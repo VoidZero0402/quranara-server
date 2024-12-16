@@ -19,3 +19,7 @@ export const GetAllCategoriesQuerySchema = PaginationQuerySchema.extend({
 });
 
 export type GetAllCategoriesQuerySchemaType = z.infer<typeof GetAllCategoriesQuerySchema>;
+
+export const GetCategoriesSummarySchema = GetAllCategoriesQuerySchema.pick({ ref: true });
+
+export type GetCategoriesSummarySchemaType = z.infer<typeof GetCategoriesSummarySchema>;

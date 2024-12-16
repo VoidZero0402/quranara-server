@@ -14,7 +14,6 @@ const schema = new Schema<ICategory>({
         type: String,
         required: true,
         trim: true,
-        index: true,
     },
 
     caption: {

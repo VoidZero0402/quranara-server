@@ -27,7 +27,7 @@ export const SigningCourseSchema = z.object({
 export type SigningCourseSchemaType = z.infer<typeof SigningCourseSchema>;
 
 export const GetAllUsersQuerySchema = PaginationQuerySchema.extend({
-    search: z.string({ message: "search is required" }).min(1, { message: "search should not be empty" }).trim(),
+    search: z.string({ message: "search is required" }).min(1, { message: "search should not be empty" }).trim().optional(),
 });
 
 export type GetAllUsersQuerySchemaType = z.infer<typeof GetAllUsersQuerySchema>;

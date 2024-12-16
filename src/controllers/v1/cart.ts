@@ -22,14 +22,19 @@ export const getCart = async (req: Request, res: Response, next: NextFunction) =
         }
 
         let totalPrice = 0;
-        let discount = 0;
+        let discount = {
+            price: 0,
+            percent: 0,
+        };
 
         for (const course of cart.items) {
             totalPrice += course.price;
-            discount += (course.price * course.discount) / 100;
+            discount.price += (course.price * course.discount) / 100;
         }
 
-        const payableAmount = totalPrice - discount;
+        discount.percent = Math.floor((discount.price * 100) / totalPrice);
+
+        const payableAmount = totalPrice - discount.price;
 
         SuccessResponse(res, 200, { cart: { ...cart, totalPrice, discount, payableAmount } });
     } catch (err) {

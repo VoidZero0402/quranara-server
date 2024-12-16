@@ -1,5 +1,5 @@
 import express from "express";
-import { getUnseenNotifications, getSeenNotifications, getNotificationsCount, getAllNotifications, sendAll, sendCourseRegisters, sendOne, update, remove, seen } from "@/controllers/v1/notifications";
+import { getUnseenNotifications, getLastUnseenNotification, getSeenNotifications, getNotificationsCount, getAllNotifications, sendAll, sendCourseRegisters, sendOne, update, remove, seen } from "@/controllers/v1/notifications";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
@@ -13,6 +13,7 @@ const router = express.Router();
 router.use(auth);
 
 router.get("/unseen", getUnseenNotifications);
+router.get("/unseen/last", getLastUnseenNotification);
 router.get("/seen", getSeenNotifications);
 router.get("/count", getNotificationsCount);
 router.patch("/:id/seen", seen);

@@ -25,7 +25,8 @@ export const getQuestions = async (req: Request<{}, {}, {}, PaginationQuerySchem
             .sort({ _id: -1 })
             .populate("session", "slug")
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .lean();
 
         const questionsCount = await QuestionModel.countDocuments(filters);
 
@@ -99,6 +100,7 @@ export const create = async (req: Request<{}, {}, CreateQuestionSchemaType>, res
             session: session._id,
             user: user._id,
             title,
+            question: content
         });
 
         await QuestionMessageModel.create({

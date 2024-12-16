@@ -40,15 +40,15 @@ export const getTicket = async (req: Request<RequestParamsWithID>, res: Response
         const { id } = req.params;
 
         const ticket = await TicketModel.findById(id)
-            .populate({ path: "messages", populate: { path: "user" } })
+            .populate({ path: "messages", populate: { path: "user", select: "username role profile" } })
             .populate("course", "title")
             .lean();
 
         if (!ticket) {
             throw new NotFoundException("ticket not found");
         }
-
-        if (ticket.user !== (req as AuthenticatedRequest).user._id) {
+        
+        if (ticket.user?.toString() !== (req as AuthenticatedRequest).user._id.toString()) {
             throw new ForbiddenException("you can not access this ticket");
         }
 
@@ -86,6 +86,7 @@ export const create = async (req: Request<{}, {}, CreateTicketSchemaType>, res: 
 
         const ticket = await TicketModel.create({
             title,
+            description: content,
             course,
             type,
             user: (req as AuthenticatedRequest).user._id,

@@ -1,5 +1,5 @@
 import express from "express";
-import { updateAccount, changePassword, getCourses, getSavedBlog, getSavedTv, getLikedBlog, getLikedTv } from "@/controllers/v1/me";
+import { updateAccount, changePassword, getCourses, getLastCourses, getSavedBlog, getSavedTv, getLikedBlog, getLikedTv } from "@/controllers/v1/me";
 
 import validator from "@/middlewares/validator";
 import { UpdateAccountSchema, ChangePasswordSchema } from "@/validators/me";
@@ -13,6 +13,7 @@ router.use(auth);
 router.put("/update-account", validator("body", UpdateAccountSchema), updateAccount);
 router.patch("/change-password", validator("body", ChangePasswordSchema), changePassword);
 router.get("/courses", getCourses)
+router.get("/last-courses", getLastCourses)
 router.get("/saved-blog", validator("query", PaginationQuerySchema), getSavedBlog);
 router.get("/saved-tv", validator("query", PaginationQuerySchema), getSavedTv);
 router.get("/liked-blog", validator("query", PaginationQuerySchema), getLikedBlog);

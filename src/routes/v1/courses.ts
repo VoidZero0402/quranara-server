@@ -1,5 +1,5 @@
 import express from "express";
-import { getAll, create, search, getOne, update, getComments, getTopics, checkAccess, shown, unshown, updateOrder, applyDiscountAll, removeDiscountAll } from "@/controllers/v1/courses";
+import { getAll, getAllSummary, create, search, getOne, update, getComments, getTopics, checkAccess, shown, unshown, updateOrder, applyDiscountAll, removeDiscountAll } from "@/controllers/v1/courses";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
@@ -20,6 +20,7 @@ router.get("/:id/check-access", checkAccess);
 router.use(auth, roleGuard(ROLES.MANAGER));
 
 router.post("/", validator("body", CreateCourseSchema), create);
+router.get("/summary", getAllSummary);
 router.put("/:id", validator("body", UpdateCourseSchema), update);
 router.patch("/:id/shown", shown);
 router.patch("/:id/unshown", unshown);

@@ -26,6 +26,7 @@ import meRouter from "@/routes/v1/me";
 import ordersRouter from "@/routes/v1/orders";
 import newsRouter from "@/routes/v1/news";
 import uiRouter from "@/routes/v1/ui";
+import usersRouter from "@/routes/v1/users";
 import pollRouter from "@/routes/v1/polls";
 import notificationsRouter from "@/routes/v1/notifications";
 
@@ -37,7 +38,7 @@ app.use(cors({ origin: "http://localhost:3000", methods: ["GET", "POST", "PUT", 
 app.use(helmet());
 
 app.use(async (req, res, next) => {
-    await new Promise((res) => setTimeout(res, 1000));
+    await new Promise((res) => setTimeout(res, 500));
     next();
 });
 
@@ -63,6 +64,7 @@ app.use("/api/me", meRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/ui", uiRouter);
+app.use("/api/users", usersRouter);
 app.use("/api/poll", pollRouter);
 app.use("/api/notifications", notificationsRouter);
 

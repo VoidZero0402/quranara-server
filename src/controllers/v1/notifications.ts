@@ -10,7 +10,7 @@ import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { TYPES } from "@/constants/notifications";
 
-import { AuthenticatedRequest, RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
+import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
@@ -25,10 +25,25 @@ export const getUnseenNotifications = async (req: Request, res: Response, next: 
         const notifications = [];
 
         for (const notificationUser of notificationUsers) {
-            notifications.push(notificationUser.notification);
+            notifications.push({ ...notificationUser.notification, identifier: notificationUser._id });
         }
 
         SuccessResponse(res, 200, { notifications });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getLastUnseenNotification = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const notificationUser = await NotificationUserModel.findOne({ user: (req as AuthenticatedRequest).user._id, isSeen: false })
+            .sort({ _id: -1 })
+            .populate("notification")
+            .lean();
+
+        const notification = notificationUser?.notification && { ...notificationUser.notification, identifier: notificationUser._id };
+
+        SuccessResponse(res, 200, { notification });
     } catch (err) {
         next(err);
     }
@@ -43,7 +58,7 @@ export const getSeenNotifications = async (req: Request, res: Response, next: Ne
         const notifications = [];
 
         for (const notificationUser of notificationUsers) {
-            notifications.push(notificationUser.notification);
+            notifications.push({ ...notificationUser.notification, identifier: notificationUser._id });
         }
 
         SuccessResponse(res, 200, { notifications });

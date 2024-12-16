@@ -14,7 +14,7 @@ import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
-import { ForbiddenException, NotFoundException, BadRequestException } from "@/utils/exceptions";
+import { ForbiddenException, NotFoundException, BadRequestException, ConflictException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { getOrdersUnique } from "@/utils/metadata";
 import { createPaginationData } from "@/utils/funcs";
@@ -26,13 +26,13 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
         let discount = 0;
 
         if (discountCode) {
-            const discountDoc = await DiscountModel.findOne({ code: discountCode });
+            const discountDoc = await DiscountModel.findOneAndUpdate({ code: discountCode }, { $inc: { uses: 1 } });
 
             if (!discountDoc) {
                 throw new NotFoundException("discount not found");
             }
 
-            if (discountDoc.uses === discountDoc.max) {
+            if (discountDoc.uses > discountDoc.max) {
                 throw new ForbiddenException("discount max uses is executed");
             }
 
@@ -45,6 +45,10 @@ export const create = async (req: Request<{}, {}, CreateOrderSchemaType>, res: R
 
         if (!cart) {
             throw new NotFoundException("cart not found");
+        }
+
+        if (!cart.items.length) {
+            throw new ConflictException("cart is empty");
         }
 
         let payableAmount = 0;
@@ -89,7 +93,7 @@ export const verify = async (req: Request<{}, {}, {}, { Authority: string }>, re
         try {
             const payment = await verifyPayment({ authority, amount: order.amount });
 
-            if (payment.code !== 100 && payment.code !== 101) {
+            if (!payment.isVerified) {
                 throw new BadRequestException("payment verification failed");
             }
 
@@ -102,7 +106,9 @@ export const verify = async (req: Request<{}, {}, {}, { Authority: string }>, re
             order.status = STATUS.SUCCESSFUL;
 
             await order.save();
-        } finally {
+
+            res.redirect(`${process.env.FRONTEND_URL}/orders/${order.shortId}`);
+        } catch {
             res.redirect(`${process.env.FRONTEND_URL}/orders/${order.shortId}`);
         }
     } catch (err) {
@@ -135,13 +141,13 @@ export const getOne = async (req: Request<RequestParamsWithID>, res: Response, n
         const user = (req as AuthenticatedRequest).user;
         const { id } = req.params;
 
-        const order = await OrderModel.findOne({ shortId: id }).populate<{ items: PopulatedCourse[] }>("items", "title description slug cover price discount").lean();
+        const order = await OrderModel.findOne({ shortId: id }).populate("user", "username").populate<{ items: PopulatedCourse[] }>("items", "title description slug cover price discount").lean();
 
         if (!order) {
             throw new NotFoundException("order not found");
         }
 
-        if (!(order.user === user._id)) {
+        if (order.user?._id.toString() !== user._id.toString()) {
             throw new ForbiddenException("you can not access to this route");
         }
 
