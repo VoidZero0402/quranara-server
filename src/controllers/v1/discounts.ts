@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import DiscountModel from "@/models/Discount";
 
-import { CreateDiscountSchemaType, AvailableDiscountQuerySchemaType } from "@/validators/discounts";
+import { CreateDiscountSchemaType, UpdateDiscountSchemaType, AvailableDiscountQuerySchemaType } from "@/validators/discounts";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
@@ -54,12 +54,12 @@ export const create = async (req: Request<{}, {}, CreateDiscountSchemaType>, res
     }
 };
 
-export const update = async (req: Request<RequestParamsWithID, {}, CreateDiscountSchemaType>, res: Response, next: NextFunction) => {
+export const update = async (req: Request<RequestParamsWithID, {}, UpdateDiscountSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const { code, percent, course, max, expireAtTime } = req.body;
 
-        const expireAt = new Date(expireAtTime);
+        const expireAt = expireAtTime && new Date(expireAtTime);
 
         const discount = await DiscountModel.findByIdAndUpdate(
             id,
@@ -69,7 +69,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateDiscoun
                     percent,
                     course,
                     max,
-                    expireAt,
+                    ...(expireAt && { expireAt }),
                 },
             },
             { new: true }

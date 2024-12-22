@@ -11,6 +11,12 @@ export const CreateDiscountSchema = z.object({
 
 export type CreateDiscountSchemaType = z.infer<typeof CreateDiscountSchema>;
 
+export const UpdateDiscountSchema = CreateDiscountSchema.extend({
+    expireAtTime: z.number({ required_error: "expireAtTime is required" }).optional(),
+});
+
+export type UpdateDiscountSchemaType = z.infer<typeof UpdateDiscountSchema>;
+
 export const AvailableDiscountQuerySchema = CreateDiscountSchema.pick({ code: true, course: true });
 
 export type AvailableDiscountQuerySchemaType = z.infer<typeof AvailableDiscountQuerySchema>;

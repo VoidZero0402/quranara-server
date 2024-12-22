@@ -1,11 +1,12 @@
 import { Schema, model, PopulatedDoc, Document, ObjectId } from "mongoose";
-import { STATUS } from "@/constants/comments";
+import { STATUS, REPLIES_STATUS } from "@/constants/comments";
 import { ICourse } from "./Course";
 import { IBlog } from "./Blog";
 import { ITv } from "./Tv";
 import { IUser } from "./User";
 
 export type Status = (typeof STATUS)[keyof typeof STATUS];
+export type RepliesStatus = (typeof REPLIES_STATUS)[keyof typeof REPLIES_STATUS];
 
 export interface IComment {
     content: string;
@@ -15,6 +16,7 @@ export interface IComment {
     user: PopulatedDoc<Document<ObjectId> & IUser>;
     pin: boolean;
     status: Status;
+    repliesStatus: RepliesStatus;
 }
 
 const schema = new Schema<IComment>(
@@ -61,17 +63,29 @@ const schema = new Schema<IComment>(
             default: STATUS.PENDING,
             index: true,
         },
+
+        repliesStatus: {
+            type: String,
+            enum: [REPLIES_STATUS.NONE, REPLIES_STATUS.PENDING],
+            default: REPLIES_STATUS.NONE,
+        },
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
-schema.index({ createdAt: -1 });
+schema.index({ updatedAt: -1 });
 
 schema.virtual("replies", {
     ref: "ReplyComment",
     localField: "_id",
     foreignField: "replyTo",
     match: { status: STATUS.ACCEPTED },
+});
+
+schema.virtual("_replies", {
+    ref: "ReplyComment",
+    localField: "_id",
+    foreignField: "replyTo",
 });
 
 const CommentModel = model<IComment>("Comment", schema);

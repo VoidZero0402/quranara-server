@@ -9,26 +9,29 @@ export interface ICategory {
     ref: Ref;
 }
 
-const schema = new Schema<ICategory>({
-    title: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+const schema = new Schema<ICategory>(
+    {
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
 
-    caption: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+        caption: {
+            type: String,
+            required: true,
+            trim: true,
+        },
 
-    ref: {
-        type: String,
-        enum: [REFERENCES.BLOG, REFERENCES.TV, REFERENCES.COURSE],
-        default: REFERENCES.BLOG,
-        index: true,
+        ref: {
+            type: String,
+            enum: [REFERENCES.BLOG, REFERENCES.TV, REFERENCES.COURSE, REFERENCES.DISCUSSION],
+            default: REFERENCES.BLOG,
+            index: true,
+        },
     },
-});
+    { timestamps: { createdAt: true, updatedAt: false } }
+);
 
 schema.index({ title: 1, ref: 1 }, { unique: true });
 

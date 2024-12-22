@@ -6,15 +6,16 @@ import { CreateCategorySchemaType, UpdateCategorySchemaType, GetAllCategoriesQue
 
 import { RequestParamsWithID } from "@/types/request.types";
 
-import { NotFoundException } from "@/utils/exceptions";
+import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
+import { isDuplicateKeyError } from "@/utils/errors";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllCategoriesQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { page, limit, ref } = req.query;
 
-        const filters = { ref };
+        const filters = { ...(ref && { ref }) };
 
         const categories = await CategoryModel.find(filters)
             .sort({ _id: -1 })
@@ -35,7 +36,7 @@ export const getAllSummary = async (req: Request<{}, {}, {}, GetCategoriesSummar
 
         const categories = await CategoryModel.find({ ref }, "title").lean();
 
-        SuccessResponse(res, 200, { categories })
+        SuccessResponse(res, 200, { categories });
     } catch (err) {
         next(err);
     }
@@ -53,6 +54,9 @@ export const create = async (req: Request<{}, {}, CreateCategorySchemaType>, res
 
         SuccessResponse(res, 201, { message: "category created successfully" });
     } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("category already exists with this information"));
+        }
         next(err);
     }
 };

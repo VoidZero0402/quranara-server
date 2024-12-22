@@ -60,7 +60,7 @@ export const createSession = async (payload: jose.JWTPayload): Promise<string> =
 };
 
 export const verifySession = async (session: string): Promise<jose.JWTPayload | null> => {
-    try {        
+    try {
         const { payload } = await jose.jwtVerify(session, JWT_SECRET);
         return payload;
     } catch {
@@ -93,24 +93,28 @@ export const setCredentialCookies = (res: Response, credentials: { session: stri
         expires,
     });
 
-    Reflect.deleteProperty(credentials.user, "password");
-    Reflect.deleteProperty(credentials.user, "_id");
+    const user = credentials.user.toObject();
 
-    res.cookie("_user", JSON.stringify(credentials.user.toObject()), {
+    Reflect.deleteProperty(user, "_id");
+    Reflect.deleteProperty(user, "password");
+
+    res.cookie("_user", JSON.stringify(user), {
         ...cookiesOption,
         expires,
     });
 };
 
-export const updateUserCredentialCookie = async (res: Response, user: UserDocument): Promise<void> => {
-    const ttl = await redis.ttl(getRedisSessionPattern(user._id.toString()));
+export const updateUserCredentialCookie = async (res: Response, userDoc: UserDocument): Promise<void> => {
+    const ttl = await redis.ttl(getRedisSessionPattern(userDoc._id.toString()));
 
     const expires = new Date(Date.now() + ttl * 1000);
 
-    Reflect.deleteProperty(user, "password");
-    Reflect.deleteProperty(user, "_id");
+    const user = userDoc.toObject();
 
-    res.cookie("_user", JSON.stringify(user.toObject()), {
+    Reflect.deleteProperty(user, "_id");
+    Reflect.deleteProperty(user, "password");
+
+    res.cookie("_user", JSON.stringify(user), {
         ...cookiesOption,
         expires,
     });

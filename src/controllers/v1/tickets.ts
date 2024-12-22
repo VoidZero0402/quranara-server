@@ -47,7 +47,7 @@ export const getTicket = async (req: Request<RequestParamsWithID>, res: Response
         if (!ticket) {
             throw new NotFoundException("ticket not found");
         }
-        
+
         if (ticket.user?.toString() !== (req as AuthenticatedRequest).user._id.toString()) {
             throw new ForbiddenException("you can not access this ticket");
         }
@@ -62,13 +62,15 @@ export const getAllTickets = async (req: Request<{}, {}, {}, GetAllTicketsQueryS
     try {
         const { page, limit, status } = req.query;
 
-        const filters = { status };
+        const filters = { ...(status && { status }) };
 
         const tickets = await TicketModel.find(filters)
             .sort({ _id: -1 })
-            .populate("course", "title")
+            .populate({ path: "messages", populate: { path: "user", select: "username role profile" } })
+            .populate("user", "username")
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .lean();
 
         const ticketsCount = await TicketModel.countDocuments(filters);
 

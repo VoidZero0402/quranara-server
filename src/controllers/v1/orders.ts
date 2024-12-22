@@ -124,6 +124,8 @@ export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>
 
         const orders = await OrderModel.find(filters)
             .sort({ createdAt: -1 })
+            .populate("user", "phone username profile")
+            .populate("items", "title description price")
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();

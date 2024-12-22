@@ -3,15 +3,50 @@ import { NextFunction, Request, Response } from "express";
 import NewsModel from "@/models/News";
 
 import { CreateNewsSchemaType, UpdateNewsSchemaType } from "@/validators/news";
+import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { RequestParamsWithID } from "@/types/request.types";
 
 import { NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
+import { createPaginationData } from "@/utils/funcs";
 
-export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit } = req.query;
+
+        const news = await NewsModel.find({})
+            .sort({ _id: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const newsCount = await NewsModel.countDocuments({});
+
+        SuccessResponse(res, 200, { news, pagination: createPaginationData(page, limit, newsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAllShown = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const news = await NewsModel.find({ shown: true }).sort({ createdAt: -1 }).lean();
+        SuccessResponse(res, 200, { news });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getOne = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const news = await NewsModel.findById(id).lean();
+
+        if (!news) {
+            throw new NotFoundException("new not found!");
+        }
+
         SuccessResponse(res, 200, { news });
     } catch (err) {
         next(err);

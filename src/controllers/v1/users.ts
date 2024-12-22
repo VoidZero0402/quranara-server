@@ -7,16 +7,17 @@ import CourseUserModel from "@/models/CourseUser";
 import { CreateUserSchemaType, BanUserSchemaType, UnbanUserSchemaType, SigningCourseSchemaType, GetAllUsersQuerySchemaType } from "@/validators/users";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
-import { ForbiddenException, NotFoundException } from "@/utils/exceptions";
+import { ConflictException, ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
 import { removeSessionFromRedis } from "@/utils/auth";
+import { isDuplicateKeyError } from "@/utils/errors";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllUsersQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { page, limit, search } = req.query;
 
-        const filters = { ...(search && { fullname: { $regex: search } }) };
+        const filters = { isBanned: false, ...(search && { $or: [{ fullname: { $regex: search } }, { username: { $regex: search } }] }) };
 
         const users = await UserModel.find(filters)
             .sort({ _id: -1 })
@@ -45,6 +46,9 @@ export const create = async (req: Request<{}, {}, CreateUserSchemaType>, res: Re
 
         SuccessResponse(res, 201, { message: "user created successfully" });
     } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("user already exists with this information"));
+        }
         next(err);
     }
 };
@@ -71,7 +75,7 @@ export const banUser = async (req: Request<{}, {}, BanUserSchemaType>, res: Resp
     try {
         const { user: userId } = req.body;
 
-        const user = await UserModel.findById(userId);
+        const user = await UserModel.findByIdAndUpdate(userId, { $set: { isBanned: true } });
 
         if (!user) {
             throw new NotFoundException("user not found");
@@ -91,13 +95,17 @@ export const unbanUser = async (req: Request<{}, {}, UnbanUserSchemaType>, res: 
     try {
         const { ban: banId } = req.body;
 
-        const ban = await BanModel.findByIdAndDelete(banId);
+        const ban = await BanModel.findById(banId);
 
         if (!ban) {
             throw new NotFoundException("ban not found");
         }
 
-        SuccessResponse(res, 201, { message: "user unbanned successfully" });
+        await UserModel.updateOne({ _id: ban.user }, { $set: { isBanned: false } });
+
+        await ban.deleteOne();
+
+        SuccessResponse(res, 200, { message: "user unbanned successfully" });
     } catch (err) {
         next(err);
     }
@@ -111,6 +119,9 @@ export const signingCourse = async (req: Request<{}, {}, SigningCourseSchemaType
 
         SuccessResponse(res, 201, { message: "course signed successfully" });
     } catch (err) {
+        if (isDuplicateKeyError(err as Error)) {
+            next(new ConflictException("user already has this course"));
+        }
         next(err);
     }
 };

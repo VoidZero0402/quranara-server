@@ -37,7 +37,6 @@ export const getUnseenNotifications = async (req: Request, res: Response, next: 
 export const getLastUnseenNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const notificationUser = await NotificationUserModel.findOne({ user: (req as AuthenticatedRequest).user._id, isSeen: false })
-            .sort({ _id: -1 })
             .populate("notification")
             .lean();
 
@@ -52,6 +51,7 @@ export const getLastUnseenNotification = async (req: Request, res: Response, nex
 export const getSeenNotifications = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const notificationUsers = await NotificationUserModel.find({ user: (req as AuthenticatedRequest).user._id, isSeen: true })
+            .sort({ _id: -1 })
             .populate("notification")
             .lean();
 

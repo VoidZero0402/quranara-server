@@ -15,6 +15,7 @@ export interface IUser {
     profile?: string;
     age?: number;
     city?: string;
+    isBanned: boolean;
 }
 
 export type UserDocument = Document<unknown, {}, IUser> &
@@ -77,6 +78,12 @@ const schema = new Schema<IUser, UserModel, IUserMethods>(
         },
 
         city: String,
+
+        isBanned: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
     },
     { timestamps: { createdAt: true, updatedAt: false } }
 );

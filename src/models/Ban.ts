@@ -18,7 +18,7 @@ const schema = new Schema<IBan>({
         ref: "User",
         required: true,
     },
-});
+}, { timestamps: { createdAt: true, updatedAt: false } });
 
 const BanModel = model<IBan>("Ban", schema);
 

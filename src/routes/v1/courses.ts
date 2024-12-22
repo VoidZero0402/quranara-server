@@ -12,6 +12,7 @@ const router = express.Router();
 
 router.get("/", validator("query", GetAllCoursesQuerySchema), getAll);
 router.get("/search", validator("query", SearchCoursesQuerySchame), search);
+router.get("/summary", getAllSummary);
 router.get("/:slug", getOne);
 router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
 router.get("/:slug/topics", getTopics);
@@ -20,7 +21,6 @@ router.get("/:id/check-access", checkAccess);
 router.use(auth, roleGuard(ROLES.MANAGER));
 
 router.post("/", validator("body", CreateCourseSchema), create);
-router.get("/summary", getAllSummary);
 router.put("/:id", validator("body", UpdateCourseSchema), update);
 router.patch("/:id/shown", shown);
 router.patch("/:id/unshown", unshown);

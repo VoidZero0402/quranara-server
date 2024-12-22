@@ -1,5 +1,14 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
+import { PaginationQuerySchema } from "./pagination";
+import { SOURCE, STATUS } from "@/constants/comments";
+
+export const GetAllCommentsQuerySchema = PaginationQuerySchema.extend({
+    source: z.enum([SOURCE.COURSE, SOURCE.BLOG, SOURCE.TV], { message: "source only can be COURSE, Blog or TV" }),
+    status: z.enum([STATUS.ACCEPTED, STATUS.PENDING, STATUS.REJECTED], { message: "status only can be ACCEPTED, PENDING or REJECTED" }).optional(),
+});
+
+export type GetAllCommentsQuerySchemaType = z.infer<typeof GetAllCommentsQuerySchema>;
 
 export const CreateCommentSchema = z
     .object({
