@@ -7,6 +7,7 @@ import CourseUserModel from "@/models/CourseUser";
 
 import { SORTING } from "@/constants/courses";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
+import { ROLES } from "@/constants/roles";
 
 import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType, DiscountAllSchemaType } from "@/validators/courses";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
@@ -24,6 +25,28 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchemaTy
         const { page, limit, sort, search } = req.query;
 
         const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }) };
+
+        const sorting = { ...(sort === SORTING.DEFAULT && { order: 1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
+
+        const courses = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
+            .sort(sorting)
+            .populate("teacher", "username profile")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const coursesCount = await CourseModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { courses, pagination: createPaginationData(page, limit, coursesCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAllRaw = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, sort, search } = req.query;
+
+        const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }) };
 
         const sorting = { ...(sort === SORTING.DEFAULT && { order: 1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
 
@@ -126,6 +149,22 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     }
 };
 
+export const getOneById = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const course = await CourseModel.findById(id).populate("teacher", "username profile");
+
+        if (!course) {
+            throw new NotFoundException("course not found");
+        }
+
+        SuccessResponse(res, 200, { course });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
@@ -219,6 +258,11 @@ export const checkAccess = async (req: Request<RequestParamsWithID>, res: Respon
 
         if (!user) {
             SuccessResponse(res, 200, { hasAccess: false });
+            return;
+        }
+
+        if (user.role === ROLES.MANAGER) {
+            SuccessResponse(res, 200, { hasAccess: true });
             return;
         }
 

@@ -62,12 +62,15 @@ export const getAllQuestions = async (req: Request<{}, {}, {}, GetAllQuestionsQu
     try {
         const { page, limit, status } = req.query;
 
-        const filters = { status };
+        const filters = { ...(status && { status }) };
 
         const questions = await QuestionModel.find(filters)
             .sort({ _id: -1 })
+            .populate("user", "username")
+            .populate({ path: "messages", populate: { path: "user", select: "username profile role" } })
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .lean();
 
         const questionsCount = await QuestionModel.countDocuments(filters);
 
@@ -100,7 +103,7 @@ export const create = async (req: Request<{}, {}, CreateQuestionSchemaType>, res
             session: session._id,
             user: user._id,
             title,
-            question: content
+            question: content,
         });
 
         await QuestionMessageModel.create({
@@ -185,13 +188,9 @@ export const close = async (req: Request<RequestParamsWithID>, res: Response, ne
     try {
         const { id } = req.params;
 
-        const question = await QuestionModel.findByIdAndUpdate(
-            id,
-            {
-                $set: { status: STATUS.COLSED },
-            },
-            { new: true }
-        );
+        const question = await QuestionModel.findByIdAndUpdate(id, {
+            $set: { status: STATUS.COLSED },
+        });
 
         if (!question) {
             throw new NotFoundException("question not found");

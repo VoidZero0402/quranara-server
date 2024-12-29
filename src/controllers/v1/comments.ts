@@ -23,7 +23,7 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCommentsQuerySchemaT
 
         const comments = await CommentModel.find(filters)
             .sort({ updatedAt: -1 })
-            .populate(field, "title")
+            .populate(field, "title slug")
             .populate("user", "username profile")
             .populate({ path: "_replies", populate: { path: "user", select: "username profile" } })
             .skip((page - 1) * limit)

@@ -42,6 +42,29 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaType
     }
 };
 
+export const getAllRaw = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, category, sort, search } = req.query;
+
+        const filters = { status: STATUS.PUBLISHED, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
+
+        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
+
+        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
+            .sort(sorting)
+            .populate("author", "username profile")
+            .populate("category", "title")
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const blogsCount = await BlogModel.countDocuments(filters);
+
+        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const create = async (req: Request<{}, {}, CreateBlogSchemaType, CreateBlogQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { status } = req.query;
@@ -113,6 +136,23 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
         next(err);
     }
 };
+
+export const getOneById = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const blog = await BlogModel.findOne({ _id: id, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title");
+
+        if (!blog) {
+            throw new NotFoundException("blog not found");
+        }
+
+        SuccessResponse(res, 200, { blog });
+    } catch (err) {
+        next(err);
+    }
+};
+
 
 export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType, CreateBlogQuerySchemaType>, res: Response, next: NextFunction) => {
     try {

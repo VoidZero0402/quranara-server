@@ -13,12 +13,12 @@ const router = express.Router();
 router.use(auth);
 
 router.route("/").get(validator("query", PaginationQuerySchema), getQuestions).post(validator("body", CreateQuestionSchema), create);
+router.get("/all", roleGuard(ROLES.MANAGER), validator("query", GetAllQuestionsQuerySchema), getAllQuestions);
 router.get("/:id", getQuestion);
 router.post("/:id/message", validator("body", CreateQuestionSchema), message);
 
 router.use(roleGuard(ROLES.MANAGER));
 
-router.get("/all", validator("query", GetAllQuestionsQuerySchema), getAllQuestions);
 router.post("/:id/answer", validator("body", AnswerQuestionSchema), answer);
 router.patch("/:id/close", close);
 

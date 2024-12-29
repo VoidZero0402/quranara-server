@@ -82,7 +82,7 @@ const schema = new Schema<ITv>(
             index: true,
         },
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 const TvModel = model<ITv>("Tv", schema);

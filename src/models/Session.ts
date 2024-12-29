@@ -13,7 +13,7 @@ export interface ISession {
     video: string;
     attached?: string;
     time: string;
-    seconds: number
+    seconds: number;
 }
 
 export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
@@ -24,62 +24,65 @@ interface ISessionMethods {
 
 type SessionModel = Model<ISession, {}, ISessionMethods>;
 
-const schema = new Schema<ISession, SessionModel, ISessionMethods>({
-    title: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+const schema = new Schema<ISession, SessionModel, ISessionMethods>(
+    {
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
 
-    slug: {
-        type: String,
-        required: true,
-        unique: true,
-        index: true,
-    },
+        slug: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+        },
 
-    course: {
-        type: Schema.Types.ObjectId,
-        ref: "Course",
-        required: true,
-        index: true,
-    },
+        course: {
+            type: Schema.Types.ObjectId,
+            ref: "Course",
+            required: true,
+            index: true,
+        },
 
-    topic: {
-        type: Schema.Types.ObjectId,
-        ref: "Topic",
-        required: true,
-        index: true,
-    },
+        topic: {
+            type: Schema.Types.ObjectId,
+            ref: "Topic",
+            required: true,
+            index: true,
+        },
 
-    order: {
-        type: Number,
-        required: true,
-        index: true,
-    },
+        order: {
+            type: Number,
+            required: true,
+            index: true,
+        },
 
-    isPublic: {
-        type: Boolean,
-        default: false,
-    },
+        isPublic: {
+            type: Boolean,
+            default: false,
+        },
 
-    video: {
-        type: String,
-        required: true,
-    },
+        video: {
+            type: String,
+            required: true,
+        },
 
-    time: {
-        type: String,
-        required: true,
-    },
+        time: {
+            type: String,
+            required: true,
+        },
 
-    seconds: {
-        type: Number,
-        required: true,
-    },
+        seconds: {
+            type: Number,
+            required: true,
+        },
 
-    attached: String,
-});
+        attached: String,
+    },
+    { timestamps: true }
+);
 
 schema.method("hasUserAccess", async function hasUserAccess(userId) {
     if (!this.isPublic) {

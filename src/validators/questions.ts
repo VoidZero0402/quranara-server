@@ -22,7 +22,7 @@ export const AnswerQuestionSchema = CreateQuestionSchema.omit({ session: true })
 export type AnswerQuestionSchemaType = z.infer<typeof AnswerQuestionSchema>;
 
 export const GetAllQuestionsQuerySchema = PaginationQuerySchema.extend({
-    status: z.enum([STATUS.ACTIVE, STATUS.SLEEP, STATUS.COLSED], { message: "status only can be ACTIVE, SLEEP or CLOSED" }).default(STATUS.ACTIVE),
+    status: z.enum([STATUS.ACTIVE, STATUS.SLEEP, STATUS.COLSED], { message: "status only can be ACTIVE, SLEEP or CLOSED" }).optional(),
 });
 
 export type GetAllQuestionsQuerySchemaType = z.infer<typeof GetAllQuestionsQuerySchema>;

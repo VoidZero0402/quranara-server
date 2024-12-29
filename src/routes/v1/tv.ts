@@ -1,5 +1,5 @@
 import express from "express";
-import { getAll, create, search, getOne, update, getRelated, getComments, getDetails, like, dislike, save, unsave, shown, unshown } from "@/controllers/v1/tv";
+import { getAll, getAllRaw, create, search, getOne, getOneById, update, getRelated, getComments, getDetails, like, dislike, save, unsave, shown, unshown } from "@/controllers/v1/tv";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
@@ -11,6 +11,7 @@ import roleGuard from "@/middlewares/roleGuard";
 const router = express.Router();
 
 router.get("/", validator("query", GetAllTvsQuerySchema), getAll);
+router.get("/all", auth, roleGuard(ROLES.MANAGER), validator("query", GetAllTvsQuerySchema), getAllRaw);
 router.get("/search", validator("query", SearchTvsQuerySchame), search);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
@@ -28,6 +29,7 @@ router.use(roleGuard(ROLES.MANAGER));
 
 router.post("/", validator("body", CreateTvSchema), create);
 router.route("/:id").put(validator("body", CreateTvSchema), update);
+router.get("/:id/raw", getOneById);
 router.patch("/:id/shown", shown);
 router.patch("/:id/unshown", unshown);
 

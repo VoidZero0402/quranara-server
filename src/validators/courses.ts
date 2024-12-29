@@ -1,11 +1,15 @@
 import { z } from "zod";
-import { slugRefiner } from "@/utils/validations";
 import { PaginationQuerySchema } from "./pagination";
 import { SORTING, STATUS } from "@/constants/courses";
 
-const CreateCourseObject = z.object({
+export const CreateCourseSchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
-    slug: z.string().min(1, { message: "slug should not be empty" }).max(255, { message: "slug should be has less than 25 character" }).trim().optional(),
+    slug: z
+        .string()
+        .min(1, { message: "slug should not be empty" })
+        .max(255, { message: "slug should be has less than 255 character" })
+        .trim()
+        .transform((value) => value.replaceAll(" ", "-")),
     description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(1024, { message: "description should be has less than 1024 character" }).trim(),
     cover: z
         .string({ required_error: "cover is required" })
@@ -37,11 +41,9 @@ const CreateCourseObject = z.object({
     ),
 });
 
-export const CreateCourseSchema = CreateCourseObject.refine(slugRefiner);
-
 export type CreateCourseSchemaType = z.infer<typeof CreateCourseSchema> & { slug: string };
 
-export const UpdateCourseSchema = CreateCourseObject.omit({ shown: true }).extend({
+export const UpdateCourseSchema = CreateCourseSchema.omit({ shown: true }).extend({
     discount: z.number().min(0, { message: "discount can not be negative" }).max(100, { message: "discount can not be over han 100" }).optional(),
 });
 

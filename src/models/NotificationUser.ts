@@ -8,29 +8,26 @@ export interface INotificationUser {
     isSeen: boolean;
 }
 
-const schema = new Schema<INotificationUser>(
-    {
-        user: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-            index: true,
-        },
-
-        notification: {
-            type: Schema.Types.ObjectId,
-            ref: "Notification",
-            required: true,
-        },
-
-        isSeen: {
-            type: Boolean,
-            default: false,
-            index: true,
-        },
+const schema = new Schema<INotificationUser>({
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
     },
-    { timestamps: true }
-);
+
+    notification: {
+        type: Schema.Types.ObjectId,
+        ref: "Notification",
+        required: true,
+    },
+
+    isSeen: {
+        type: Boolean,
+        default: false,
+        index: true,
+    },
+});
 
 const NotificationUserModel = model<INotificationUser>("NotificationUser", schema);
 

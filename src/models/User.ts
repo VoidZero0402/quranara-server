@@ -85,7 +85,7 @@ const schema = new Schema<IUser, UserModel, IUserMethods>(
             index: true,
         },
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 schema.pre("save", async function (next) {

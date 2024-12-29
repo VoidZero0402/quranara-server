@@ -46,7 +46,7 @@ const schema = new Schema<INews>(
             default: true,
         },
     },
-    { timestamps: { createdAt: true } }
+    { timestamps: { createdAt: true, updatedAt: false } }
 );
 
 schema.index({ createdAt: -1 });

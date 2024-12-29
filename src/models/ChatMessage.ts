@@ -55,7 +55,7 @@ const schema = new Schema<IChatMessage>(
             default: new Date(Date.now() + 259_200_000),
         },
     },
-    { timestamps: { createdAt: true } }
+    { timestamps: { createdAt: true, updatedAt: false } }
 );
 
 schema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
