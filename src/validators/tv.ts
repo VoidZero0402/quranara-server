@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sanitizeHtmlContent, validateObjectId } from "@/utils/validations";
+import { validateObjectId } from "@/utils/validations";
 import { SORTING } from "@/constants/tv";
 import { PaginationQuerySchema } from "./pagination";
 
@@ -16,15 +16,15 @@ export const CreateTvSchema = z.object({
     cover: z
         .string({ required_error: "cover is required" })
         .min(1, { message: "video should not be empty" })
-        .regex(/^[\w-]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
+        .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
         .trim(),
     video: z
         .string({ required_error: "video is required" })
         .min(1, { message: "video should not be empty" })
-        .regex(/^[\w-]+\.(mp4)$/, { message: "video has invalid signiture" })
+        .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
         .trim(),
     attached: z.string().min(1, { message: "attached should not be empty" }).trim().optional(),
-    content: z.string().min(1, { message: "content should not be empty" }).trim().transform(sanitizeHtmlContent).optional(),
+    content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
     shown: z.boolean({ required_error: "shown is required" }),
 });
 

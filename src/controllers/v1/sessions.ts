@@ -57,19 +57,15 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateSession
         const { id } = req.params;
         const { title, isPublic, video, time, attached } = req.body;
 
-        await SessionModel.findByIdAndUpdate(
-            id,
-            {
-                $set: {
-                    title,
-                    isPublic,
-                    video,
-                    time,
-                    attached,
-                },
+        await SessionModel.findByIdAndUpdate(id, {
+            $set: {
+                title,
+                isPublic,
+                video,
+                time,
+                attached,
             },
-            { new: true }
-        );
+        });
 
         SuccessResponse(res, 200, { message: "session updated successfully" });
     } catch (err) {

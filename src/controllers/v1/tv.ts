@@ -17,7 +17,6 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData, getUser } from "@/utils/funcs";
-import { increaseViews } from "@/utils/metadata";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllTvsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -121,8 +120,6 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
         if (!tv) {
             throw new NotFoundException("tv not found");
         }
-
-        await increaseViews("tv", tv._id.toString());
 
         SuccessResponse(res, 200, { tv });
     } catch (err) {

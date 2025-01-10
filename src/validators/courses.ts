@@ -14,7 +14,7 @@ export const CreateCourseSchema = z.object({
     cover: z
         .string({ required_error: "cover is required" })
         .min(1, { message: "cover should not be empty" })
-        .regex(/^[\w-]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
+        .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
         .trim(),
     price: z.number({ required_error: "price is required" }).min(0, { message: "price can not be negative" }),
     status: z.enum([STATUS.PRE_SELL, STATUS.ON_PERFORMING, STATUS.REACHED], { message: "status only can be PRE_SELL, ON_PERFORMING or REACHED" }).default(STATUS.PRE_SELL),
@@ -24,7 +24,7 @@ export const CreateCourseSchema = z.object({
             video: z
                 .string()
                 .min(1, { message: "video should not be empty" })
-                .regex(/^[\w-]+\.(mp4)$/, { message: "video has invalid signiture" })
+                .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
                 .trim()
                 .optional(),
             content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
@@ -43,7 +43,7 @@ export const CreateCourseSchema = z.object({
 
 export type CreateCourseSchemaType = z.infer<typeof CreateCourseSchema> & { slug: string };
 
-export const UpdateCourseSchema = CreateCourseSchema.omit({ shown: true }).extend({
+export const UpdateCourseSchema = CreateCourseSchema.extend({
     discount: z.number().min(0, { message: "discount can not be negative" }).max(100, { message: "discount can not be over han 100" }).optional(),
 });
 

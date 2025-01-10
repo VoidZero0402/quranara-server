@@ -50,7 +50,7 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchem
 
         const sorting = { ...(sort === SORTING.DEFAULT && { order: 1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
 
-        const courses = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
+        const courses = await CourseModel.find(filters, "-introduction")
             .sort(sorting)
             .populate("teacher", "username profile")
             .skip((page - 1) * limit)
@@ -139,7 +139,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         const time = await course.getTime();
 
-        const defredTime = time[0] + time[1] ? 1 : 0;
+        const defredTime = time[0] + (time[1] ? 1 : 0);
 
         const progress = course.getProgress(defredTime);
 
@@ -168,25 +168,22 @@ export const getOneById = async (req: Request<RequestParamsWithID>, res: Respons
 export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { title, slug, description, cover, price, status, introduction, metadata, discount } = req.body;
+        const { title, slug, description, cover, price, status, introduction, metadata, shown, discount } = req.body;
 
-        const updatedCourse = await CourseModel.findByIdAndUpdate(
-            id,
-            {
-                $set: {
-                    title,
-                    slug,
-                    description,
-                    cover,
-                    price,
-                    status,
-                    introduction,
-                    metadata,
-                    ...(discount && { discount }),
-                },
+        const updatedCourse = await CourseModel.findByIdAndUpdate(id, {
+            $set: {
+                title,
+                slug,
+                description,
+                cover,
+                price,
+                status,
+                introduction,
+                metadata,
+                shown,
+                ...(discount && { discount }),
             },
-            { new: true }
-        );
+        });
 
         if (!updatedCourse) {
             throw new NotFoundException("course not found");
@@ -241,7 +238,7 @@ export const getTopics = async (req: Request<RequestParamsWithSlug>, res: Respon
         }
 
         const topics = await TopicModel.find({ course: course._id })
-            .populate({ path: "sessions", select: "title slug order time isPublic", options: { sort: { order: 1 } } })
+            .populate({ path: "sessions", select: "title slug order time isPublic video attached", options: { sort: { order: 1 } } })
             .sort({ order: 1 })
             .lean();
 
@@ -343,7 +340,7 @@ export const applyDiscountAll = async (req: Request<{}, {}, DiscountAllSchemaTyp
     try {
         const { discount } = req.body;
 
-        await CourseModel.updateMany({ shown: true }, { $set: { discount } });
+        await CourseModel.updateMany({ shown: true, discount: { $ne: 100 } }, { $set: { discount } });
 
         SuccessResponse(res, 200, { message: "discount apply successfully" });
     } catch (err) {
@@ -353,7 +350,7 @@ export const applyDiscountAll = async (req: Request<{}, {}, DiscountAllSchemaTyp
 
 export const removeDiscountAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await CourseModel.updateMany({}, { $set: { discount: 0 } });
+        await CourseModel.updateMany({ discount: { $ne: 100 } }, { $set: { discount: 0 } });
 
         SuccessResponse(res, 200, { message: "discount remove successfully" });
     } catch (err) {

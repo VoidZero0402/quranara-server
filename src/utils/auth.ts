@@ -26,16 +26,8 @@ export const getOtp = async (phone: string): Promise<{ expired: boolean; ttl: nu
     return { expired: false, ttl };
 };
 
-export const generateOtp = async (phone: string): Promise<string> => {
-    let otp = "";
-
-    for (let i = 0; i < 5; i++) {
-        otp += Math.floor(Math.random() * (10 - 0) + 0);
-    }
-
+export const saveOtpInRedis = async (phone: string, otp: string): Promise<void> => {
     await redis.set(getRedisOtpPattern(phone), otp, "EX", TWO_MINUTES_IN_SECONDS);
-
-    return otp;
 };
 
 export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: boolean; matched: boolean }> => {

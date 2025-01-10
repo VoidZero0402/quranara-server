@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sanitizeHtmlContent, validateObjectId } from "@/utils/validations";
+import { validateObjectId } from "@/utils/validations";
 import { SORTING, STATUS } from "@/constants/blog";
 import { PaginationQuerySchema } from "./pagination";
 
@@ -16,20 +16,14 @@ export const CreateBlogSchema = z.object({
     cover: z
         .string({ required_error: "cover is required" })
         .min(1, { message: "cover should not be empty" })
-        .regex(/^[\w-]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
+        .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
         .trim(),
-    content: z.string({ required_error: "content is required" }).min(1, { message: "content should not be empty" }).trim().transform(sanitizeHtmlContent),
-    tags: z.array(z.string().min(1, { message: "tag should not be empty" }), { invalid_type_error: "tags should be an array od string" }).optional(),
+    content: z.string({ required_error: "content is required" }).min(1, { message: "content should not be empty" }).trim(),
     relatedCourses: z.array(validateObjectId, { message: "relatedCourses should be an array of course ObjectIds" }).optional(),
+    shown: z.boolean({ required_error: "shown is required" }),
 });
 
 export type CreateBlogSchemaType = z.infer<typeof CreateBlogSchema> & { slug: string };
-
-export const CreateBlogQuerySchema = z.object({
-    status: z.enum([STATUS.DRAFTED, STATUS.PUBLISHED], { message: "status only can be DRAFTED or PUBLISHED" }).default(STATUS.DRAFTED),
-});
-
-export type CreateBlogQuerySchemaType = z.infer<typeof CreateBlogQuerySchema>;
 
 export const GetAllBlogsQuerySchema = PaginationQuerySchema.extend({
     category: validateObjectId.or(z.array(validateObjectId)).optional(),

@@ -5,10 +5,10 @@ import CommentModel from "@/models/Comment";
 import BlogLikeModel from "@/models/BlogLike";
 import BlogSaveModel from "@/models/BlogSave";
 
-import { STATUS, SORTING } from "@/constants/blog";
+import { SORTING } from "@/constants/blog";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 
-import { CreateBlogSchemaType, CreateBlogQuerySchemaType, GetAllBlogsQuerySchemaType, SearchBlogsQuerySchameType } from "@/validators/blog";
+import { CreateBlogSchemaType, GetAllBlogsQuerySchemaType, SearchBlogsQuerySchameType } from "@/validators/blog";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { AuthenticatedRequest, RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
@@ -17,13 +17,13 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
 import { createPaginationData, getUser } from "@/utils/funcs";
-import { decreaseBlogsUnique, getBlogUnique, increaseViews } from "@/utils/metadata";
+import { decreaseBlogsUnique, getBlogUnique } from "@/utils/metadata";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaType>, res: Response, next: NextFunction) => {
     try {
         const { page, limit, category, sort, search } = req.query;
 
-        const filters = { shown: true, status: STATUS.PUBLISHED, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
+        const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
         const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
@@ -46,11 +46,11 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaT
     try {
         const { page, limit, category, sort, search } = req.query;
 
-        const filters = { status: STATUS.PUBLISHED, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
+        const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
         const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
-        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
+        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -status")
             .sort(sorting)
             .populate("author", "username profile")
             .populate("category", "title")
@@ -65,12 +65,12 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaT
     }
 };
 
-export const create = async (req: Request<{}, {}, CreateBlogSchemaType, CreateBlogQuerySchemaType>, res: Response, next: NextFunction) => {
+export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { status } = req.query;
-        const { title, description, slug, category, cover, content, tags, relatedCourses } = req.body;
+        const { title, description, slug, category, cover, content, relatedCourses, shown } = req.body;
 
         const timeToRead = Math.ceil(content.length / 1500);
+
         const shortId = await getBlogUnique();
 
         await BlogModel.create({
@@ -81,11 +81,10 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType, CreateBl
             author: (req as AuthenticatedRequest).user._id,
             cover,
             content,
-            status,
-            tags,
             timeToRead,
             relatedCourses,
             shortId,
+            shown,
         });
 
         SuccessResponse(res, 201, { message: "blog created successfully" });
@@ -102,7 +101,7 @@ export const search = async (req: Request<{}, {}, {}, SearchBlogsQuerySchameType
     try {
         const { page, limit, q } = req.query;
 
-        const filters = { shown: true, status: STATUS.PUBLISHED, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
+        const filters = { shown: true, $or: [{ title: { $regex: q } }, { description: { $regex: q } }] };
 
         const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
             .sort({ _id: -1 })
@@ -123,13 +122,11 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title").populate("relatedCourses", "title slug description status metadata.rating metadata.students");
+        const blog = await BlogModel.findOne({ slug, shown: true }).populate("author", "username profile").populate("category", "title").populate("relatedCourses", "title slug description status metadata.rating metadata.students");
 
         if (!blog) {
             throw new NotFoundException("blog not found");
         }
-
-        await increaseViews("blog", blog._id.toString());
 
         SuccessResponse(res, 200, { blog });
     } catch (err) {
@@ -141,7 +138,7 @@ export const getOneById = async (req: Request<RequestParamsWithID>, res: Respons
     try {
         const { id } = req.params;
 
-        const blog = await BlogModel.findOne({ _id: id, status: STATUS.PUBLISHED }).populate("author", "username profile").populate("category", "title");
+        const blog = await BlogModel.findById(id).populate("author", "username profile").populate("category", "title");
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -153,33 +150,26 @@ export const getOneById = async (req: Request<RequestParamsWithID>, res: Respons
     }
 };
 
-
-export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType, CreateBlogQuerySchemaType>, res: Response, next: NextFunction) => {
+export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { status } = req.query;
-        const { title, description, slug, category, cover, content, tags, relatedCourses } = req.body;
+        const { title, description, slug, category, cover, content, relatedCourses, shown } = req.body;
 
         const timeToRead = Math.ceil(content.length / 1500);
 
-        const blog = await BlogModel.findByIdAndUpdate(
-            id,
-            {
-                $set: {
-                    title,
-                    description,
-                    slug,
-                    category,
-                    cover,
-                    content,
-                    status,
-                    tags,
-                    timeToRead,
-                    relatedCourses,
-                },
+        const blog = await BlogModel.findByIdAndUpdate(id, {
+            $set: {
+                title,
+                description,
+                slug,
+                category,
+                cover,
+                content,
+                timeToRead,
+                relatedCourses,
+                shown,
             },
-            { new: true }
-        );
+        });
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -191,48 +181,11 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSch
     }
 };
 
-export const getAllDrafted = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>, res: Response, next: NextFunction) => {
-    try {
-        const { page, limit } = req.query;
-
-        const filters = { status: STATUS.DRAFTED };
-
-        const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
-            .sort({ _id: -1 })
-            .populate("author", "username profile")
-            .populate("category", "title")
-            .skip((page - 1) * limit)
-            .limit(limit);
-
-        const blogsCount = await BlogModel.countDocuments(filters);
-
-        SuccessResponse(res, 200, { blogs, pagination: createPaginationData(page, limit, blogsCount) });
-    } catch (err) {
-        next(err);
-    }
-};
-
-export const getOneDrafted = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
-    try {
-        const { id } = req.params;
-
-        const draftedBlog = await BlogModel.findOne({ _id: id, status: STATUS.DRAFTED });
-
-        if (!draftedBlog) {
-            throw new NotFoundException("drafted blog not found");
-        }
-
-        SuccessResponse(res, 200, { blog: draftedBlog });
-    } catch (err) {
-        next(err);
-    }
-};
-
 export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Response, next: NextFunction) => {
     try {
         const { slug } = req.params;
 
-        const blog = await BlogModel.findOne({ slug, shown: true, status: STATUS.PUBLISHED }, "_id category tags");
+        const blog = await BlogModel.findOne({ slug, shown: true }, "_id category tags");
 
         if (!blog) {
             throw new NotFoundException("blog not found");
@@ -240,7 +193,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
 
         const aggragation = await BlogModel.aggregate([
             {
-                $match: { shown: true, status: STATUS.PUBLISHED, $or: [{ category: blog.category }, { tags: { $in: blog.tags } }], _id: { $ne: blog._id } },
+                $match: { shown: true, category: blog.category, _id: { $ne: blog._id } },
             },
             {
                 $sample: { size: 4 },

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { Role } from "@/models/User";
 import { AuthenticatedRequest } from "@/types/request.types";
 import { ForbiddenException } from "@/utils/exceptions";

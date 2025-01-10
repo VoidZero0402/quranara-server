@@ -1,9 +1,9 @@
 import express from "express";
-import { getAll, getAllRaw, create, search, getOne, getOneById, update, getRelated, getComments, getDetails, like, dislike, save, unsave, shown, unshown, getAllDrafted, getOneDrafted } from "@/controllers/v1/blog";
+import { getAll, getAllRaw, create, search, getOne, getOneById, update, getRelated, getComments, getDetails, like, dislike, save, unsave, shown, unshown } from "@/controllers/v1/blog";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
-import { CreateBlogSchema, CreateBlogQuerySchema, GetAllBlogsQuerySchema, SearchBlogsQuerySchame } from "@/validators/blog";
+import { CreateBlogSchema, GetAllBlogsQuerySchema, SearchBlogsQuerySchame } from "@/validators/blog";
 import { PaginationQuerySchema } from "@/validators/pagination";
 import auth from "@/middlewares/auth";
 import roleGuard from "@/middlewares/roleGuard";
@@ -27,10 +27,8 @@ router.delete("/:id/unsave", unsave);
 
 router.use(roleGuard(ROLES.MANAGER));
 
-router.post("/", validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), create);
-router.get("/drafted", validator("query", PaginationQuerySchema), getAllDrafted);
-router.get("/drafted/:id", getOneDrafted);
-router.route("/:id").put(validator("query", CreateBlogQuerySchema), validator("body", CreateBlogSchema), update);
+router.post("/", validator("body", CreateBlogSchema), create);
+router.route("/:id").put(validator("body", CreateBlogSchema), update);
 router.get("/:id/raw", getOneById);
 router.patch("/:id/shown", shown);
 router.patch("/:id/unshown", unshown);

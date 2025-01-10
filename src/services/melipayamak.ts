@@ -1,6 +1,11 @@
 import { ServiceUnavailableException } from "@/utils/exceptions";
 
-export const sendOtp = async (phone: string, otp: string): Promise<string> => {
+type SendOtpOutput = Promise<{
+    code: string;
+    status: string;
+}>;
+
+export const sendOtp = async (phone: string): SendOtpOutput => {
     try {
         const options = {
             method: "POST",
@@ -8,9 +13,7 @@ export const sendOtp = async (phone: string, otp: string): Promise<string> => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                bodyId: parseInt(process.env.MELIPAYAMAK_BODYID as string),
                 to: phone,
-                args: [otp],
             }),
         };
 
@@ -20,8 +23,9 @@ export const sendOtp = async (phone: string, otp: string): Promise<string> => {
             throw new Error();
         }
 
-        const { recId } = await res.json();
-        return recId;
+        const result = await res.json();
+
+        return result;
     } catch {
         throw new ServiceUnavailableException("melipayamak service is unavailable");
     }

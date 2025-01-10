@@ -1,9 +1,9 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 
+import cors from "./middlewares/cors";
 import secure from "./middlewares/secure";
 import parseQuery from "./middlewares/parseQuery";
 import notFound from "./middlewares/notFound";
@@ -33,7 +33,7 @@ import notificationsRouter from "@/routes/v1/notifications";
 const app = express();
 
 // app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
-app.use(cors({ origin: "http://localhost:3000", methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization", "x-quranara-secret"], credentials: true }));
+app.use(cors);
 // app.use(secure);
 app.use(helmet());
 

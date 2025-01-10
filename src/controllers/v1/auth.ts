@@ -12,7 +12,7 @@ import { AuthenticatedRequest } from "@/types/request.types";
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createSession, generateOtp, getOtp, removeSessionFromRedis, saveSessionInRedis, setCredentialCookies, verifyOtp } from "@/utils/auth";
+import { createSession, saveOtpInRedis, getOtp, removeSessionFromRedis, saveSessionInRedis, setCredentialCookies, verifyOtp } from "@/utils/auth";
 
 export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Response, next: NextFunction) => {
     try {
@@ -47,7 +47,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
 
         setCredentialCookies(res, { session, user });
 
-        SuccessResponse(res, 201, { message: "signup was successful", username: user.username });
+        SuccessResponse(res, 201, { message: "signup was successful" });
     } catch (err) {
         if (isDuplicateKeyError(err as Error)) {
             next(new ConflictException("user already exists with this information", { field: Object.keys((err as any).keyPattern)[0], key: "duplicate" }));
@@ -72,9 +72,9 @@ export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Respons
             throw new ConflictException("Otp already exist", { ttl });
         }
 
-        const otp = await generateOtp(phone);
+        const { code } = await sendOtp(phone);
 
-        await sendOtp(phone, otp);
+        await saveOtpInRedis(phone, code);
 
         SuccessResponse(res, 200, { message: "otp sent successfully!" });
     } catch (err) {
@@ -108,7 +108,7 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
 
         setCredentialCookies(res, { session, user });
 
-        SuccessResponse(res, 200, { message: "login was successful", username: user.username });
+        SuccessResponse(res, 200, { message: "login was successful", role: user.role });
     } catch (err) {
         next(err);
     }
@@ -142,7 +142,7 @@ export const loginWithPassword = async (req: Request<{}, {}, LoginWithPasswordSc
 
         setCredentialCookies(res, { session, user });
 
-        SuccessResponse(res, 200, { message: "login was successful", username: user.username });
+        SuccessResponse(res, 200, { message: "login was successful", role: user.role });
     } catch (err) {
         next(err);
     }
