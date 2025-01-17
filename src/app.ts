@@ -32,15 +32,10 @@ import notificationsRouter from "@/routes/v1/notifications";
 
 const app = express();
 
-// app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
 app.use(cors);
-// app.use(secure);
+app.use(secure);
 app.use(helmet());
-
-app.use(async (req, res, next) => {
-    await new Promise((res) => setTimeout(res, 500));
-    next();
-});
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));

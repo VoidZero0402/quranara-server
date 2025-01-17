@@ -11,6 +11,7 @@ export const CreateSessionSchema = z.object({
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
         .trim(),
+    content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
     time: z
         .string({ required_error: "time of video is required" })
         .trim()

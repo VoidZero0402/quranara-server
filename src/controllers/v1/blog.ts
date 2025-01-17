@@ -67,9 +67,9 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaT
 
 export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { title, description, slug, category, cover, content, relatedCourses, shown } = req.body;
+        const { title, description, slug, category, cover, content, headings, relatedCourses, shown } = req.body;
 
-        const timeToRead = Math.ceil(content.length / 1500);
+        const timeToRead = Math.ceil(content.length / 2500);
 
         const shortId = await getBlogUnique();
 
@@ -81,6 +81,7 @@ export const create = async (req: Request<{}, {}, CreateBlogSchemaType>, res: Re
             author: (req as AuthenticatedRequest).user._id,
             cover,
             content,
+            headings,
             timeToRead,
             relatedCourses,
             shortId,
@@ -153,9 +154,9 @@ export const getOneById = async (req: Request<RequestParamsWithID>, res: Respons
 export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { title, description, slug, category, cover, content, relatedCourses, shown } = req.body;
+        const { title, description, slug, category, cover, content, headings, relatedCourses, shown } = req.body;
 
-        const timeToRead = Math.ceil(content.length / 1500);
+        const timeToRead = Math.ceil(content.length / 2500);
 
         const blog = await BlogModel.findByIdAndUpdate(id, {
             $set: {
@@ -165,6 +166,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, CreateBlogSch
                 category,
                 cover,
                 content,
+                headings,
                 timeToRead,
                 relatedCourses,
                 shown,
