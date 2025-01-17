@@ -5,7 +5,6 @@ import { rateLimit } from "express-rate-limit";
 
 import cors from "./middlewares/cors";
 import secure from "./middlewares/secure";
-import parseQuery from "./middlewares/parseQuery";
 import notFound from "./middlewares/notFound";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 
@@ -32,41 +31,37 @@ import notificationsRouter from "@/routes/v1/notifications";
 
 const app = express();
 
-// app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7" }));
-app.use(cors);
-// app.use(secure);
-app.use(helmet());
+app.set("trust proxy", true);
 
-app.use(async (req, res, next) => {
-    await new Promise((res) => setTimeout(res, 500));
-    next();
-});
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7", validate: { trustProxy: false } }));
+app.use(cors);
+app.use(secure);
+app.use(helmet());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
-app.use(parseQuery);
 
-app.use("/api/auth", authRouter);
-app.use("/api/courses", coursesRouter);
-app.use("/api/topics", topicsRouter);
-app.use("/api/sessions", sessionsRouter);
-app.use("/api/questions", questionsRouter);
-app.use("/api/uploads", uploadsRouter);
-app.use("/api/tickets", ticketsRouter);
-app.use("/api/categories", categoriesRouter);
-app.use("/api/tv", tvRouter);
-app.use("/api/blog", blogRouter);
-app.use("/api/comments", commentsRouter);
-app.use("/api/discounts", discountsRouter);
-app.use("/api/cart", cartRouter);
-app.use("/api/me", meRouter);
-app.use("/api/orders", ordersRouter);
-app.use("/api/news", newsRouter);
-app.use("/api/ui", uiRouter);
-app.use("/api/users", usersRouter);
-app.use("/api/poll", pollRouter);
-app.use("/api/notifications", notificationsRouter);
+app.use("/auth", authRouter);
+app.use("/courses", coursesRouter);
+app.use("/topics", topicsRouter);
+app.use("/sessions", sessionsRouter);
+app.use("/questions", questionsRouter);
+app.use("/uploads", uploadsRouter);
+app.use("/tickets", ticketsRouter);
+app.use("/categories", categoriesRouter);
+app.use("/tv", tvRouter);
+app.use("/blog", blogRouter);
+app.use("/comments", commentsRouter);
+app.use("/discounts", discountsRouter);
+app.use("/cart", cartRouter);
+app.use("/me", meRouter);
+app.use("/orders", ordersRouter);
+app.use("/news", newsRouter);
+app.use("/ui", uiRouter);
+app.use("/users", usersRouter);
+app.use("/poll", pollRouter);
+app.use("/notifications", notificationsRouter);
 
 app.use(notFound);
 app.use(globalErrorHandler);

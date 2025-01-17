@@ -15,7 +15,7 @@ router.get("/", getAllShown);
 router.use(auth, roleGuard(ROLES.MANAGER));
 
 router.post("/", validator("body", CreateNewsSchema), create);
-router.get("/all", validator("query", PaginationQuerySchema), getAll);
+router.get("/all", validator("query", PaginationQuerySchema), getAll as any);
 router.route("/:id").get(getOne).put(validator("body", UpdateNewsSchema), update).delete(remove);
 router.patch("/:id/shown", shown);
 router.patch("/:id/unshown", unshown);

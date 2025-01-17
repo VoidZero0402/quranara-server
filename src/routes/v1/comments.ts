@@ -16,7 +16,7 @@ router.post("/:id/reply", validator("body", ReplyCommentSchema), reply);
 
 router.use(roleGuard(ROLES.MANAGER));
 
-router.get("/all", validator("query", GetAllCommentsQuerySchema), getAll);
+router.get("/all", validator("query", GetAllCommentsQuerySchema), getAll as any);
 router.get("/:id", getOne);
 router.post("/:id/answer", validator("body", ReplyCommentSchema), answer);
 router.patch("/:id/accept", validator("query", ActionsQuerySchema), accept);

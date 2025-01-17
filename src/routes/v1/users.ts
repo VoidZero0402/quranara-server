@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.use(auth, roleGuard(ROLES.MANAGER));
 
-router.route("/").get(validator("query", GetAllUsersQuerySchema), getAll).post(validator("body", CreateUserSchema), create);
-router.route("/ban").get(validator("query", PaginationQuerySchema), getAllBan).post(validator("body", BanUserSchema), banUser);
+router.route("/").get(validator("query", GetAllUsersQuerySchema), getAll as any).post(validator("body", CreateUserSchema), create);
+router.route("/ban").get(validator("query", PaginationQuerySchema), getAllBan as any).post(validator("body", BanUserSchema), banUser);
 router.post("/unban", validator("body", UnbanUserSchema), unbanUser);
 router.post("/signing-course", validator("body", SigningCourseSchema), signingCourse);
 

@@ -9,7 +9,7 @@ import { SORTING } from "@/constants/courses";
 import { STATUS as COMMENT_STATUS } from "@/constants/comments";
 import { ROLES } from "@/constants/roles";
 
-import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType, DiscountAllSchemaType } from "@/validators/courses";
+import { CreateCourseSchemaType, UpdateCourseSchemaType, GetAllCoursesQuerySchemaType, SearchCoursesQuerySchameType, DiscountAllSchemaType, UpdateCourseOrderSchemaType } from "@/validators/courses";
 import { PaginationQuerySchemaType } from "@/validators/pagination";
 
 import { AuthenticatedRequest, RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
@@ -66,7 +66,7 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchem
 
 export const getAllSummary = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const courses = await CourseModel.find({}, "title").lean();
+        const courses = await CourseModel.find({}, "title slug").lean();
 
         SuccessResponse(res, 200, { courses });
     } catch (err) {
@@ -305,7 +305,7 @@ export const unshown = async (req: Request<RequestParamsWithID>, res: Response, 
     }
 };
 
-export const updateOrder = async (req: Request<RequestParamsWithID>, res: Response, next: NextFunction) => {
+export const updateOrder = async (req: Request<RequestParamsWithID, {}, UpdateCourseOrderSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const { from, to } = req.body;

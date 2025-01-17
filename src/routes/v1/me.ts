@@ -14,9 +14,9 @@ router.put("/update-account", validator("body", UpdateAccountSchema), updateAcco
 router.patch("/change-password", validator("body", ChangePasswordSchema), changePassword);
 router.get("/courses", getCourses)
 router.get("/last-courses", getLastCourses)
-router.get("/saved-blog", validator("query", PaginationQuerySchema), getSavedBlog);
-router.get("/saved-tv", validator("query", PaginationQuerySchema), getSavedTv);
-router.get("/liked-blog", validator("query", PaginationQuerySchema), getLikedBlog);
-router.get("/liked-tv", validator("query", PaginationQuerySchema), getLikedTv);
+router.get("/saved-blog", validator("query", PaginationQuerySchema), getSavedBlog as any);
+router.get("/saved-tv", validator("query", PaginationQuerySchema), getSavedTv as any);
+router.get("/liked-blog", validator("query", PaginationQuerySchema), getLikedBlog as any);
+router.get("/liked-tv", validator("query", PaginationQuerySchema), getLikedTv as any);
 
 export default router;

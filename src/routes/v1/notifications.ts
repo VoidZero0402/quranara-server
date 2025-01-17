@@ -20,7 +20,7 @@ router.patch("/:id/seen", seen);
 
 router.use(roleGuard(ROLES.MANAGER));
 
-router.get("/all", validator("query", PaginationQuerySchema), getAllNotifications);
+router.get("/all", validator("query", PaginationQuerySchema), getAllNotifications as any);
 router.post("/send-all", validator("body", SendAllNotificationSchema), sendAll);
 router.post("/send-course-registers", validator("body", SendCourseRegistersNotificationSchema), sendCourseRegisters);
 router.post("/send-one", validator("body", SendOneNotificationSchema), sendOne);

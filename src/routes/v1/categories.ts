@@ -9,7 +9,7 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.get("/", validator("query", GetAllCategoriesQuerySchema), getAll);
+router.get("/", validator("query", GetAllCategoriesQuerySchema), getAll as any);
 
 router.use(auth, roleGuard(ROLES.MANAGER));
 

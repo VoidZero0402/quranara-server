@@ -10,12 +10,12 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
-router.get("/", validator("query", GetAllBlogsQuerySchema), getAll);
-router.get("/all", auth, roleGuard(ROLES.MANAGER), validator("query", GetAllBlogsQuerySchema), getAllRaw);
-router.get("/search", validator("query", SearchBlogsQuerySchame), search);
+router.get("/", validator("query", GetAllBlogsQuerySchema), getAll as any);
+router.get("/all", auth, roleGuard(ROLES.MANAGER), validator("query", GetAllBlogsQuerySchema), getAllRaw as any);
+router.get("/search", validator("query", SearchBlogsQuerySchame), search as any);
 router.get("/:slug", getOne);
 router.get("/:slug/related", getRelated);
-router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments);
+router.get("/:slug/comments", validator("query", PaginationQuerySchema), getComments as any);
 router.get("/:id/details", getDetails);
 
 router.use(auth);

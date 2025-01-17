@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.use(auth);
 
-router.route("/").get(validator("query", PaginationQuerySchema), getQuestions).post(validator("body", CreateQuestionSchema), create);
-router.get("/all", roleGuard(ROLES.MANAGER), validator("query", GetAllQuestionsQuerySchema), getAllQuestions);
+router.route("/").get(validator("query", PaginationQuerySchema), getQuestions as any).post(validator("body", CreateQuestionSchema), create);
+router.get("/all", roleGuard(ROLES.MANAGER), validator("query", GetAllQuestionsQuerySchema), getAllQuestions as any);
 router.get("/:id", getQuestion);
 router.post("/:id/message", validator("body", CreateQuestionSchema), message);
 

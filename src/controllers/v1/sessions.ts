@@ -17,7 +17,7 @@ import { getUser, timeToSeconds } from "@/utils/funcs";
 
 export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { title, course: courseId, topic, isPublic, video, time, attached } = req.body;
+        const { title, course: courseId, topic, isPublic, video, content, time, attached } = req.body;
 
         const course = await CourseModel.findByIdAndUpdate(courseId, {});
 
@@ -41,6 +41,7 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
             order: sessionCounts + 1,
             isPublic,
             video,
+            content,
             time,
             seconds,
             attached,
@@ -55,13 +56,14 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
 export const update = async (req: Request<RequestParamsWithID, {}, UpdateSessionSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { title, isPublic, video, time, attached } = req.body;
+        const { title, isPublic, video, content, time, attached } = req.body;
 
         await SessionModel.findByIdAndUpdate(id, {
             $set: {
                 title,
                 isPublic,
                 video,
+                content,
                 time,
                 attached,
             },
@@ -108,7 +110,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const session = await SessionModel.findOne({ slug }).populate("topic").populate("course", "title slug cover");
+        const session = await SessionModel.findOne({ slug }).populate("topic").populate("course", "title slug description cover");
 
         if (!session) {
             throw new NotFoundException("session not found");

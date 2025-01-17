@@ -4,13 +4,15 @@ import * as jose from "jose";
 import redis from "@/config/redis";
 import { UserDocument } from "@/models/User";
 
-const TWO_MINUTES_IN_SECONDS = 120;
+const TwoMinutesInSeconds = 120;
 
-const NINETY_DAYS_IN_SECONDS = 7_776_000;
+const JwtSessionExpires = parseInt(process.env.JWT_SESSION_EXPIRES as string);
 
-const NINETY_DAYS_IN_MILLI_SECONDS = 7_776_000_000;
+const JwtSessionExpiresInMilliSeconds = JwtSessionExpires * 1000;
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+const JoseSessionExpirationTime = `${JwtSessionExpires}s`;
+
+const JwtSecret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const getRedisOtpPattern = (phone: string): string => `otp:${phone}`;
 
@@ -27,7 +29,7 @@ export const getOtp = async (phone: string): Promise<{ expired: boolean; ttl: nu
 };
 
 export const saveOtpInRedis = async (phone: string, otp: string): Promise<void> => {
-    await redis.set(getRedisOtpPattern(phone), otp, "EX", TWO_MINUTES_IN_SECONDS);
+    await redis.set(getRedisOtpPattern(phone), otp, "EX", TwoMinutesInSeconds);
 };
 
 export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: boolean; matched: boolean }> => {
@@ -47,13 +49,13 @@ export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: 
 };
 
 export const createSession = async (payload: jose.JWTPayload): Promise<string> => {
-    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setExpirationTime("1d").sign(JWT_SECRET);
+    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setExpirationTime(JoseSessionExpirationTime).sign(JwtSecret);
     return jwt;
 };
 
 export const verifySession = async (session: string): Promise<jose.JWTPayload | null> => {
     try {
-        const { payload } = await jose.jwtVerify(session, JWT_SECRET);
+        const { payload } = await jose.jwtVerify(session, JwtSecret);
         return payload;
     } catch {
         return null;
@@ -63,7 +65,7 @@ export const verifySession = async (session: string): Promise<jose.JWTPayload | 
 const getRedisSessionPattern = (_id: string): string => `session:${_id}`;
 
 export const saveSessionInRedis = async (session: string, _id: string): Promise<void> => {
-    await redis.set(getRedisSessionPattern(_id), session, "EX", NINETY_DAYS_IN_SECONDS);
+    await redis.set(getRedisSessionPattern(_id), session, "EX", JwtSessionExpires);
 };
 
 export const removeSessionFromRedis = async (_id: string): Promise<void> => {
@@ -78,7 +80,7 @@ const cookiesOption = {
 } as const;
 
 export const setCredentialCookies = (res: Response, credentials: { session: string; user: UserDocument }): void => {
-    const expires = new Date(Date.now() + NINETY_DAYS_IN_MILLI_SECONDS);
+    const expires = new Date(Date.now() + JwtSessionExpiresInMilliSeconds);
 
     res.cookie("_session", credentials.session, {
         ...cookiesOption,

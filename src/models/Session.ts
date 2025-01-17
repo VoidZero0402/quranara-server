@@ -12,6 +12,7 @@ export interface ISession {
     isPublic: boolean;
     video: string;
     attached?: string;
+    content?: string;
     time: string;
     seconds: number;
 }
@@ -68,6 +69,8 @@ const schema = new Schema<ISession, SessionModel, ISessionMethods>(
             type: String,
             required: true,
         },
+
+        content: String,
 
         time: {
             type: String,

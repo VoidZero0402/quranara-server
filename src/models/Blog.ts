@@ -9,7 +9,7 @@ export interface IBlog {
     description: string;
     cover: string;
     content: string;
-    headings: { id: string; heading: string }[];
+    headings: { id: string; text: string }[];
     author: PopulatedDoc<Document<ObjectId> & IUser>;
     category: PopulatedDoc<Document<ObjectId> & ICategory>;
     views: number;
@@ -59,7 +59,7 @@ const schema = new Schema<IBlog>(
                     required: true,
                 },
 
-                heading: {
+                text: {
                     type: String,
                     required: true,
                 },

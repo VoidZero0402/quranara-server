@@ -14,7 +14,7 @@ router.patch("/:id/voute", validator("body", VoutePollSchema), voute);
 
 router.use(auth, roleGuard(ROLES.MANAGER));
 
-router.route("/").get(validator("query", PaginationQuerySchema), getAll).post(validator("body", CreatePollSchema), create);
+router.route("/").get(validator("query", PaginationQuerySchema), getAll as any).post(validator("body", CreatePollSchema), create);
 router.route("/:id").get(getOne).put(validator("body", UpdatePollSchema), update).delete(remove);
 
 export default router;

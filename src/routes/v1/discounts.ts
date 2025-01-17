@@ -12,11 +12,11 @@ const router = express.Router();
 
 router.use(auth);
 
-router.get("/available", validator("query", AvailableDiscountQuerySchema), available);
+router.get("/available", validator("query", AvailableDiscountQuerySchema), available as any);
 
 router.use(roleGuard(ROLES.MANAGER));
 
-router.route("/").get(validator("query", PaginationQuerySchema), getAll).post(validator("body", CreateDiscountSchema), create);
+router.route("/").get(validator("query", PaginationQuerySchema), getAll as any).post(validator("body", CreateDiscountSchema), create);
 router.route("/:id").put(validator("body", UpdateDiscountSchema), update).delete(remove);
 
 export default router;
