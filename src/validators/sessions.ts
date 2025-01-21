@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
+import { Paths } from "@/constants/uploads";
 
 export const CreateSessionSchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 25 character" }).trim(),
@@ -10,13 +11,19 @@ export const CreateSessionSchema = z.object({
         .string({ required_error: "video is required" })
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
-        .trim(),
+        .trim()
+        .transform((video) => `${Paths.sessions.episodes}/${video}`),
     content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
     time: z
         .string({ required_error: "time of video is required" })
         .trim()
         .regex(/^(\d{1,2}):([0-5]\d):([0-5]\d)$|^([0-5]?\d):([0-5]\d)$/, { message: "time is not valid" }),
-    attached: z.string().min(1, { message: "attached should not be empty" }).trim().optional(),
+    attached: z
+        .string()
+        .min(1, { message: "attached should not be empty" })
+        .trim()
+        .transform((attached) => attached && `${Paths.sessions.attachments}/${attached}`)
+        .optional(),
 });
 
 export type CreateSessionSchemaType = z.infer<typeof CreateSessionSchema>;

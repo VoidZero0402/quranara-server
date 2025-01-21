@@ -3,23 +3,21 @@ const baseURL = "https://dl.quranara.com";
 export const Paths = {
     courses: {
         cover: `${baseURL}/courses/cover`,
-        content: `${baseURL}/courses/content`,
+        intro: `${baseURL}/courses/intro`,
     },
 
     blog: {
         cover: `${baseURL}/blog/cover`,
-        content: `${baseURL}/blog/content`,
     },
 
     tv: {
         cover: `${baseURL}/tv/cover`,
-        content: `${baseURL}/tv/content`,
+        episodes: `${baseURL}/tv/episodes`,
         attachments: `${baseURL}/tv/attachments`,
     },
 
     sessions: {
         episodes: `${baseURL}/sessions/episodes`,
-        content: `${baseURL}/sessions/content`,
         attachments: `${baseURL}/sessions/attachments`,
     },
 

@@ -45,7 +45,7 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
 
         await saveSessionInRedis(session, user._id.toString());
 
-        setCredentialCookies(res, { session, user });
+        setCredentialCookies(res, { session });
 
         SuccessResponse(res, 201, { message: "signup was successful" });
     } catch (err) {
@@ -106,7 +106,7 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
 
         await saveSessionInRedis(session, user._id.toString());
 
-        setCredentialCookies(res, { session, user });
+        setCredentialCookies(res, { session });
 
         SuccessResponse(res, 200, { message: "login was successful", role: user.role });
     } catch (err) {
@@ -140,7 +140,7 @@ export const loginWithPassword = async (req: Request<{}, {}, LoginWithPasswordSc
 
         await saveSessionInRedis(session, user._id.toString());
 
-        setCredentialCookies(res, { session, user });
+        setCredentialCookies(res, { session });
 
         SuccessResponse(res, 200, { message: "login was successful", role: user.role });
     } catch (err) {
@@ -160,7 +160,6 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
     try {
         await removeSessionFromRedis((req as AuthenticatedRequest).user._id.toString());
         res.clearCookie("_session");
-        res.clearCookie("_user");
 
         SuccessResponse(res, 200, { message: "logout is successful" });
     } catch (err) {

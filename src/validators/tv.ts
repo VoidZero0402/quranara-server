@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
-import { SORTING } from "@/constants/tv";
 import { PaginationQuerySchema } from "./pagination";
+import { SORTING } from "@/constants/tv";
+import { Paths } from "@/constants/uploads";
 
 export const CreateTvSchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 25 character" }).trim(),
@@ -17,13 +18,20 @@ export const CreateTvSchema = z.object({
         .string({ required_error: "cover is required" })
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
-        .trim(),
+        .trim()
+        .transform((cover) => `${Paths.tv.cover}/${cover}`),
     video: z
         .string({ required_error: "video is required" })
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
-        .trim(),
-    attached: z.string().min(1, { message: "attached should not be empty" }).trim().optional(),
+        .trim()
+        .transform((video) => `${Paths.tv.episodes}/${video}`),
+    attached: z
+        .string()
+        .min(1, { message: "attached should not be empty" })
+        .trim()
+        .transform((attached) => attached && `${Paths.tv.attachments}/${attached}`)
+        .optional(),
     content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
     shown: z.boolean({ required_error: "shown is required" }),
 });

@@ -17,7 +17,6 @@ import { ConflictException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { updateUserCredentialCookie } from "@/utils/auth";
 
 export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType>, res: Response, next: NextFunction) => {
     try {
@@ -41,8 +40,6 @@ export const updateAccount = async (req: Request<{}, {}, UpdateAccountSchemaType
         if (!updatedUser) {
             throw new NotFoundException("user not found");
         }
-
-        await updateUserCredentialCookie(res, updatedUser);
 
         SuccessResponse(res, 200, { message: "account updated successfully" });
     } catch (err) {

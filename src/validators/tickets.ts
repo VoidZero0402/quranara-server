@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
+import { PaginationQuerySchema } from "./pagination";
 import { ATTACHED_FILE_TYPES } from "@/constants/files";
 import { STATUS, TYPE } from "@/constants/tickets";
-import { PaginationQuerySchema } from "./pagination";
 
 export const CreateTicketSchema = z.object({
     course: validateObjectId.optional(),

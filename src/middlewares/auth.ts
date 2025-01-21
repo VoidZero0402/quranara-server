@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 import UserModel, { UserDocument } from "@/models/User";
 
-import { verifySession } from "@/utils/auth";
+import { verifySession, checkSession } from "@/utils/auth";
 import { UnauthorizedException } from "@/utils/exceptions";
 import { AuthenticatedRequest } from "@/types/request.types";
 
@@ -25,6 +25,8 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
         if (!user) {
             throw new UnauthorizedException("user not found");
         }
+
+        await checkSession(session, user._id.toString());
 
         (req as AuthenticatedRequest).user = user;
 

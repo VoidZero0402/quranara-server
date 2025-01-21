@@ -2,7 +2,7 @@ import { Response } from "express";
 import * as jose from "jose";
 
 import redis from "@/config/redis";
-import { UserDocument } from "@/models/User";
+import { UnauthorizedException } from "./exceptions";
 
 const TwoMinutesInSeconds = 120;
 
@@ -68,6 +68,18 @@ export const saveSessionInRedis = async (session: string, _id: string): Promise<
     await redis.set(getRedisSessionPattern(_id), session, "EX", JwtSessionExpires);
 };
 
+export const checkSession = async (session: string, _id: string) => {
+    const savedSession = await redis.get(getRedisSessionPattern(_id));
+
+    console.log(savedSession);
+
+    const isMatched = session === savedSession;
+
+    if (!isMatched) {
+        throw new UnauthorizedException("invalid session");
+    }
+};
+
 export const removeSessionFromRedis = async (_id: string): Promise<void> => {
     await redis.del(getRedisSessionPattern(_id));
 };
@@ -79,36 +91,10 @@ const cookiesOption = {
     secure: process.env.NODE_ENV === "production",
 } as const;
 
-export const setCredentialCookies = (res: Response, credentials: { session: string; user: UserDocument }): void => {
+export const setCredentialCookies = (res: Response, credentials: { session: string }): void => {
     const expires = new Date(Date.now() + JwtSessionExpiresInMilliSeconds);
 
     res.cookie("_session", credentials.session, {
-        ...cookiesOption,
-        expires,
-    });
-
-    const user = credentials.user.toObject();
-
-    Reflect.deleteProperty(user, "_id");
-    Reflect.deleteProperty(user, "password");
-
-    res.cookie("_user", JSON.stringify(user), {
-        ...cookiesOption,
-        expires,
-    });
-};
-
-export const updateUserCredentialCookie = async (res: Response, userDoc: UserDocument): Promise<void> => {
-    const ttl = await redis.ttl(getRedisSessionPattern(userDoc._id.toString()));
-
-    const expires = new Date(Date.now() + ttl * 1000);
-
-    const user = userDoc.toObject();
-
-    Reflect.deleteProperty(user, "_id");
-    Reflect.deleteProperty(user, "password");
-
-    res.cookie("_user", JSON.stringify(user), {
         ...cookiesOption,
         expires,
     });

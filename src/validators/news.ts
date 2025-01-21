@@ -1,11 +1,13 @@
 import { z } from "zod";
+import { Paths } from "@/constants/uploads";
 
 export const CreateNewsSchema = z.object({
     cover: z
         .string({ required_error: "cover is required" })
         .min(1, { message: "cover should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
-        .trim(),
+        .trim()
+        .transform((cover) => `${Paths.news.cover}/${cover}`),
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
     description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(2048, { message: "description should be has less than 2048 character" }).trim(),
     link: z

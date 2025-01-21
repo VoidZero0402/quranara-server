@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { validateObjectId } from "@/utils/validations";
-import { SORTING } from "@/constants/blog";
 import { PaginationQuerySchema } from "./pagination";
+import { SORTING } from "@/constants/blog";
+import { Paths } from "@/constants/uploads";
 
 export const CreateBlogSchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
@@ -17,7 +18,8 @@ export const CreateBlogSchema = z.object({
         .string({ required_error: "cover is required" })
         .min(1, { message: "cover should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
-        .trim(),
+        .trim()
+        .transform((cover) => `${Paths.blog.cover}/${cover}`),
     content: z.string({ required_error: "content is required" }).min(1, { message: "content should not be empty" }).trim(),
     headings: z.array(z.object({ id: z.string(), text: z.string() })),
     relatedCourses: z.array(validateObjectId, { message: "relatedCourses should be an array of course ObjectIds" }).optional(),
