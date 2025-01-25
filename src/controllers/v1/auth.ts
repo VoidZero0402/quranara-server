@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import UserModel from "@/models/User";
 import BanModel from "@/models/Ban";
 
+import { PHASE } from "@/constants/auth";
+
 import { sendOtp } from "@/services/melipayamak";
 
 import { SignupShcemaType, SendOtpSchemaType, LoginWithOtpSchemaType, LoginWithPasswordSchemaType } from "@/validators/auth";
@@ -58,12 +60,20 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
 
 export const send = async (req: Request<{}, {}, SendOtpSchemaType>, res: Response, next: NextFunction) => {
     try {
-        const { phone } = req.body;
+        const { phone, phase } = req.body;
 
         const isBanned = await BanModel.findOne({ phone });
 
         if (isBanned) {
             throw new ForbiddenException("this account has been blocked");
+        }
+
+        if (phase === PHASE.LOGIN) {
+            const user = await UserModel.findOne({ phone });
+
+            if (!user) {
+                throw new NotFoundException("user not found with this phone");
+            }
         }
 
         const { expired, ttl } = await getOtp(phone);

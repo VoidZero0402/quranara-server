@@ -71,8 +71,6 @@ export const saveSessionInRedis = async (session: string, _id: string): Promise<
 export const checkSession = async (session: string, _id: string) => {
     const savedSession = await redis.get(getRedisSessionPattern(_id));
 
-    console.log(savedSession);
-
     const isMatched = session === savedSession;
 
     if (!isMatched) {

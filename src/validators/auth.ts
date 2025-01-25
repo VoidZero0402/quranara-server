@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PHASE } from "@/constants/auth";
 
 export const SignupShcema = z.object({
     phone: z
@@ -12,7 +13,7 @@ export const SignupShcema = z.object({
 
 export type SignupShcemaType = z.infer<typeof SignupShcema>;
 
-export const SendOtpSchema = SignupShcema.pick({ phone: true });
+export const SendOtpSchema = SignupShcema.pick({ phone: true }).extend({ phase: z.enum([PHASE.SIGNUP, PHASE.LOGIN]).default(PHASE.SIGNUP) });
 
 export type SendOtpSchemaType = z.infer<typeof SendOtpSchema>;
 
