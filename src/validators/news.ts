@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { transformToUploadPath } from "@/utils/validations";
 import { Paths } from "@/constants/uploads";
 
 export const CreateNewsSchema = z.object({
@@ -7,7 +8,7 @@ export const CreateNewsSchema = z.object({
         .min(1, { message: "cover should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
         .trim()
-        .transform((cover) => `${Paths.news.cover}/${cover}`),
+        .transform((cover) => transformToUploadPath(cover, Paths.news.cover)),
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
     description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(2048, { message: "description should be has less than 2048 character" }).trim(),
     link: z

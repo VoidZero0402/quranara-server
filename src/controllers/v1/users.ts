@@ -10,7 +10,7 @@ import { PaginationQuerySchemaType } from "@/validators/pagination";
 import { ConflictException, ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { createPaginationData } from "@/utils/funcs";
-import { removeSessionFromRedis } from "@/utils/auth";
+import { removeAllSession } from "@/utils/auth";
 import { isDuplicateKeyError } from "@/utils/errors";
 
 export const getAll = async (req: Request<{}, {}, {}, GetAllUsersQuerySchemaType>, res: Response, next: NextFunction) => {
@@ -83,7 +83,7 @@ export const banUser = async (req: Request<{}, {}, BanUserSchemaType>, res: Resp
 
         await BanModel.create({ phone: user.phone, user: user._id });
 
-        await removeSessionFromRedis(user._id.toString());
+        await removeAllSession(user._id.toString());
 
         SuccessResponse(res, 201, { message: "user banned successfully" });
     } catch (err) {

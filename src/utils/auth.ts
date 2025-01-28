@@ -1,8 +1,12 @@
 import { Response } from "express";
 import * as jose from "jose";
+import { v4 as uuidv4 } from "uuid";
 
 import redis from "@/config/redis";
 import { UnauthorizedException } from "./exceptions";
+import { scanRedisKeys } from "./funcs";
+
+import { Credentials } from "@/types/auth.types";
 
 const TwoMinutesInSeconds = 120;
 
@@ -48,9 +52,14 @@ export const verifyOtp = async (phone: string, otp: string): Promise<{ expired: 
     return { expired: false, matched: isOtpMatch };
 };
 
-export const createSession = async (payload: jose.JWTPayload): Promise<string> => {
-    const jwt = await new jose.SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setExpirationTime(JoseSessionExpirationTime).sign(JwtSecret);
-    return jwt;
+const getAuthKey = (): string => `_auth_key_${uuidv4()}`;
+
+export const createCredential = async (payload: jose.JWTPayload): Promise<Credentials> => {
+    const session = await new jose.SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setExpirationTime(JoseSessionExpirationTime).sign(JwtSecret);
+
+    const authKey = getAuthKey();
+
+    return { session, authKey };
 };
 
 export const verifySession = async (session: string): Promise<jose.JWTPayload | null> => {
@@ -62,37 +71,50 @@ export const verifySession = async (session: string): Promise<jose.JWTPayload | 
     }
 };
 
-const getRedisSessionPattern = (_id: string): string => `session:${_id}`;
+const getRedisSessionPattern = (authKey: string, _id: string): string => `session:${_id}:${authKey}`;
 
-export const saveSessionInRedis = async (session: string, _id: string): Promise<void> => {
-    await redis.set(getRedisSessionPattern(_id), session, "EX", JwtSessionExpires);
+export const saveSessionInRedis = async (credentials: Credentials, _id: string): Promise<void> => {
+    await redis.set(getRedisSessionPattern(credentials.authKey, _id), credentials.session, "EX", JwtSessionExpires);
 };
 
-export const checkSession = async (session: string, _id: string) => {
-    const savedSession = await redis.get(getRedisSessionPattern(_id));
+export const checkSession = async (credentials: Credentials, _id: string) => {
+    const savedSession = await redis.get(getRedisSessionPattern(credentials.authKey, _id));
 
-    const isMatched = session === savedSession;
+    const isMatched = credentials.session === savedSession;
 
-    if (!isMatched) {
-        throw new UnauthorizedException("invalid session");
-    }
+    return isMatched;
 };
 
-export const removeSessionFromRedis = async (_id: string): Promise<void> => {
-    await redis.del(getRedisSessionPattern(_id));
+export const removeSession = async (authKey: string, _id: string): Promise<void> => {
+    await redis.del(getRedisSessionPattern(authKey, _id));
+};
+
+export const removeAllSession = async (_id: string): Promise<void> => {
+    const pattern = `session:${_id}:*`;
+
+    const keys = await scanRedisKeys(pattern);
+
+    await redis.del(keys);
 };
 
 const cookiesOption = {
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
+    sameSite: "strict",
+    priority: "high",
     secure: process.env.NODE_ENV === "production",
+    signed: process.env.NODE_ENV === "production",
 } as const;
 
-export const setCredentialCookies = (res: Response, credentials: { session: string }): void => {
+export const setCredentialCookies = (res: Response, credentials: { session: string; authKey: string }): void => {
     const expires = new Date(Date.now() + JwtSessionExpiresInMilliSeconds);
 
     res.cookie("_session", credentials.session, {
+        ...cookiesOption,
+        expires,
+    });
+
+    res.cookie("_auth_key", credentials.authKey, {
         ...cookiesOption,
         expires,
     });

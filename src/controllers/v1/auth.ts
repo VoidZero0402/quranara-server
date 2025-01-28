@@ -14,7 +14,7 @@ import { AuthenticatedRequest } from "@/types/request.types";
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from "@/utils/exceptions";
 import { SuccessResponse } from "@/utils/responses";
 import { isDuplicateKeyError } from "@/utils/errors";
-import { createSession, saveOtpInRedis, getOtp, removeSessionFromRedis, saveSessionInRedis, setCredentialCookies, verifyOtp } from "@/utils/auth";
+import { saveOtpInRedis, getOtp, verifyOtp, createCredential, saveSessionInRedis, setCredentialCookies, removeSession } from "@/utils/auth";
 
 export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Response, next: NextFunction) => {
     try {
@@ -43,11 +43,11 @@ export const signup = async (req: Request<{}, {}, SignupShcemaType>, res: Respon
             password,
         });
 
-        const session = await createSession({ _id: user._id });
+        const credentials = await createCredential({ _id: user._id });
 
-        await saveSessionInRedis(session, user._id.toString());
+        await saveSessionInRedis(credentials, user._id.toString());
 
-        setCredentialCookies(res, { session });
+        setCredentialCookies(res, credentials);
 
         SuccessResponse(res, 201, { message: "signup was successful" });
     } catch (err) {
@@ -112,11 +112,11 @@ export const loginWithOtp = async (req: Request<{}, {}, LoginWithOtpSchemaType>,
             throw new NotFoundException("user not found");
         }
 
-        const session = await createSession({ _id: user._id });
+        const credentials = await createCredential({ _id: user._id });
 
-        await saveSessionInRedis(session, user._id.toString());
+        await saveSessionInRedis(credentials, user._id.toString());
 
-        setCredentialCookies(res, { session });
+        setCredentialCookies(res, credentials);
 
         SuccessResponse(res, 200, { message: "login was successful", role: user.role });
     } catch (err) {
@@ -146,11 +146,11 @@ export const loginWithPassword = async (req: Request<{}, {}, LoginWithPasswordSc
             throw new NotFoundException("user not found");
         }
 
-        const session = await createSession({ _id: user._id });
+        const credentials = await createCredential({ _id: user._id });
 
-        await saveSessionInRedis(session, user._id.toString());
+        await saveSessionInRedis(credentials, user._id.toString());
 
-        setCredentialCookies(res, { session });
+        setCredentialCookies(res, credentials);
 
         SuccessResponse(res, 200, { message: "login was successful", role: user.role });
     } catch (err) {
@@ -168,8 +168,12 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await removeSessionFromRedis((req as AuthenticatedRequest).user._id.toString());
+        const authKey = req.signedCookies._auth_key;
+
+        await removeSession(authKey, (req as AuthenticatedRequest).user._id.toString());
+
         res.clearCookie("_session");
+        res.clearCookie("_auth_key");
 
         SuccessResponse(res, 200, { message: "logout is successful" });
     } catch (err) {

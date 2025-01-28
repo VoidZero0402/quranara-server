@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { validateObjectId } from "@/utils/validations";
+import { validateObjectId, transformToUploadPath } from "@/utils/validations";
 import { Paths } from "@/constants/uploads";
 
 export const CreateSessionSchema = z.object({
@@ -12,7 +12,7 @@ export const CreateSessionSchema = z.object({
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
         .trim()
-        .transform((video) => `${Paths.sessions.episodes}/${video}`),
+        .transform((video) => transformToUploadPath(video, Paths.sessions.episodes)),
     content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
     time: z
         .string({ required_error: "time of video is required" })
@@ -22,7 +22,7 @@ export const CreateSessionSchema = z.object({
         .string()
         .min(1, { message: "attached should not be empty" })
         .trim()
-        .transform((attached) => attached && `${Paths.sessions.attachments}/${attached}`)
+        .transform((attached) => attached && transformToUploadPath(attached, Paths.sessions.attachments))
         .optional(),
 });
 

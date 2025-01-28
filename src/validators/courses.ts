@@ -1,23 +1,19 @@
 import { z } from "zod";
+import { transformToSlug, transformToUploadPath } from "@/utils/validations";
 import { PaginationQuerySchema } from "./pagination";
 import { SORTING, STATUS } from "@/constants/courses";
 import { Paths } from "@/constants/uploads";
 
 export const CreateCourseSchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 255 character" }).trim(),
-    slug: z
-        .string()
-        .min(1, { message: "slug should not be empty" })
-        .max(255, { message: "slug should be has less than 255 character" })
-        .trim()
-        .transform((value) => value.replaceAll(" ", "-")),
+    slug: z.string().min(1, { message: "slug should not be empty" }).max(255, { message: "slug should be has less than 255 character" }).trim().transform(transformToSlug),
     description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(1024, { message: "description should be has less than 1024 character" }).trim(),
     cover: z
         .string({ required_error: "cover is required" })
         .min(1, { message: "cover should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
         .trim()
-        .transform((cover) => `${Paths.courses.cover}/${cover}`),
+        .transform((cover) => transformToUploadPath(cover, Paths.courses.cover)),
     price: z.number({ required_error: "price is required" }).min(0, { message: "price can not be negative" }),
     status: z.enum([STATUS.PRE_SELL, STATUS.ON_PERFORMING, STATUS.REACHED], { message: "status only can be PRE_SELL, ON_PERFORMING or REACHED" }).default(STATUS.PRE_SELL),
     shown: z.boolean({ required_error: "shown is required" }),
@@ -28,7 +24,7 @@ export const CreateCourseSchema = z.object({
                 .min(1, { message: "video should not be empty" })
                 .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
                 .trim()
-                .transform((video) => video && `${Paths.courses.intro}/${video}`)
+                .transform((video) => video && transformToUploadPath(video, Paths.courses.intro))
                 .optional(),
             content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
         })

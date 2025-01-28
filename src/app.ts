@@ -39,8 +39,7 @@ app.use(secure);
 app.use(helmet());
 
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static("public"));
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIES_SECRET));
 
 app.use("/auth", authRouter);
 app.use("/courses", coursesRouter);

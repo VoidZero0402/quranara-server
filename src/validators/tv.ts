@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { validateObjectId } from "@/utils/validations";
+import { validateObjectId, transformToSlug, transformToUploadPath } from "@/utils/validations";
 import { PaginationQuerySchema } from "./pagination";
 import { SORTING } from "@/constants/tv";
 import { Paths } from "@/constants/uploads";
@@ -7,30 +7,25 @@ import { Paths } from "@/constants/uploads";
 export const CreateTvSchema = z.object({
     title: z.string({ required_error: "title is required" }).min(1, { message: "title should not be empty" }).max(255, { message: "title should be has less than 25 character" }).trim(),
     description: z.string({ required_error: "description is required" }).min(1, { message: "description should not be empty" }).max(1024, { message: "description should be has less than 1024 character" }).trim(),
-    slug: z
-        .string()
-        .min(1, { message: "slug should not be empty" })
-        .max(255, { message: "slug should be has less than 25 character" })
-        .trim()
-        .transform((value) => value.replaceAll(" ", "-")),
+    slug: z.string().min(1, { message: "slug should not be empty" }).max(255, { message: "slug should be has less than 25 character" }).trim().transform(transformToSlug),
     category: validateObjectId,
     cover: z
         .string({ required_error: "cover is required" })
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(jpg|jpeg|png|webp)$/, { message: "cover has invalid signiture" })
         .trim()
-        .transform((cover) => `${Paths.tv.cover}/${cover}`),
+        .transform((cover) => transformToUploadPath(cover, Paths.tv.cover)),
     video: z
         .string({ required_error: "video is required" })
         .min(1, { message: "video should not be empty" })
         .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
         .trim()
-        .transform((video) => `${Paths.tv.episodes}/${video}`),
+        .transform((video) => transformToUploadPath(video, Paths.tv.episodes)),
     attached: z
         .string()
         .min(1, { message: "attached should not be empty" })
         .trim()
-        .transform((attached) => attached && `${Paths.tv.attachments}/${attached}`)
+        .transform((attached) => attached && transformToUploadPath(attached, Paths.tv.attachments))
         .optional(),
     content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),
     shown: z.boolean({ required_error: "shown is required" }),

@@ -2,12 +2,13 @@ import { Request } from "express";
 
 import redis from "@/config/redis";
 import UserModel, { UserDocument } from "@/models/User";
-import { verifySession } from "./auth";
+import { verifySession, checkSession } from "./auth";
 
 export const getUser = async (req: Request) => {
-    const session: string = req.cookies._session;
+    const session: string = req.signedCookies._session;
+    const authKey: string = req.signedCookies._auth_key;
 
-    if (!session) {
+    if (!session || !authKey) {
         return null;
     }
 
@@ -17,7 +18,17 @@ export const getUser = async (req: Request) => {
         return null;
     }
 
-    const user = (await UserModel.findById(payload._id, "-__v")) as UserDocument;
+    const user = (await UserModel.findById(payload._id, "-password -__v")) as UserDocument;
+
+    if (!user) {
+        return null;
+    }
+
+    const isMatched = await checkSession({ session, authKey }, user._id.toString());
+
+    if (!isMatched) {
+        return null;
+    }
 
     return user;
 };

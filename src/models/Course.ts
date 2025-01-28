@@ -173,7 +173,7 @@ schema.method("getTime", async function () {
 
 schema.method("getProgress", function (hours: number) {
     if (hours === 0) return 0;
-    return Math.floor((hours * 100) / this.metadata.hours);
+    return Math.min(Math.floor((hours * 100) / this.metadata.hours), 100);
 });
 
 const CourseModel = model<ICourse, CourseModel>("Course", schema);

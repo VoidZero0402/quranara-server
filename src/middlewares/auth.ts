@@ -8,10 +8,11 @@ import { AuthenticatedRequest } from "@/types/request.types";
 
 const auth = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const session: string = req.cookies._session;
+        const session: string = req.signedCookies._session;
+        const authKey: string = req.signedCookies._auth_key;
 
-        if (!session) {
-            throw new UnauthorizedException("session not provided");
+        if (!session || !authKey) {
+            throw new UnauthorizedException("credentials not provided");
         }
 
         const payload = await verifySession(session);
@@ -20,13 +21,17 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
             throw new UnauthorizedException("session is expired");
         }
 
-        const user = (await UserModel.findById(payload._id, "-__v")) as UserDocument;
+        const user = (await UserModel.findById(payload._id, "-password -__v")) as UserDocument;
 
         if (!user) {
             throw new UnauthorizedException("user not found");
         }
 
-        await checkSession(session, user._id.toString());
+        const isMatched = await checkSession({ session, authKey }, user._id.toString());
+
+        if (!isMatched) {
+            throw new UnauthorizedException("invalid credentials");
+        }
 
         (req as AuthenticatedRequest).user = user;
 
