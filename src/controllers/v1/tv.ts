@@ -115,7 +115,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
     try {
         const { slug } = req.params;
 
-        const tv = await TvModel.findOne({ slug, shown: true }).populate("publisher").populate("category");
+        const tv = await TvModel.findOne({ slug, shown: true }).populate("publisher", "username profile").populate("category");
 
         if (!tv) {
             throw new NotFoundException("tv not found");
@@ -131,7 +131,7 @@ export const getOneById = async (req: Request<RequestParamsWithID>, res: Respons
     try {
         const { id } = req.params;
 
-        const tv = await TvModel.findById(id).populate("publisher").populate("category");
+        const tv = await TvModel.findById(id).populate("publisher", "username profile").populate("category");
 
         if (!tv) {
             throw new NotFoundException("tv not found");
@@ -189,7 +189,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
             throw new NotFoundException("tv not found");
         }
 
-        const aggregation = await TvModel.aggregate([
+        let aggregation = await TvModel.aggregate([
             {
                 $match: { shown: true, category: tv.category, _id: { $ne: tv._id } },
             },
@@ -197,6 +197,19 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
                 $sample: { size: 4 },
             },
         ]);
+
+        if (aggregation.length < 4) {
+            const others = await TvModel.aggregate([
+                {
+                    $match: { shown: true, category: { $ne: tv.category }, _id: { $ne: tv._id } },
+                },
+                {
+                    $sample: { size: 4 - aggregation.length },
+                },
+            ]);
+
+            aggregation = aggregation.concat(others);
+        }
 
         const related = await TvModel.populate(aggregation, [
             { path: "publisher", select: "username profile" },

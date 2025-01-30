@@ -102,8 +102,8 @@ const cookiesOption = {
     path: "/",
     sameSite: "strict",
     priority: "high",
+    signed: true,
     secure: process.env.NODE_ENV === "production",
-    signed: process.env.NODE_ENV === "production",
 } as const;
 
 export const setCredentialCookies = (res: Response, credentials: { session: string; authKey: string }): void => {

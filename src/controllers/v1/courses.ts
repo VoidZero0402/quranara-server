@@ -93,7 +93,10 @@ export const create = async (req: Request<{}, {}, CreateCourseSchemaType>, res: 
             order: order + 1,
             teacher: (req as AuthenticatedRequest).user._id,
             introduction,
-            metadata,
+            "metadata.support": metadata.support,
+            "metadata.preRequisite": metadata.preRequisite,
+            "metadata.present": metadata.present,
+            "metadata.hours": metadata.hours,
             shortId,
         });
 
@@ -179,9 +182,12 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateCourseS
                 price,
                 status,
                 introduction,
-                metadata,
+                "metadata.support": metadata.support,
+                "metadata.preRequisite": metadata.preRequisite,
+                "metadata.present": metadata.present,
+                "metadata.hours": metadata.hours,
                 shown,
-                ...(discount && { discount }),
+                discount,
             },
         });
 
@@ -237,10 +243,48 @@ export const getTopics = async (req: Request<RequestParamsWithSlug>, res: Respon
             throw new NotFoundException("course not found");
         }
 
-        const topics = await TopicModel.find({ course: course._id })
-            .populate({ path: "sessions", select: "title slug order time isPublic video attached", options: { sort: { order: 1 } } })
-            .sort({ order: 1 })
-            .lean();
+        const topics = await TopicModel.aggregate([
+            {
+                $match: { course: course._id },
+            },
+            {
+                $lookup: {
+                    from: "sessions",
+                    as: "sessions",
+                    localField: "_id",
+                    foreignField: "topic",
+                    pipeline: [
+                        {
+                            $sort: { order: 1 },
+                        },
+                        {
+                            $project: { title: 1, slug: 1, order: 1, time: 1, seconds: 1, isPublic: 1, video: 1, attached: 1 },
+                        },
+                    ],
+                },
+            },
+            {
+                $addFields: {
+                    meta: {
+                        count: { $size: "$sessions" },
+                        time: {
+                            $let: {
+                                vars: { seconds: { $sum: "$sessions.seconds" } },
+                                in: {
+                                    hours: { $floor: { $divide: ["$$seconds", 3600] } },
+                                    minutes: {
+                                        $floor: { $divide: [{ $mod: ["$$seconds", 3600] }, 60] },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $sort: { order: 1 },
+            },
+        ]).exec();
 
         SuccessResponse(res, 200, { topics });
     } catch (err) {

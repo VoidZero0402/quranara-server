@@ -31,7 +31,7 @@ const schema = new Schema<ITopic>({
 schema.virtual("sessions", {
     ref: "Session",
     localField: "_id",
-    foreignField: "topic"
+    foreignField: "topic",
 });
 
 const TopicModel = model<ITopic>("Topic", schema);

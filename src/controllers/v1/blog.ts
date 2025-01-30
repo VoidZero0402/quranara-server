@@ -193,7 +193,7 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
             throw new NotFoundException("blog not found");
         }
 
-        const aggragation = await BlogModel.aggregate([
+        let aggragation = await BlogModel.aggregate([
             {
                 $match: { shown: true, category: blog.category, _id: { $ne: blog._id } },
             },
@@ -204,6 +204,22 @@ export const getRelated = async (req: Request<RequestParamsWithSlug>, res: Respo
                 $project: { content: 0, relatedCourses: 0, headings: 0, shown: 0, status: 0 },
             },
         ]);
+
+        if (aggragation.length < 4) {
+            const others = await BlogModel.aggregate([
+                {
+                    $match: { shown: true, category: { $ne: blog.category }, _id: { $ne: blog._id } },
+                },
+                {
+                    $sample: { size: 4 },
+                },
+                {
+                    $project: { content: 0, relatedCourses: 0, headings: 0, shown: 0, status: 0 },
+                },
+            ]);
+
+            aggragation = aggragation.concat(others);
+        }
 
         const related = await BlogModel.populate(aggragation, [
             { path: "author", select: "username profile" },

@@ -6,9 +6,9 @@ const isSecure = process.env.SECURE === "enable";
 const secure = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (isSecure) {
-            const origin = req.headers.origin;
+            const origin = req.headers.origin || req.headers.referer || "";
 
-            if (origin !== process.env.FRONTEND_URL) {
+            if (!origin.startsWith(process.env.FRONTEND_URL as string)) {
                 throw new ForbiddenException("you don't have authorization to access this server");
             }
 

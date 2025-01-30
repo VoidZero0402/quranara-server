@@ -10,10 +10,11 @@ import roleGuard from "@/middlewares/roleGuard";
 
 const router = express.Router();
 
+router.get("/verify", verify);
+
 router.use(auth);
 
 router.post("/", validator("body", CreateOrderSchema), create);
-router.get("/verify", verify);
 router.get("/all", roleGuard(ROLES.MANAGER), validator("query", PaginationQuerySchema), getAll as any);
 router.get("/check/:id", getOne);
 
