@@ -3,7 +3,6 @@ import * as jose from "jose";
 import { v4 as uuidv4 } from "uuid";
 
 import redis from "@/config/redis";
-import { UnauthorizedException } from "./exceptions";
 import { scanRedisKeys } from "./funcs";
 
 import { Credentials } from "@/types/auth.types";
