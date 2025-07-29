@@ -2,6 +2,7 @@ import { Schema, model, PopulatedDoc, Document, ObjectId, Model, Types } from "m
 import { ICourse } from "./Course";
 import { ITopic } from "./Topic";
 import CourseUserModel from "./CourseUser";
+import { TYPE } from "@/constants/sessions";
 
 export interface ISession {
     title: string;
@@ -15,6 +16,7 @@ export interface ISession {
     content?: string;
     time: string;
     seconds: number;
+    type: string
 }
 
 export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
@@ -83,6 +85,12 @@ const schema = new Schema<ISession, SessionModel, ISessionMethods>(
         },
 
         attached: String,
+
+        type: {
+            type: String,
+            enum: [TYPE.VIDEO, TYPE.AUDIO],
+            default: TYPE.VIDEO
+        }
     },
     { timestamps: true }
 );

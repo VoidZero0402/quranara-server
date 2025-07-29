@@ -7,6 +7,7 @@ import QuestionModel from "@/models/Question";
 import { CreateSessionSchemaType, UpdateSessionSchemaType, UpdateSessionOrderSchemaType } from "@/validators/sessions";
 
 import { ROLES } from "@/constants/roles";
+import { TYPE as SESSION_TYPE } from "@/constants/sessions";
 
 import { RequestParamsWithID, RequestParamsWithSlug } from "@/types/request.types";
 
@@ -33,6 +34,8 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
 
         const seconds = timeToSeconds(time);
 
+        const sessionType = video.endsWith(".mp4") ? SESSION_TYPE.VIDEO : SESSION_TYPE.AUDIO;
+
         await SessionModel.create({
             title,
             slug,
@@ -45,6 +48,7 @@ export const create = async (req: Request<{}, {}, CreateSessionSchemaType>, res:
             time,
             seconds,
             attached,
+            type: sessionType,
         });
 
         SuccessResponse(res, 201, { message: "session created successfully" });
@@ -58,6 +62,8 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateSession
         const { id } = req.params;
         const { title, isPublic, video, content, time, attached } = req.body;
 
+        const sessionType = video.endsWith(".mp4") ? SESSION_TYPE.VIDEO : SESSION_TYPE.AUDIO;
+
         await SessionModel.findByIdAndUpdate(id, {
             $set: {
                 title,
@@ -66,6 +72,7 @@ export const update = async (req: Request<RequestParamsWithID, {}, UpdateSession
                 content,
                 time,
                 attached,
+                type: sessionType
             },
         });
 

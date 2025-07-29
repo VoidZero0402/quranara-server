@@ -10,7 +10,7 @@ export const CreateSessionSchema = z.object({
     video: z
         .string({ required_error: "video is required" })
         .min(1, { message: "video should not be empty" })
-        .regex(/^[\w-\/\:\.]+\.(mp4)$/, { message: "video has invalid signiture" })
+        .regex(/^[\w-\/\:\.]+\.(mp4|mp3)$/, { message: "video has invalid signiture" })
         .trim()
         .transform((video) => transformToUploadPath(video, Paths.sessions.episodes)),
     content: z.string().min(1, { message: "content should not be empty" }).trim().optional(),

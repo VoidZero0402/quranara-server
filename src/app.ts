@@ -1,6 +1,8 @@
 import path from "node:path";
 import fs from "node:fs";
 import express from "express";
+import serveStatic from "serve-static";
+import serveIndex from "serve-index";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
@@ -35,11 +37,11 @@ const app = express();
 
 app.set("trust proxy", true);
 
-app.use(express.static(path.join(__dirname, "../public")));
-
-if (!fs.existsSync(path.join(__dirname, "../public/uploads"))) {
-    fs.mkdir(path.join(__dirname, "../public/uploads"), { recursive: true }, () => {});
+if (!fs.existsSync(path.join(__dirname, "../public"))) {
+    fs.mkdir(path.join(__dirname, "../public"), { recursive: true }, () => {});
 }
+
+app.use("/ftp", express.static(path.join(__dirname, "../public")), serveIndex(path.join(__dirname, "../public"), { icons: true }));
 
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7", validate: { trustProxy: false } }));
 app.use(cors);

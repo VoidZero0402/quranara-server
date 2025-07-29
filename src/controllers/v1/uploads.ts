@@ -23,7 +23,7 @@ export const getPreSignedUrl = async (req: Request<{}, {}, {}, GetPreSignedUrlQu
 export const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (req.file) {
-            const url = `https://quranara.com/api/uploads/${req.file.originalname}`;
+            const url = `https://quranara.com/api/${req.file.originalname}`;
             SuccessResponse(res, 200, { url });
         }
     } catch (err) {
