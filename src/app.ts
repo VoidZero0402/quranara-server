@@ -43,7 +43,7 @@ if (!fs.existsSync(path.join(__dirname, "../public"))) {
 
 app.use("/ftp", express.static(path.join(__dirname, "../public")), serveIndex(path.join(__dirname, "../public"), { icons: true }));
 
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7", validate: { trustProxy: false } }));
+// app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: "draft-7", validate: { trustProxy: false } }));
 app.use(cors);
 app.use(secure);
 app.use(helmet());

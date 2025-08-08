@@ -25,7 +25,7 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaType
 
         const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
-        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
+        const sorting = { ...(sort === SORTING.DEFAULT && { _id: -1 }), ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
         const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -shown -status")
             .sort(sorting)
@@ -48,7 +48,7 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllBlogsQuerySchemaT
 
         const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
-        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
+        const sorting = { ...(sort === SORTING.DEFAULT && { _id: -1 }), ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
         const blogs = await BlogModel.find(filters, "-content -relatedCourses -headings -status")
             .sort(sorting)

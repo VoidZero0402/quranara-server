@@ -24,7 +24,7 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllTvsQuerySchemaType>,
 
         const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
-        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
+        const sorting = { ...(sort === SORTING.DEFAULT && { _id: -1 }), ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
         const tvs = await TvModel.find(filters)
             .sort(sorting)
@@ -47,7 +47,7 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllTvsQuerySchemaTyp
 
         const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }), ...(category && { category: Array.isArray(category) ? { $in: category } : category }) };
 
-        const sorting = { ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
+        const sorting = { ...(sort === SORTING.DEFAULT && { _id: -1 }), ...(sort === SORTING.NEWEST && { _id: -1 }), ...(sort === SORTING.POPULAR && { views: -1 }) } as any;
 
         const tvs = await TvModel.find(filters)
             .sort(sorting)
