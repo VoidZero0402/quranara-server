@@ -26,7 +26,7 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchemaTy
 
         const filters = { shown: true, ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }) };
 
-        const sorting = { ...(sort === SORTING.DEFAULT && { order: 1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
+        const sorting = { ...(sort === SORTING.DEFAULT && { _id: -1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
 
         const courses = await CourseModel.find(filters, "metadata.students metadata.rating title slug description cover price discount status")
             .sort(sorting)
@@ -48,7 +48,7 @@ export const getAllRaw = async (req: Request<{}, {}, {}, GetAllCoursesQuerySchem
 
         const filters = { ...(search && { $or: [{ title: { $regex: search } }, { description: { $regex: search } }] }) };
 
-        const sorting = { ...(sort === SORTING.DEFAULT && { order: 1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
+        const sorting = { ...(sort === SORTING.DEFAULT && { _id: -1 }), ...(sort === SORTING.NEWSET && { _id: -1 }), ...(sort === SORTING.POPULAR && { "metadata.students": 1 }) } as any;
 
         const courses = await CourseModel.find(filters, "-introduction")
             .sort(sorting)
@@ -258,7 +258,7 @@ export const getTopics = async (req: Request<RequestParamsWithSlug>, res: Respon
                             $sort: { order: 1 },
                         },
                         {
-                            $project: { title: 1, slug: 1, order: 1, time: 1, seconds: 1, isPublic: 1, video: 1, attached: 1 },
+                            $project: { title: 1, slug: 1, order: 1, time: 1, seconds: 1, isPublic: 1, video: 1, attached: 1, content: 1, type: 1 },
                         },
                     ],
                 },
