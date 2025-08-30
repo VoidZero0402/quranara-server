@@ -20,7 +20,7 @@ import { SuccessResponse } from "@/utils/responses";
 
 export const getMenus = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const courses = await CourseModel.find({}, "title slug").sort({ order: 1 }).limit(5);
+        const courses = await CourseModel.find({}, "title description slug").sort({ _id: -1 }).limit(5);
 
         const blogCategories = await CategoryModel.find({ ref: REFERENCES.BLOG }, "title caption").sort({ _id: -1 }).limit(5);
 
