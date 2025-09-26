@@ -3,23 +3,21 @@ FROM node:18-alpine AS builder
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY . .
-
 RUN npm run build
 
 FROM node:18-alpine AS production
 
 WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app/package*.json ./
+COPY package*.json ./
 RUN npm ci --only=production
 
 COPY --from=builder /usr/src/app/dist ./dist
 
-RUN npm install pm2 -g
+RUN npm install -g pm2
 
 EXPOSE 4000
 
