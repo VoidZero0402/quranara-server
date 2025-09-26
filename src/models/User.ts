@@ -55,7 +55,6 @@ const schema = new Schema<IUser, UserModel, IUserMethods>(
             type: String,
             required: true,
             trim: true,
-            unique: true,
         },
 
         role: {
