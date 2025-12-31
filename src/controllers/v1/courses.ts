@@ -146,7 +146,9 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         const progress = course.getProgress(defredTime);
 
-        SuccessResponse(res, 200, { course: { ...course.toObject(), time, progress } });
+        const hasAccess = await course.hasAccess(req)
+
+        SuccessResponse(res, 200, { course: { ...course.toObject(), time, progress, hasAccess } });
     } catch (err) {
         next(err);
     }

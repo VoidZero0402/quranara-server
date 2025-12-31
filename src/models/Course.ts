@@ -2,7 +2,10 @@ import { Schema, model, PopulatedDoc, Document, ObjectId, Model } from "mongoose
 import { STATUS } from "@/constants/courses";
 import { IUser } from "./User";
 import SessionModel from "./Session";
-import { secondsToTimeArray } from "@/utils/funcs";
+import { getUser, secondsToTimeArray } from "@/utils/funcs";
+import { Request } from "express";
+import { ROLES } from "@/constants/roles";
+import CourseUserModel from "./CourseUser";
 
 export type Status = (typeof STATUS)[keyof typeof STATUS];
 
@@ -35,6 +38,7 @@ export interface ICourse {
 interface ICourseMethods {
     getTime(): Promise<[number, number]>;
     getProgress(hours: number): number;
+    hasAccess(request: Request): Promise<boolean>
 }
 
 type CourseModel = Model<ICourse, {}, ICourseMethods>;
@@ -175,6 +179,16 @@ schema.method("getProgress", function (hours: number) {
     if (hours === 0) return 0;
     return Math.min(Math.floor((hours * 100) / this.metadata.hours), 100);
 });
+
+schema.method("hasAccess", async function (request: Request) {
+    const user = await getUser(request);
+    
+    if (user) {
+        return user.role === ROLES.MANAGER || Boolean(await CourseUserModel.exists({ course: this._id, user: user._id }))
+    }
+
+    return false
+})
 
 const CourseModel = model<ICourse, CourseModel>("Course", schema);
 
