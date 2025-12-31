@@ -123,23 +123,9 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
             throw new NotFoundException("session not found");
         }
 
-        const user = await getUser(req);
+        const hasAccess = await session.hasAccess(req);
 
-        if (!session.isPublic) {
-            if (!user) {
-                throw new UnauthorizedException("user is unauthorized");
-            }
-
-            if (user.role === ROLES.USER) {
-                const hasAccess = await session.hasUserAccess(user._id);
-
-                if (!hasAccess) {
-                    throw new ForbiddenException("you can not access to this session");
-                }
-            }
-        }
-
-        SuccessResponse(res, 200, { session });
+        SuccessResponse(res, 200, { session: { ...session.toObject(), hasAccess } });
     } catch (err) {
         next(err);
     }

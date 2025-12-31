@@ -3,6 +3,9 @@ import { ICourse } from "./Course";
 import { ITopic } from "./Topic";
 import CourseUserModel from "./CourseUser";
 import { TYPE } from "@/constants/sessions";
+import { Request } from "express";
+import { getUser } from "@/utils/funcs";
+import { ROLES } from "@/constants/roles";
 
 export interface ISession {
     title: string;
@@ -16,13 +19,13 @@ export interface ISession {
     content?: string;
     time: string;
     seconds: number;
-    type: string
+    type: string;
 }
 
 export type PopulatedCourse = Document<unknown, {}, ICourse> & ICourse;
 
 interface ISessionMethods {
-    hasUserAccess(_id: Types.ObjectId): Promise<boolean>;
+    hasAccess(request: Request): Promise<boolean>;
 }
 
 type SessionModel = Model<ISession, {}, ISessionMethods>;
@@ -89,22 +92,20 @@ const schema = new Schema<ISession, SessionModel, ISessionMethods>(
         type: {
             type: String,
             enum: [TYPE.VIDEO, TYPE.AUDIO],
-            default: TYPE.VIDEO
-        }
+            default: TYPE.VIDEO,
+        },
     },
     { timestamps: true }
 );
 
-schema.method("hasUserAccess", async function hasUserAccess(userId) {
-    if (!this.isPublic) {
-        const hasAccess = await CourseUserModel.exists({ user: userId, course: this.course });
+schema.method("hasAccess", async function hasAccess(request: Request) {
+    const user = await getUser(request);
 
-        if (!hasAccess) {
-            return false;
-        }
+    if (user) {
+        return user.role === ROLES.MANAGER || Boolean(await CourseUserModel.exists({ course: this.course, user: user._id }))
     }
 
-    return true;
+    return false;
 });
 
 const SessionModel = model<ISession, SessionModel>("Session", schema);

@@ -91,7 +91,7 @@ export const create = async (req: Request<{}, {}, CreateQuestionSchemaType>, res
             throw new NotFoundException("session not found");
         }
 
-        const hasAccess = await session.hasUserAccess(user._id);
+        const hasAccess = session.isPublic || (await session.hasAccess(req))
 
         if (!hasAccess) {
             throw new ForbiddenException("you can not access to this action");
@@ -131,7 +131,7 @@ export const message = async (req: Request<RequestParamsWithID, {}, CreateQuesti
             throw new NotFoundException("session not found");
         }
 
-        const hasAccess = await session.hasUserAccess(user._id);
+        const hasAccess = session.isPublic || (await session.hasAccess(req))
 
         if (!hasAccess) {
             throw new ForbiddenException("you can not access to this action");
