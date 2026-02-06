@@ -17,8 +17,6 @@ RUN npm ci --only=production
 
 COPY --from=builder /usr/src/app/dist ./dist
 
-RUN npm install -g pm2
-
 EXPOSE 4000
 
-CMD ["pm2-runtime", "dist/server.js"]
+CMD ["node", "dist/server.js"]
