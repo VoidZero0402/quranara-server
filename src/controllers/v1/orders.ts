@@ -120,9 +120,7 @@ export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>
     try {
         const { page, limit } = req.query;
 
-        const filters = { status: STATUS.SUCCESSFUL };
-
-        const orders = await OrderModel.find(filters)
+        const orders = await OrderModel.find()
             .sort({ createdAt: -1 })
             .populate("user", "phone username profile")
             .populate("items", "title description price")
@@ -130,7 +128,7 @@ export const getAll = async (req: Request<{}, {}, {}, PaginationQuerySchemaType>
             .limit(limit)
             .lean();
 
-        const ordersCount = await OrderModel.countDocuments(filters);
+        const ordersCount = await OrderModel.countDocuments();
 
         SuccessResponse(res, 200, { orders, pagination: createPaginationData(page, limit, ordersCount) });
     } catch (err) {
