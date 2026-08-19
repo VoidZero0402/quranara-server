@@ -146,7 +146,7 @@ export const getOne = async (req: Request<RequestParamsWithSlug>, res: Response,
 
         const progress = course.getProgress(defredTime);
 
-        const hasAccess = await course.hasAccess(req)
+        const hasAccess = await course.hasAccess(req);
 
         SuccessResponse(res, 200, { course: { ...course.toObject(), time, progress, hasAccess } });
     } catch (err) {
@@ -227,9 +227,18 @@ export const getComments = async (req: Request<RequestParamsWithSlug, {}, {}, Pa
             .limit(limit)
             .lean();
 
+        const normalizedComments = comments.map((comment) => ({
+            ...comment,
+            user: comment.user ?? {
+                _id: null,
+                username: comment.username,
+            },
+            username: undefined,
+        }));
+
         const commentsCount = await CommentModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
+        SuccessResponse(res, 200, { comments: normalizedComments, pagination: createPaginationData(page, limit, commentsCount) });
     } catch (err) {
         next(err);
     }
@@ -325,7 +334,7 @@ export const shown = async (req: Request<RequestParamsWithID>, res: Response, ne
             { _id: id },
             {
                 $set: { shown: true },
-            }
+            },
         );
 
         SuccessResponse(res, 200, { message: "shown set successfully" });
@@ -342,7 +351,7 @@ export const unshown = async (req: Request<RequestParamsWithID>, res: Response, 
             { _id: id },
             {
                 $set: { shown: false },
-            }
+            },
         );
 
         SuccessResponse(res, 200, { message: "shown unset successfully" });

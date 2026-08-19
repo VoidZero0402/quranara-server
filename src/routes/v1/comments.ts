@@ -1,9 +1,9 @@
 import express from "express";
-import { getAll, getOne, create, reply, answer, accept, reject, pin, unpin, checkReplies } from "@/controllers/v1/comments";
+import { getAll, getOne, create, createExternal, reply, answer, accept, reject, pin, unpin, checkReplies } from "@/controllers/v1/comments";
 
 import { ROLES } from "@/constants/roles";
 import validator from "@/middlewares/validator";
-import { GetAllCommentsQuerySchema, CreateCommentSchema, ReplyCommentSchema, ActionsQuerySchema } from "@/validators/comments";
+import { GetAllCommentsQuerySchema, CreateCommentSchema, ReplyCommentSchema, ActionsQuerySchema, CreateCommentExternalSchema } from "@/validators/comments";
 import auth from "@/middlewares/auth";
 import roleGuard from "@/middlewares/roleGuard";
 
@@ -18,6 +18,7 @@ router.use(roleGuard(ROLES.MANAGER));
 
 router.get("/all", validator("query", GetAllCommentsQuerySchema), getAll as any);
 router.get("/:id", getOne);
+router.post("/external", validator("body", CreateCommentExternalSchema), createExternal);
 router.post("/:id/answer", validator("body", ReplyCommentSchema), answer);
 router.patch("/:id/accept", validator("query", ActionsQuerySchema), accept);
 router.patch("/:id/reject", validator("query", ActionsQuerySchema), reject);

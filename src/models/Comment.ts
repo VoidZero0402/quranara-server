@@ -13,7 +13,8 @@ export interface IComment {
     blog?: PopulatedDoc<Document<ObjectId> & IBlog>;
     course?: PopulatedDoc<Document<ObjectId> & ICourse>;
     tv?: PopulatedDoc<Document<ObjectId> & ITv>;
-    user: PopulatedDoc<Document<ObjectId> & IUser>;
+    user?: PopulatedDoc<Document<ObjectId> & IUser>;
+    username?: string;
     pin: boolean;
     status: Status;
     repliesStatus: RepliesStatus;
@@ -48,8 +49,9 @@ const schema = new Schema<IComment>(
         user: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true,
         },
+
+        username: String,
 
         pin: {
             type: Boolean,
@@ -70,7 +72,7 @@ const schema = new Schema<IComment>(
             default: REPLIES_STATUS.NONE,
         },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 schema.index({ updatedAt: -1 });

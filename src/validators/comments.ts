@@ -21,6 +21,14 @@ export const CreateCommentSchema = z
 
 export type CreateCommentSchemaType = z.infer<typeof CreateCommentSchema>;
 
+export const CreateCommentExternalSchema = z.object({
+    content: z.string({ required_error: "content is required" }).min(1, { message: "content should not be empty" }).max(2048, { message: "content should be has less than 2048 character" }).trim(),
+    course: validateObjectId,
+    username: z.string({ required_error: "username is required" }).min(1, { message: "username should be more than or equal 3 character" }).max(255, { message: "username should be less than or equal 255 character" }),
+});
+
+export type CreateCommentExternalSchemaType = z.infer<typeof CreateCommentExternalSchema>;
+
 export const ReplyCommentSchema = z.object({
     content: z.string({ required_error: "content is required" }).min(1, { message: "content should not be empty" }).max(2048, { message: "content should be has less than 2048 character" }).trim(),
 });

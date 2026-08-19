@@ -5,7 +5,7 @@ import ReplyCommentModel from "@/models/ReplyComment";
 
 import { STATUS, REPLIES_STATUS } from "@/constants/comments";
 
-import { GetAllCommentsQuerySchemaType, CreateCommentSchemaType, ReplyCommentSchemaType, ActionsQuerySchemaType } from "@/validators/comments";
+import { GetAllCommentsQuerySchemaType, CreateCommentSchemaType, ReplyCommentSchemaType, ActionsQuerySchemaType, CreateCommentExternalSchemaType } from "@/validators/comments";
 
 import { AuthenticatedRequest, RequestParamsWithID } from "@/types/request.types";
 
@@ -30,9 +30,18 @@ export const getAll = async (req: Request<{}, {}, {}, GetAllCommentsQuerySchemaT
             .limit(limit)
             .lean();
 
+        const normalizedComments = comments.map((comment) => ({
+            ...comment,
+            user: comment.user ?? {
+                _id: null,
+                username: comment.username,
+            },
+            username: undefined,
+        }));
+
         const commentsCount = await CommentModel.countDocuments(filters);
 
-        SuccessResponse(res, 200, { comments, pagination: createPaginationData(page, limit, commentsCount) });
+        SuccessResponse(res, 200, { comments: normalizedComments, pagination: createPaginationData(page, limit, commentsCount) });
     } catch (err) {
         next(err);
     }
@@ -56,6 +65,23 @@ export const create = async (req: Request<{}, {}, CreateCommentSchemaType>, res:
     }
 };
 
+export const createExternal = async (req: Request<{}, {}, CreateCommentExternalSchemaType>, res: Response, next: NextFunction) => {
+    try {
+        const { content, course, username } = req.body;
+
+        await CommentModel.create({
+            content,
+            course,
+            username,
+            status: STATUS.ACCEPTED,
+        });
+
+        SuccessResponse(res, 201, { message: "comment created successfully" });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getOne = async (req: Request<RequestParamsWithID, {}, ReplyCommentSchemaType>, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
@@ -69,7 +95,16 @@ export const getOne = async (req: Request<RequestParamsWithID, {}, ReplyCommentS
             throw new NotFoundException("comment not found");
         }
 
-        SuccessResponse(res, 200, { comment });
+        const normalizedComment = {
+            ...comment,
+            user: comment.user ?? {
+                _id: null,
+                username: comment.username,
+            },
+            username: undefined,
+        };
+
+        SuccessResponse(res, 200, { comment: normalizedComment });
     } catch (err) {
         next(err);
     }
@@ -129,7 +164,7 @@ export const accept = async (req: Request<RequestParamsWithID, {}, {}, ActionsQu
                 {
                     $set: { status: STATUS.ACCEPTED },
                 },
-                { new: true }
+                { new: true },
             );
 
             if (!reply) {
@@ -143,7 +178,7 @@ export const accept = async (req: Request<RequestParamsWithID, {}, {}, ActionsQu
                 {
                     $set: { status: STATUS.ACCEPTED },
                 },
-                { new: true }
+                { new: true },
             );
 
             if (!comment) {
@@ -168,7 +203,7 @@ export const reject = async (req: Request<RequestParamsWithID, {}, {}, ActionsQu
                 {
                     $set: { status: STATUS.REJECTED },
                 },
-                { new: true }
+                { new: true },
             );
 
             if (!reply) {
@@ -182,7 +217,7 @@ export const reject = async (req: Request<RequestParamsWithID, {}, {}, ActionsQu
                 {
                     $set: { status: STATUS.REJECTED },
                 },
-                { new: true }
+                { new: true },
             );
 
             if (!comment) {
@@ -205,7 +240,7 @@ export const pin = async (req: Request<RequestParamsWithID>, res: Response, next
             {
                 $set: { pin: true },
             },
-            { new: true }
+            { new: true },
         );
 
         if (!comment) {
@@ -227,7 +262,7 @@ export const unpin = async (req: Request<RequestParamsWithID>, res: Response, ne
             {
                 $set: { pin: false },
             },
-            { new: true }
+            { new: true },
         );
 
         if (!comment) {
